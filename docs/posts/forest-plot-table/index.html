@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.175">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
+<meta name="dcterms.date" content="2022-06-28">
+<meta name="description" content="I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.">
+
+<title>bggj - Forest Plots with Built-In Tables</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../favicon.ico" rel="icon">
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-EGQ9KVCY2C"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
+</script>
+
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+<meta property="og:title" content="bggj - Forest Plots with Built-In Tables">
+<meta property="og:description" content="I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.">
+<meta property="og:image" content="https://www.bggj.is/posts/forest-plot-table/featured.png">
+<meta property="og:site-name" content="bggj">
+<meta property="og:image:height" content="834">
+<meta property="og:image:width" content="1344">
+<meta name="twitter:title" content="bggj - Forest Plots with Built-In Tables">
+<meta name="twitter:description" content="I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.">
+<meta name="twitter:image" content="https://www.bggj.is/posts/forest-plot-table/featured.png">
+<meta name="twitter:creator" content="@bggjonsson">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="834">
+<meta name="twitter:image-width" content="1344">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">bggj</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">blog</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">about</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https:/www.bggj.is/bggjphd">phd stuff</a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-page">
+      <h1 class="title">Forest Plots with Built-In Tables</h1>
+            <p class="subtitle lead">Creating forest plots with coefficient tables in ggplot2 with cowplot</p>
+                  <div>
+        <div class="description">
+          <p>I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the <code>ggplot2</code> and <code>cowplot</code> packages.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">english</div>
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">plots</div>
+                <div class="quarto-category">tutorial</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <a href="bggj.is">Brynjólfur Gauti Guðrúnar Jónsson</a> 
+    </div>
+      <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://www.hi.is/tolfraedi_0">
+              Tölfræði, Raunvísindadeild Háskóla Íslands
+              </a>
+            </p>
+        </div>
+      </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 28, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block column-page" id="quarto-document-content">
+
+
+
+
+<div class="cell">
+
+</div>
+<p>I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the <code>ggplot2</code> and <code>cowplot</code> packages.</p>
+<p>To start with I have some fake data, <code>d</code>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="at">format =</span> <span class="st">"html"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_styling</span>(<span class="at">full_width =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> name </th>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> lower </th>
+   <th style="text-align:right;"> upper </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Covfefe </td>
+   <td style="text-align:right;"> 1.1989430 </td>
+   <td style="text-align:right;"> 1.0707825 </td>
+   <td style="text-align:right;"> 1.358700 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Coffee </td>
+   <td style="text-align:right;"> 1.8509518 </td>
+   <td style="text-align:right;"> 1.5589701 </td>
+   <td style="text-align:right;"> 2.227752 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Variable </td>
+   <td style="text-align:right;"> 1.2181512 </td>
+   <td style="text-align:right;"> 1.0834045 </td>
+   <td style="text-align:right;"> 1.411683 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Covariate </td>
+   <td style="text-align:right;"> 1.1970336 </td>
+   <td style="text-align:right;"> 1.0699671 </td>
+   <td style="text-align:right;"> 1.342737 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Predictor </td>
+   <td style="text-align:right;"> 0.9085823 </td>
+   <td style="text-align:right;"> 0.8049225 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Smoking </td>
+   <td style="text-align:right;"> 0.8770238 </td>
+   <td style="text-align:right;"> 0.7447709 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Age </td>
+   <td style="text-align:right;"> 0.9344551 </td>
+   <td style="text-align:right;"> 0.8305984 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Uranium </td>
+   <td style="text-align:right;"> 0.9177338 </td>
+   <td style="text-align:right;"> 0.8021060 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Stuff </td>
+   <td style="text-align:right;"> 1.0760010 </td>
+   <td style="text-align:right;"> 1.0000000 </td>
+   <td style="text-align:right;"> 1.216474 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Thing </td>
+   <td style="text-align:right;"> 0.9143605 </td>
+   <td style="text-align:right;"> 0.7753231 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Koffing </td>
+   <td style="text-align:right;"> 1.0686924 </td>
+   <td style="text-align:right;"> 1.0000000 </td>
+   <td style="text-align:right;"> 1.178642 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Coughing </td>
+   <td style="text-align:right;"> 1.0648236 </td>
+   <td style="text-align:right;"> 1.0000000 </td>
+   <td style="text-align:right;"> 1.194998 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Polvo </td>
+   <td style="text-align:right;"> 0.9227277 </td>
+   <td style="text-align:right;"> 0.8097846 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<section id="the-forest-plot" class="level3">
+<h3 class="anchored" data-anchor-id="the-forest-plot">The Forest Plot</h3>
+<p>The forest plot itself is not hard to do. Notice how I create this striped pattern with <code>geom_vline(aes(xintercept = name), col = "grey95", size = 5)</code>. I’ll do the same thing to the table part of the figure later.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">name =</span> <span class="fu">fct_reorder</span>(name, mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> mean,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper)) <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> name), <span class="at">col =</span> <span class="st">"grey95"</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_linerange</span>() <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">5</span>, <span class="at">r =</span> <span class="sc">-</span><span class="dv">4</span>, <span class="at">b =</span> <span class="dv">5</span>, <span class="at">l =</span> <span class="dv">5</span>))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>p1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+<section id="the-table" class="level3">
+<h3 class="anchored" data-anchor-id="the-table">The Table</h3>
+<p>To make the table look nice I convert the numbers to text and clean them up so that the text is justified nicely when plotting it. I did some manual tuning of the margins to make the plot and table line up nicely.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">name =</span> <span class="fu">fct_reorder</span>(name, mean),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">mean =</span> <span class="fu">round</span>(mean, <span class="dv">2</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">mean =</span> <span class="fu">str_pad</span>(mean, <span class="at">width =</span> <span class="dv">4</span>, <span class="at">side =</span> <span class="st">"right"</span>, <span class="at">pad =</span> <span class="st">"0"</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">lower =</span> <span class="fu">round</span>(lower, <span class="dv">2</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">lower =</span> <span class="fu">as.character</span>(lower),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">lower =</span> <span class="fu">ifelse</span>(lower <span class="sc">==</span> <span class="st">"1"</span>, <span class="st">"1.00"</span>, lower),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">lower =</span> <span class="fu">str_pad</span>(lower, <span class="at">width =</span> <span class="dv">4</span>, <span class="at">side =</span> <span class="st">"right"</span>, <span class="at">pad =</span> <span class="st">"0"</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">upper =</span> <span class="fu">round</span>(upper, <span class="dv">2</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">upper =</span> <span class="fu">as.character</span>(upper),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">upper =</span> <span class="fu">ifelse</span>(upper <span class="sc">==</span> <span class="st">"1"</span>, <span class="st">"1.00"</span>, upper),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>           <span class="at">upper =</span> <span class="fu">str_pad</span>(upper, <span class="at">width =</span> <span class="dv">4</span>, <span class="at">side =</span> <span class="st">"right"</span>, <span class="at">pad =</span> <span class="st">"0"</span>),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">ci =</span> <span class="fu">str_c</span>(lower, <span class="st">", "</span>, upper)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name)) <span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> name), <span class="at">col =</span> <span class="st">"grey95"</span>, <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> mean, <span class="at">y =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> ci, <span class="at">y =</span> <span class="fl">1.07</span>)) <span class="sc">+</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_flip</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.99</span>, <span class="fl">1.1</span>)) <span class="sc">+</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.title =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.line.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>          <span class="at">panel.border =</span> <span class="fu">element_blank</span>(), </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>          <span class="at">panel.grid =</span> <span class="fu">element_blank</span>(), </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>          <span class="at">plot.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>          <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">5</span>, <span class="at">r =</span> <span class="dv">5</span>, <span class="at">b =</span> <span class="fl">19.3</span>, <span class="at">l =</span> <span class="dv">0</span>))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>p2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+<section id="the-finished-bottom-row" class="level4">
+<h4 class="anchored" data-anchor-id="the-finished-bottom-row">The finished bottom row</h4>
+<p>Now we have alligned the plot and table. If you zoom in you might see that they don’t line up perfectly. I am not liable for any bodily harm caused by this.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bottom_row <span class="ot">&lt;-</span> <span class="fu">plot_grid</span>(p1, p2, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">rel_widths =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.3</span>)) </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>bottom_row</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="the-headers" class="level3">
+<h3 class="anchored" data-anchor-id="the-headers">The headers</h3>
+<p>I admit that this is a pretty handwavy manual way to make the header fit, and there is probably a nice way to automatically fit this using the coordinate system.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>top_row <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> <span class="fu">tibble</span>()) <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">1</span>, <span class="at">x =</span> <span class="fl">0.02</span>, <span class="at">label =</span> <span class="st">"Variable"</span>), <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">1</span>, <span class="at">x =</span> <span class="fl">0.84</span>, <span class="at">label =</span> <span class="st">"Mean"</span>), <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">1</span>, <span class="at">x =</span> <span class="fl">0.98</span>, <span class="at">label =</span> <span class="st">"95% CI"</span>), <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">0</span>, <span class="at">r =</span> <span class="dv">5</span>, <span class="at">b =</span> <span class="dv">0</span>, <span class="at">l =</span> <span class="dv">5</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.line.x.bottom =</span> <span class="fu">element_line</span>())</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>top_row</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+<section id="putting-it-all-together" class="level3">
+<h3 class="anchored" data-anchor-id="putting-it-all-together">Putting it all together</h3>
+<p>And so we come to the finished plot. If we wrangle the <code>rel_heights</code> setting a little bit we can get a pretty nice looking forest plot and table hybrid.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(top_row, bottom_row, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">rel_heights =</span> <span class="fu">c</span>(<span class="fl">0.07</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/finished_plot-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+<p>This was actually less of an inconvenience than I thought. The mixture of <code>ggplot2</code> and <code>cowplot</code> made this a pretty easy task.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

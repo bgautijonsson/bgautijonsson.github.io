@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>bggj</title>
+<link>https://www.bggj.is/index_old.html</link>
+<atom:link href="https://www.bggj.is/index_old.xml" rel="self" type="application/rss+xml"/>
+<description>Blogg um tölfræði og gögn</description>
+<image>
+<url>https://www.bggj.is/binni.png</url>
+<title>bggj</title>
+<link>https://www.bggj.is/index_old.html</link>
+<height>144</height>
+<width>144</width>
+</image>
+<generator>quarto-1.1.175</generator>
+<lastBuildDate>Fri, 16 Sep 2022 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Databeers #2</title>
+  <link>https://www.bggj.is/talks/databeers_2022_09_16/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>The presentations were in the <a href="https://www.pechakucha.com">PechaKucha</a> format:</p>
+<ul>
+<li>20 slides</li>
+<li>20 seconds per slide</li>
+</ul>
+<iframe width="700" height="400" src="https://www.bggj.is/databeers" title="Slides from my talk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="">
+</iframe>
+<p><a href="https://bggj.is/databeers" target="_blank">Link to the slides in full size</a></p>
+
+
+
+ ]]></description>
+  <category>english</category>
+  <category>presentation</category>
+  <category>data literacy</category>
+  <guid>https://www.bggj.is/talks/databeers_2022_09_16/index.html</guid>
+  <pubDate>Fri, 16 Sep 2022 00:00:00 GMT</pubDate>
+  <media:content url="https://www.bggj.is/talks/databeers_2022_09_16/databeers.png" medium="image" type="image/png" height="142" width="144"/>
+</item>
+<item>
+  <title>Forest Plots with Built-In Tables</title>
+  <dc:creator>Brynjólfur Gauti Guðrúnar Jónsson</dc:creator>
+  <link>https://www.bggj.is/posts/forest-plot-table/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="cell">
+
+</div>
+<p>I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the <code>ggplot2</code> and <code>cowplot</code> packages.</p>
+<p>To start with I have some fake data, <code>d</code>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1">d <span class="sc" style="color: #5E5E5E;">|&gt;</span> </span>
+<span id="cb1-2">    <span class="fu" style="color: #4758AB;">kable</span>(<span class="at" style="color: #657422;">format =</span> <span class="st" style="color: #20794D;">"html"</span>) <span class="sc" style="color: #5E5E5E;">|&gt;</span> </span>
+<span id="cb1-3">    <span class="fu" style="color: #4758AB;">kable_styling</span>(<span class="at" style="color: #657422;">full_width =</span> F)</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> name </th>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> lower </th>
+   <th style="text-align:right;"> upper </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Covfefe </td>
+   <td style="text-align:right;"> 1.1989430 </td>
+   <td style="text-align:right;"> 1.0707825 </td>
+   <td style="text-align:right;"> 1.358700 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Coffee </td>
+   <td style="text-align:right;"> 1.8509518 </td>
+   <td style="text-align:right;"> 1.5589701 </td>
+   <td style="text-align:right;"> 2.227752 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Variable </td>
+   <td style="text-align:right;"> 1.2181512 </td>
+   <td style="text-align:right;"> 1.0834045 </td>
+   <td style="text-align:right;"> 1.411683 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Covariate </td>
+   <td style="text-align:right;"> 1.1970336 </td>
+   <td style="text-align:right;"> 1.0699671 </td>
+   <td style="text-align:right;"> 1.342737 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Predictor </td>
+   <td style="text-align:right;"> 0.9085823 </td>
+   <td style="text-align:right;"> 0.8049225 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Smoking </td>
+   <td style="text-align:right;"> 0.8770238 </td>
+   <td style="text-align:right;"> 0.7447709 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Age </td>
+   <td style="text-align:right;"> 0.9344551 </td>
+   <td style="text-align:right;"> 0.8305984 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Uranium </td>
+   <td style="text-align:right;"> 0.9177338 </td>
+   <td style="text-align:right;"> 0.8021060 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Stuff </td>
+   <td style="text-align:right;"> 1.0760010 </td>
+   <td style="text-align:right;"> 1.0000000 </td>
+   <td style="text-align:right;"> 1.216474 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Thing </td>
+   <td style="text-align:right;"> 0.9143605 </td>
+   <td style="text-align:right;"> 0.7753231 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Koffing </td>
+   <td style="text-align:right;"> 1.0686924 </td>
+   <td style="text-align:right;"> 1.0000000 </td>
+   <td style="text-align:right;"> 1.178642 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Coughing </td>
+   <td style="text-align:right;"> 1.0648236 </td>
+   <td style="text-align:right;"> 1.0000000 </td>
+   <td style="text-align:right;"> 1.194998 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Polvo </td>
+   <td style="text-align:right;"> 0.9227277 </td>
+   <td style="text-align:right;"> 0.8097846 </td>
+   <td style="text-align:right;"> 1.000000 </td>
+  </tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<section id="the-forest-plot" class="level3">
+<h3 class="anchored" data-anchor-id="the-forest-plot">The Forest Plot</h3>
+<p>The forest plot itself is not hard to do. Notice how I create this striped pattern with <code>geom_vline(aes(xintercept = name), col = "grey95", size = 5)</code>. I’ll do the same thing to the table part of the figure later.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">p1 <span class="ot" style="color: #003B4F;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;">|&gt;</span> </span>
+<span id="cb2-2">    <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">name =</span> <span class="fu" style="color: #4758AB;">fct_reorder</span>(name, mean)) <span class="sc" style="color: #5E5E5E;">|&gt;</span> </span>
+<span id="cb2-3">    <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> name, <span class="at" style="color: #657422;">y =</span> mean,</span>
+<span id="cb2-4">                  <span class="at" style="color: #657422;">ymin =</span> lower, <span class="at" style="color: #657422;">ymax =</span> upper)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-5">    <span class="fu" style="color: #4758AB;">geom_vline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">xintercept =</span> name), <span class="at" style="color: #657422;">col =</span> <span class="st" style="color: #20794D;">"grey95"</span>, <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">5</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-6">    <span class="fu" style="color: #4758AB;">geom_hline</span>(<span class="at" style="color: #657422;">yintercept =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">lty =</span> <span class="dv" style="color: #AD0000;">2</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-7">    <span class="fu" style="color: #4758AB;">geom_point</span>() <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-8">    <span class="fu" style="color: #4758AB;">geom_linerange</span>() <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-9">    <span class="fu" style="color: #4758AB;">coord_flip</span>() <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-10">    <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x =</span> <span class="cn" style="color: #8f5902;">NULL</span>, <span class="at" style="color: #657422;">y =</span> <span class="cn" style="color: #8f5902;">NULL</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb2-11">    <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">plot.margin =</span> <span class="fu" style="color: #4758AB;">margin</span>(<span class="at" style="color: #657422;">t =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">r =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">4</span>, <span class="at" style="color: #657422;">b =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">l =</span> <span class="dv" style="color: #AD0000;">5</span>))</span>
+<span id="cb2-12"></span>
+<span id="cb2-13">p1</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://www.bggj.is/posts/forest-plot-table/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+<section id="the-table" class="level3">
+<h3 class="anchored" data-anchor-id="the-table">The Table</h3>
+<p>To make the table look nice I convert the numbers to text and clean them up so that the text is justified nicely when plotting it. I did some manual tuning of the margins to make the plot and table line up nicely.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">p2 <span class="ot" style="color: #003B4F;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;">|&gt;</span> </span>
+<span id="cb3-2">    <span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">name =</span> <span class="fu" style="color: #4758AB;">fct_reorder</span>(name, mean),</span>
+<span id="cb3-3">           <span class="at" style="color: #657422;">mean =</span> <span class="fu" style="color: #4758AB;">round</span>(mean, <span class="dv" style="color: #AD0000;">2</span>),</span>
+<span id="cb3-4">           <span class="at" style="color: #657422;">mean =</span> <span class="fu" style="color: #4758AB;">str_pad</span>(mean, <span class="at" style="color: #657422;">width =</span> <span class="dv" style="color: #AD0000;">4</span>, <span class="at" style="color: #657422;">side =</span> <span class="st" style="color: #20794D;">"right"</span>, <span class="at" style="color: #657422;">pad =</span> <span class="st" style="color: #20794D;">"0"</span>),</span>
+<span id="cb3-5">           <span class="at" style="color: #657422;">lower =</span> <span class="fu" style="color: #4758AB;">round</span>(lower, <span class="dv" style="color: #AD0000;">2</span>),</span>
+<span id="cb3-6">           <span class="at" style="color: #657422;">lower =</span> <span class="fu" style="color: #4758AB;">as.character</span>(lower),</span>
+<span id="cb3-7">           <span class="at" style="color: #657422;">lower =</span> <span class="fu" style="color: #4758AB;">ifelse</span>(lower <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">"1"</span>, <span class="st" style="color: #20794D;">"1.00"</span>, lower),</span>
+<span id="cb3-8">           <span class="at" style="color: #657422;">lower =</span> <span class="fu" style="color: #4758AB;">str_pad</span>(lower, <span class="at" style="color: #657422;">width =</span> <span class="dv" style="color: #AD0000;">4</span>, <span class="at" style="color: #657422;">side =</span> <span class="st" style="color: #20794D;">"right"</span>, <span class="at" style="color: #657422;">pad =</span> <span class="st" style="color: #20794D;">"0"</span>),</span>
+<span id="cb3-9">           <span class="at" style="color: #657422;">upper =</span> <span class="fu" style="color: #4758AB;">round</span>(upper, <span class="dv" style="color: #AD0000;">2</span>),</span>
+<span id="cb3-10">           <span class="at" style="color: #657422;">upper =</span> <span class="fu" style="color: #4758AB;">as.character</span>(upper),</span>
+<span id="cb3-11">           <span class="at" style="color: #657422;">upper =</span> <span class="fu" style="color: #4758AB;">ifelse</span>(upper <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">"1"</span>, <span class="st" style="color: #20794D;">"1.00"</span>, upper),</span>
+<span id="cb3-12">           <span class="at" style="color: #657422;">upper =</span> <span class="fu" style="color: #4758AB;">str_pad</span>(upper, <span class="at" style="color: #657422;">width =</span> <span class="dv" style="color: #AD0000;">4</span>, <span class="at" style="color: #657422;">side =</span> <span class="st" style="color: #20794D;">"right"</span>, <span class="at" style="color: #657422;">pad =</span> <span class="st" style="color: #20794D;">"0"</span>),</span>
+<span id="cb3-13">           <span class="at" style="color: #657422;">ci =</span> <span class="fu" style="color: #4758AB;">str_c</span>(lower, <span class="st" style="color: #20794D;">", "</span>, upper)) <span class="sc" style="color: #5E5E5E;">|&gt;</span> </span>
+<span id="cb3-14">    <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> name)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-15">    <span class="fu" style="color: #4758AB;">geom_vline</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">xintercept =</span> name), <span class="at" style="color: #657422;">col =</span> <span class="st" style="color: #20794D;">"grey95"</span>, <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">5</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-16">    <span class="fu" style="color: #4758AB;">geom_text</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">label =</span> mean, <span class="at" style="color: #657422;">y =</span> <span class="dv" style="color: #AD0000;">1</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-17">    <span class="fu" style="color: #4758AB;">geom_text</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">label =</span> ci, <span class="at" style="color: #657422;">y =</span> <span class="fl" style="color: #AD0000;">1.07</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-18">    <span class="fu" style="color: #4758AB;">coord_flip</span>(<span class="at" style="color: #657422;">ylim =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="fl" style="color: #AD0000;">0.99</span>, <span class="fl" style="color: #AD0000;">1.1</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb3-19">    <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">axis.title =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb3-20">          <span class="at" style="color: #657422;">axis.text =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb3-21">          <span class="at" style="color: #657422;">axis.ticks =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb3-22">          <span class="at" style="color: #657422;">axis.line.y =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb3-23">          <span class="at" style="color: #657422;">panel.border =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(), </span>
+<span id="cb3-24">          <span class="at" style="color: #657422;">panel.grid =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(), </span>
+<span id="cb3-25">          <span class="at" style="color: #657422;">plot.background =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb3-26">          <span class="at" style="color: #657422;">plot.margin =</span> <span class="fu" style="color: #4758AB;">margin</span>(<span class="at" style="color: #657422;">t =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">r =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">b =</span> <span class="fl" style="color: #AD0000;">19.3</span>, <span class="at" style="color: #657422;">l =</span> <span class="dv" style="color: #AD0000;">0</span>))</span>
+<span id="cb3-27"></span>
+<span id="cb3-28">p2</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://www.bggj.is/posts/forest-plot-table/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+<section id="the-finished-bottom-row" class="level4">
+<h4 class="anchored" data-anchor-id="the-finished-bottom-row">The finished bottom row</h4>
+<p>Now we have alligned the plot and table. If you zoom in you might see that they don’t line up perfectly. I am not liable for any bodily harm caused by this.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">bottom_row <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">plot_grid</span>(p1, p2, <span class="at" style="color: #657422;">nrow =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">rel_widths =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">1</span>, <span class="fl" style="color: #AD0000;">0.3</span>)) </span>
+<span id="cb4-2"></span>
+<span id="cb4-3">bottom_row</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://www.bggj.is/posts/forest-plot-table/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="the-headers" class="level3">
+<h3 class="anchored" data-anchor-id="the-headers">The headers</h3>
+<p>I admit that this is a pretty handwavy manual way to make the header fit, and there is probably a nice way to automatically fit this using the coordinate system.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">top_row <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="at" style="color: #657422;">data =</span> <span class="fu" style="color: #4758AB;">tibble</span>()) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-2">    <span class="fu" style="color: #4758AB;">geom_text</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">x =</span> <span class="fl" style="color: #AD0000;">0.02</span>, <span class="at" style="color: #657422;">label =</span> <span class="st" style="color: #20794D;">"Variable"</span>), <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">5</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-3">    <span class="fu" style="color: #4758AB;">geom_text</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">x =</span> <span class="fl" style="color: #AD0000;">0.84</span>, <span class="at" style="color: #657422;">label =</span> <span class="st" style="color: #20794D;">"Mean"</span>), <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">5</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-4">    <span class="fu" style="color: #4758AB;">geom_text</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">y =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">x =</span> <span class="fl" style="color: #AD0000;">0.98</span>, <span class="at" style="color: #657422;">label =</span> <span class="st" style="color: #20794D;">"95% CI"</span>), <span class="at" style="color: #657422;">size =</span> <span class="dv" style="color: #AD0000;">5</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-5">    <span class="fu" style="color: #4758AB;">coord_cartesian</span>(<span class="at" style="color: #657422;">xlim =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-6">    <span class="fu" style="color: #4758AB;">theme_void</span>() <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb5-7">    <span class="fu" style="color: #4758AB;">theme</span>(<span class="at" style="color: #657422;">plot.margin =</span> <span class="fu" style="color: #4758AB;">margin</span>(<span class="at" style="color: #657422;">t =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">r =</span> <span class="dv" style="color: #AD0000;">5</span>, <span class="at" style="color: #657422;">b =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">l =</span> <span class="dv" style="color: #AD0000;">5</span>),</span>
+<span id="cb5-8">          <span class="at" style="color: #657422;">axis.line.x.bottom =</span> <span class="fu" style="color: #4758AB;">element_line</span>())</span>
+<span id="cb5-9"></span>
+<span id="cb5-10"></span>
+<span id="cb5-11">top_row</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://www.bggj.is/posts/forest-plot-table/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+<section id="putting-it-all-together" class="level3">
+<h3 class="anchored" data-anchor-id="putting-it-all-together">Putting it all together</h3>
+<p>And so we come to the finished plot. If we wrangle the <code>rel_heights</code> setting a little bit we can get a pretty nice looking forest plot and table hybrid.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;">plot_grid</span>(top_row, bottom_row, <span class="at" style="color: #657422;">ncol =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">rel_heights =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="fl" style="color: #AD0000;">0.07</span>, <span class="dv" style="color: #AD0000;">1</span>))</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="https://www.bggj.is/posts/forest-plot-table/index_files/figure-html/finished_plot-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+<p>This was actually less of an inconvenience than I thought. The mixture of <code>ggplot2</code> and <code>cowplot</code> made this a pretty easy task.</p>
+
+
+</section>
+
+ ]]></description>
+  <category>english</category>
+  <category>R</category>
+  <category>plots</category>
+  <category>tutorial</category>
+  <guid>https://www.bggj.is/posts/forest-plot-table/index.html</guid>
+  <pubDate>Tue, 28 Jun 2022 00:00:00 GMT</pubDate>
+  <media:content url="https://www.bggj.is/posts/forest-plot-table/featured.png" medium="image" type="image/png" height="89" width="144"/>
+</item>
+<item>
+  <title>Interview on the University website</title>
+  <link>https://www.bggj.is/talks/hi-vefur/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p><a href="https://english.hi.is/statistics_is_about_being_wrong" target="_blank">Find the iterview here</a></p>
+
+
+
+ ]]></description>
+  <guid>https://www.bggj.is/talks/hi-vefur/index.html</guid>
+  <pubDate>Tue, 22 Dec 2020 00:00:00 GMT</pubDate>
+  <media:content url="https://www.bggj.is/talks/hi-vefur/image.jpeg" medium="image" type="image/jpeg"/>
+</item>
+<item>
+  <title>StanCon2020: COVID-19 Prediction Model</title>
+  <link>https://www.bggj.is/talks/covid-model/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<iframe width="700" height="400" src="https://www.youtube.com/embed/Qj94Z59PT7c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="">
+</iframe>
+
+
+
+ ]]></description>
+  <category>english</category>
+  <category>presentation</category>
+  <category>covid19</category>
+  <category>bayesian statistics</category>
+  <category>trustworthiness</category>
+  <guid>https://www.bggj.is/talks/covid-model/index.html</guid>
+  <pubDate>Thu, 13 Aug 2020 00:00:00 GMT</pubDate>
+  <media:content url="https://www.bggj.is/talks/covid-model/image.png" medium="image" type="image/png" height="85" width="144"/>
+</item>
+</channel>
+</rss>

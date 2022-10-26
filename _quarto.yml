@@ -1,0 +1,34 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  search: false
+  navbar: 
+    right:
+      - text: "blog"
+        href: index.qmd
+      - text: "about"
+        href: about.qmd
+      - text: "phd stuff"
+        href: https:/www.bggj.is/bggjphd
+  title: "bggj"
+  site-url: "https://www.bggj.is"
+  description: Blogg um tölfræði og gögn
+  favicon: favicon.ico
+  repo-url: https://github.com/bgautijonsson/bgautijonsson.github.io
+  google-analytics: "G-EGQ9KVCY2C"
+  open-graph: true
+  twitter-card: 
+    creator: "@bggjonsson"
+    card-style: summary_large_image
+    site: "@bggjonsson"
+format:
+  html:
+    # include-in-header: header/header.html
+    theme: [flatly, theme.scss]
+    execute:
+      freeze: auto
+
+
+

@@ -1,0 +1,39 @@
+---
+title: "Brynjólfur Gauti Guðrúnar Jónsson"
+image: images/binni_graphic_smaller.png
+about:
+    id: aboutme
+    template: trestles
+    image-width: 250px
+    image-shape: rounded
+    links:
+        - icon: twitter
+          href: https://twitter.com/bggjonsson
+        - icon: linkedin
+          href: https://linkedin.com/in/bgautijonsson
+        - icon: github
+          href: https://github.com/bgautijonsson
+        - icon: file-earmark-person-fill
+          href: https://bggj.is/resume
+listing:
+    -   id: listing-talks
+        contents: talks
+        sort: "date desc"
+        type: grid
+        categories: false
+        page-size: 3
+        grid-item-border: true
+---
+
+::: {#aboutme}
+
+## About me
+
+I am a statistics PhD student at the University of Iceland researching improved 21st century projections of sub-daily extreme precipitation by spatio-temporal recalibration. I also teach [Statistical consulting](https://ugla.hi.is/kennsluskra/index.php?tab=nam&chapter=namskeid&id=70742120230&namskra=0){target="_blank"} and work at [The Icelandic Heart Association](https://hjarta.is/en/){target="_blank"}. 
+
+:::
+
+## Talks, interviews etc.
+
+::: {#listing-talks}
+:::

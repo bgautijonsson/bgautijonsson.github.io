@@ -1,0 +1,29 @@
+/*-- scss:defaults --*/
+
+@import "https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css";
+@import "https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js";
+
+$primary:                       #525252;
+$secondary:                     #ffffff;
+
+$body-bg:                       #ffffff;
+
+
+
+$font-size-base:                1rem; 
+$font-family-base:              "Lato";
+$font-family-sans-serif:        "Lato", "Open Sans", "Montserrat", "Roboto";
+$font-family-monospace:         "SFMono-Regular", "Menlo", "Monaco", "Consolas";
+
+
+$headings-color:                $primary;
+$headings-font-weight:          4000;
+$headings-font-family:          "Segoe UI";
+
+
+$navbar-brand-font-size:        $font-size-base * 2;
+$navbar-brand-font-family:      "Roboto Slab";
+$navbar-brand-font-weight:      700;
+
+
+

@@ -1,0 +1,9 @@
+---
+title: "Interview on the University website"
+description: |
+    Halldór Marteinsson interviewed me for the University of Iceland website about statistics, covid-19 predictions and more.
+image: image.jpeg
+date: "2020/12/22"
+---
+
+[Find the iterview here](https://english.hi.is/statistics_is_about_being_wrong){target="_blank"}

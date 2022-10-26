@@ -1,0 +1,14 @@
+{
+  "listingMap": {
+    "index_old.qmd": [
+      "posts",
+      "talks"
+    ],
+    "index.qmd": [
+      "posts"
+    ],
+    "about.qmd": [
+      "talks"
+    ]
+  }
+}

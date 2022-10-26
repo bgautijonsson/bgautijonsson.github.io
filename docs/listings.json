@@ -1,0 +1,25 @@
+[
+  {
+    "listing": "/index_old.html",
+    "items": [
+      "/posts/forest-plot-table/index.html",
+      "/talks/databeers_2022_09_16/index.html",
+      "/talks/hi-vefur/index.html",
+      "/talks/covid-model/index.html"
+    ]
+  },
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/forest-plot-table/index.html"
+    ]
+  },
+  {
+    "listing": "/about.html",
+    "items": [
+      "/talks/databeers_2022_09_16/index.html",
+      "/talks/hi-vefur/index.html",
+      "/talks/covid-model/index.html"
+    ]
+  }
+]
