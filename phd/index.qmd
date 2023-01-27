@@ -1,0 +1,7 @@
+---
+title: "About my PhD"
+---
+
+I'm developing and maintaining this package to go along with my PhD studies for reproducibility and to held me keep my sanity intact for the next years.
+
+The main gist of my PhD research will be adding to the `Max-and-Smooth` method previously developed and published by my advisor, Birgir Hrafnkelsson, and others [here](https://arxiv.org/abs/1907.11969){target="_blank"}

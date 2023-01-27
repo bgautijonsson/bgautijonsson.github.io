@@ -1,34 +1,71 @@
 project:
   type: website
   output-dir: docs
+  preview: 
+    port: 4200
 
 website:
-  search: false
-  navbar: 
-    right:
-      - text: "blog"
-        href: index.qmd
-      - text: "about"
-        href: about.qmd
-      - text: "phd stuff"
-        href: /phd/
   title: "bggj"
   site-url: "https://www.bggj.is"
   description: Blogg um tölfræði og gögn
-  favicon: favicon.ico
+  search: false
+  
   repo-url: https://github.com/bgautijonsson/bgautijonsson.github.io
+  
+  favicon: favicon.ico
+  
   google-analytics: "G-EGQ9KVCY2C"
   open-graph: true
   twitter-card: 
     creator: "@bggjonsson"
     card-style: summary_large_image
     site: "@bggjonsson"
+    
+  navbar: 
+    left:
+      - text: "blog"
+        href: index.qmd
+      - text: "about"
+        href: about.qmd
+      - text: "phd"
+        href: phd/index.qmd
+        
+    right:
+      - icon: twitter
+        href: https://twitter.com/bggjonsson
+      - icon: github
+        href: https://github.com/bgautijonsson/bgautijonsson.github.io
+  
+  sidebar:
+    - title: blog
+    - title: about
+    - title: "phd"
+      collapse-level: 2
+      contents: 
+        - phd/index.qmd
+        - section: "Writing"
+          contents: 
+            - section: "Data"
+              contents: 
+                - phd/articles/data/ukcp/index.qmd
+            - section: "Theory"
+              contents: 
+                - phd/articles/theory/max/index.qmd
+            - section: "Results"
+              contents: 
+                - phd/articles/results/max/index.qmd
+                - phd/articles/results/spatial/index.qmd
+        
 format:
   html:
-    # include-in-header: header/header.html
     theme: [flatly, theme.scss]
+    code-fold: true
+    title-block-banner: true
     execute:
       freeze: auto
+      warning: false
+      message: false
 
 
 
+editor: source

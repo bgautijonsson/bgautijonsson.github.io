@@ -25,5 +25,29 @@
   },
   "about.qmd": {
     "about.html": "6ff32fb0"
+  },
+  "phd/articles/theory/index.qmd": {
+    "index.html": "6a159035"
+  },
+  "phd/articles/theory/max/index.qmd": {
+    "index.html": "7696e321"
+  },
+  "phd/articles/results/index.qmd": {
+    "index.html": "423f8704"
+  },
+  "phd/articles/results/max/index.qmd": {
+    "index.html": "13b540c0"
+  },
+  "phd/articles/data/ukcp/index.qmd": {
+    "index.html": "584f940c"
+  },
+  "phd/articles/data/index.qmd": {
+    "index.html": "99a77e4e"
+  },
+  "phd/index.qmd": {
+    "index.html": "e77950d3"
+  },
+  "phd/articles/results/spatial/index.qmd": {
+    "index.html": "a156af92"
   }
 }

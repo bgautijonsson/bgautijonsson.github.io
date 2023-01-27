@@ -1,0 +1,14 @@
+{
+  "hash": "3d3aa9e87fdef6f273a09355d93bc6a4",
+  "result": {
+    "markdown": "---\ntitle: \"Summary\"\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(bggjphd)\nlibrary(tidyverse)\nlibrary(GGally)\nlibrary(cowplot)\ntheme_set(theme_bggj())\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
