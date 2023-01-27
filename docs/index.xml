@@ -9,7 +9,7 @@
 <link>https://www.bggj.is/index.html</link>
 <atom:link href="https://www.bggj.is/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blogg um tölfræði og gögn</description>
-<generator>quarto-1.1.175</generator>
+<generator>quarto-1.2.313</generator>
 <lastBuildDate>Tue, 28 Jun 2022 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Forest Plots with Built-In Tables</title>

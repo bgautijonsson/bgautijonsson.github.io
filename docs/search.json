@@ -39,14 +39,14 @@
     "href": "talks/databeers_2022_09_16/index.html",
     "title": "Databeers #2",
     "section": "",
-    "text": "20 slides\n20 seconds per slide\n\n\n\nLink to the slides in full size"
+    "text": "The presentations were in the PechaKucha format:\n\n20 slides\n20 seconds per slide\n\n\n\nLink to the slides in full size"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
     "title": "bggj",
     "section": "",
-    "text": "Creating forest plots with coefficient tables in ggplot2 with cowplot\n\n\nI’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.\n\n\n\n\n\n\nJun 28, 2022\n\n\nBrynjólfur Gauti Guðrúnar Jónsson\n\n\n\n\n\n\nNo matching items"
+    "text": "Forest Plots with Built-In Tables\n\n\nCreating forest plots with coefficient tables in ggplot2 with cowplot\n\n\nI’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.\n\n\n\n\n\n\nJun 28, 2022\n\n\nBrynjólfur Gauti Guðrúnar Jónsson\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
