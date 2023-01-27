@@ -45,9 +45,14 @@ website:
         - phd/index.qmd
         - section: "Writing"
           contents: 
-            - section: "Data"
-              contents: 
-                - phd/articles/data/ukcp/index.qmd
+            - section: "Methods"
+              contents:
+                - section: "Data"
+                  contents: 
+                    - phd/articles/methods/data/ukcp/index.qmd
+                - section: "Code"
+                  contents:
+                    - phd/articles/methods/code/max/index.qmd
             - section: "Theory"
               contents: 
                 - phd/articles/theory/max/index.qmd
@@ -62,7 +67,7 @@ format:
     code-fold: true
     title-block-banner: true
     execute:
-      freeze: false
+      freeze: auto
       warning: false
       message: false
 

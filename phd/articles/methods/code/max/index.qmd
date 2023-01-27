@@ -1,0 +1,59 @@
+---
+title: "The Max Step"
+code-fold: false
+code-block-bg: true
+code-block-border-left: "#31BAE9"
+code-link: true
+code-line-numbers: true
+execute:
+  eval: false
+highlight-style: atom-one
+---
+
+# Log likelihood
+
+
+```{r}
+
+neg_log_lik_gev_trend <- function(
+    y,
+    t,
+    par,
+    priors,
+    links,
+    t0 = 1981
+) {
+  t <- t - t0
+  
+  mu0 <- exp(par[1])
+  sigma <- exp(par[2] + par[1])
+  xi <- link_shape_inverse(par[3])
+  delta <- link_trend_inverse(par[4])
+  
+  mu <- mu0 * (1 + delta * t)
+  
+  z <- (y - mu) / sigma
+  
+  if (any(1 + xi * z <= 0)) {
+    return(NA)
+  }
+  
+  out <- evd::dgev(
+    x = y,
+    loc = mu,
+    scale = sigma,
+    shape = xi,
+    log = TRUE
+  ) |>
+    sum()
+  
+  prior_likelihood <- priors$location(par[1]) +
+    priors$scale(par[2]) +
+    priors$shape(par[3]) +
+    priors$trend(par[4])
+  
+  out <- out + prior_likelihood
+  
+  -out
+}
+```

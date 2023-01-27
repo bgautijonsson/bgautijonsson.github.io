@@ -1,0 +1,16 @@
+{
+  "hash": "d33dd11e78ab3c94c2f99b1ffabf896b",
+  "result": {
+    "markdown": "---\ntitle: \"The Max Step\"\ncode-fold: false\ncode-block-bg: true\ncode-block-border-left: \"#31BAE9\"\ncode-link: true\ncode-line-numbers: true\nexecute:\n  eval: false\nhighlight-style: atom-one\n---\n\n\n# Log likelihood\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nneg_log_lik_gev_trend <- function(\n    y,\n    t,\n    par,\n    priors,\n    links,\n    t0 = 1981\n) {\n  t <- t - t0\n  \n  mu0 <- exp(par[1])\n  sigma <- exp(par[2] + par[1])\n  xi <- link_shape_inverse(par[3])\n  delta <- link_trend_inverse(par[4])\n  \n  mu <- mu0 * (1 + delta * t)\n  \n  z <- (y - mu) / sigma\n  \n  if (any(1 + xi * z <= 0)) {\n    return(NA)\n  }\n  \n  out <- evd::dgev(\n    x = y,\n    loc = mu,\n    scale = sigma,\n    shape = xi,\n    log = TRUE\n  ) |>\n    sum()\n  \n  prior_likelihood <- priors$location(par[1]) +\n    priors$scale(par[2]) +\n    priors$shape(par[3]) +\n    priors$trend(par[4])\n  \n  out <- out + prior_likelihood\n  \n  -out\n}\n```\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

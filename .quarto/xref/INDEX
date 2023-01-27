@@ -49,5 +49,11 @@
   },
   "phd/articles/results/spatial/index.qmd": {
     "index.html": "a156af92"
+  },
+  "phd/articles/methods/code/max/index.qmd": {
+    "index.html": "1e31d0d5"
+  },
+  "phd/articles/methods/data/ukcp/index.qmd": {
+    "index.html": "f3adb7c6"
   }
 }
