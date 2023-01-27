@@ -62,7 +62,7 @@ format:
     code-fold: true
     title-block-banner: true
     execute:
-      freeze: auto
+      freeze: false
       warning: false
       message: false
 

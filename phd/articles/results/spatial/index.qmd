@@ -314,7 +314,12 @@ station_results |>
 station_results |> 
   filter(variable == "phi") |> 
   mutate(variable = "xi") |> 
-  mutate_at(vars(ml_estimate, mcmc_mean), link_shape_inverse) |> 
+  mutate_at(
+    vars(ml_estimate, mcmc_mean), 
+    function(x) {
+      2 * 0.5 * 1 / (1 + exp(-x)) - 0.5
+    }
+  ) |> 
   proj_plot()
 ```
 
@@ -334,7 +339,12 @@ station_results |>
 station_results |> 
   filter(variable == "gamma") |> 
   mutate(variable = "delta") |> 
-  mutate_at(vars(ml_estimate, mcmc_mean), link_trend_inverse) |> 
+  mutate_at(
+    vars(ml_estimate, mcmc_mean), 
+    function(x) {
+      2 * 0.01 * 1 / (1 + exp(-x)) - 0.01
+    }
+  ) |> 
   proj_plot()
 ```
 
