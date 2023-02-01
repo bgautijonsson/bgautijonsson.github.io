@@ -19,7 +19,7 @@ The data used in this research are downloaded from the CEDA Archive:
 
 * [UKCP Local Projections on a 5km grid over the UK for 1980-2080](https://data.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km)
 
-The raw data contain climate projections for the UK on a 5km grid from 1980 to 2080 for a high emissions scenario, *RCP8.5*, and contain hourly precipitation rates of $43.920$ squares on a $180 \times 244$ grid. The projections are calculated for $1980 - 2000$, $2020 - 2040$, and $2060 - 2080$, thus giving $60 \times 365 \times 24 \times 180 \times 244 \approx 24 \cdot 10^9$ data points. 
+The raw data contain climate projections for the UK on a 5km grid from 1980 to 2080 for a high emissions scenario, *RCP8.5*, and contain hourly precipitation rates of $43.920$ squares on a $180 \times 244$ grid. The projections are calculated for $1980 - 2000$, $2020 - 2040$, and $2060 - 2080$, thus giving $60 \times 365 \times 24 \times 180 \times 244 \approx 2.3 \cdot 10^{10}$ data points. 
 
 The raw data were processed by calculating the yearly maximum over the hourly precipitation rates for each station, thus reducing the number of data points to $60 \times 180 \times 244 \approx 2.6 \cdot 10^6$.
 
@@ -162,6 +162,7 @@ ggsave(
 #| out-width: 100%
 #| column: page
 #| fig-align: center
+#| fig-width: 10
 
 n_station <- 5
 precip |> 
