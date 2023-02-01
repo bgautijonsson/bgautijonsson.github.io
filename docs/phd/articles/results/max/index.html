@@ -83,6 +83,25 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
 </style>
 
 
@@ -146,7 +165,7 @@ e^{- e^{- \frac{y - \mu}{\sigma}
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-sidebar floating nav-fixed fullcontent">
+<body class="nav-sidebar floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -307,6 +326,11 @@ e^{- e^{- \frac{y - \mu}{\sigma}
   <a href="../../../../phd/articles/results/spatial/index.html" class="sidebar-item-text sidebar-link">The Smooth Step</a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../../phd/articles/results/copula/index.html" class="sidebar-item-text sidebar-link">T-Copula</a>
+  </div>
+</li>
       </ul>
   </li>
       </ul>
@@ -315,9 +339,11 @@ e^{- e^{- \frac{y - \mu}{\sigma}
     </div>
 </nav>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
 
 
 
@@ -344,20 +370,31 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 1 + \xi_i \frac{y_{it} - \mu_{it}}{\sigma_i} &gt; 0, \quad \forall i, t.
 \]</span></p>
 </section>
-<section id="maximum-likelihood-estimation" class="level1">
+<section id="maximum-likelihood-estimation" class="level1 page-columns page-full">
 <h1>Maximum Likelihood Estimation</h1>
-<section id="transformed-parameters" class="level2">
+<section id="transformed-parameters" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="transformed-parameters">Transformed parameters</h2>
 <p>Having performed the Max step and saved the ML estimates we can easily load them by fetching the object <code>station_estimates</code>. Here we plot the distribution of transformed estimates.</p>
-<p><span class="math display">\[
-\begin{aligned}
+<span class="math display">\[\begin{aligned}
 \psi &amp;= \log(\mu) \\
 \tau &amp;= \log(\frac{\sigma}{\mu}) = \log(\sigma) - \log(\mu) \\
-\phi &amp;= \mathrm{logit}(\xi, \text{ scale}=1.6) - 0.8 \\
-\gamma &amp;= \mathrm{logit}(\Delta, \text{ scale}=0.02) - 0.01.
-\end{aligned}
-\]</span></p>
-<p>These transformations make it so that <span class="math inline">\(\xi\)</span> can take values between <span class="math inline">\(-0.8\)</span> and <span class="math inline">\(0.8\)</span>, and <span class="math inline">\(\Delta\)</span> can take values between <span class="math inline">\(-0.01\)</span> and <span class="math inline">\(0.01\)</span>.</p>
+\phi &amp;= h(\xi) \\
+\gamma &amp;= d(\Delta),
+\end{aligned}\]</span>
+<p>where the link functions for the shape and trend parameters are defined according to <span class="citation" data-cites="johannesson2021">Johannesson et al. (<a href="#ref-johannesson2021" role="doc-biblioref">2021</a>)</span></p>
+<div class="no-row-height column-margin column-container"><div id="ref-johannesson2021" class="csl-entry" role="doc-biblioentry">
+Johannesson, Árni V., Stefan Siegert, Raphaël Huser, Haakon Bakka, and Birgir Hrafnkelsson. 2021. <span>“Approximate Bayesian Inference for Analysis of Spatio-Temporal Flood Frequency Data,”</span> April. <a href="https://doi.org/10.48550/arXiv.1907.04763">https://doi.org/10.48550/arXiv.1907.04763</a>.
+</div></div><span class="math display">\[\begin{aligned}
+h(\xi) &amp;= a_\phi + b_\phi \log\left(-\log\left[1 - \left(\xi + \frac12\right)^{c_\phi}\right]\right) \\
+c_\phi &amp;= 0.8 \\
+b_\phi &amp;= -\frac{1}{c_\phi}\log\left(1 - \frac{1}{2^{c_\phi}}\right)\left(1 - \frac{1}{2^{c_\phi}}\right) 2^{c_\phi - 1} \\
+a_\phi &amp;= -b_\phi \log\left(-\log(1 - \frac{1}{2^{c_\phi}})\right) \\
+
+\newline
+
+d(\Delta) &amp;= \frac12 \delta_0 \left(\log(\delta_0 + \Delta) - \log(\delta_0 - \Delta_i)\right) \\
+\delta_0 &amp;= 0.008.
+\end{aligned}\]</span>
 </section>
 </section>
 <section id="results" class="level1">
@@ -393,18 +430,35 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(value)) <span class="sc">+</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">60</span>) <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="st">"name"</span>, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distributions of GEV parameters from Max step"</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d_prior <span class="ot">&lt;-</span> <span class="fu">crossing</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"phi"</span>, <span class="st">"gamma"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">len =</span> <span class="dv">200</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, x <span class="sc">*</span> <span class="fl">0.8</span>, x <span class="sc">*</span> <span class="fl">0.01</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, <span class="fu">prior_shape</span>(x) <span class="sc">|&gt;</span> <span class="fu">exp</span>(), <span class="fu">prior_trend</span>(x) <span class="sc">|&gt;</span> <span class="fu">exp</span>()),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, y <span class="sc">*</span> <span class="dv">6000</span>, y <span class="sc">*</span> <span class="fl">0.05</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(value)) <span class="sc">+</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">60</span>) <span class="sc">+</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> d_prior,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y <span class="sc">*</span> <span class="fl">1e3</span>),</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> F</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="st">"name"</span>, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distributions of GEV parameters from Max step"</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"The superimposed curves are the implied prior distributions"</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell" data-fig.asp="1">
@@ -416,7 +470,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggpairs</span>(<span class="at">progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -425,26 +479,44 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mu =</span> <span class="fu">exp</span>(psi),</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">sigma =</span> <span class="fu">exp</span>(tau <span class="sc">+</span> psi),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">xi =</span> <span class="fu">link_shape_inverse</span>(phi),</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">delta =</span> <span class="fu">link_trend_inverse</span>(gamma)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>psi, <span class="sc">-</span>tau, <span class="sc">-</span>phi, <span class="sc">-</span>gamma, <span class="sc">-</span>proj_x, <span class="sc">-</span>proj_y) <span class="sc">|&gt;</span> </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>station)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"mu"</span>, <span class="st">"sigma"</span>, <span class="st">"xi"</span>, <span class="st">"delta"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(value)) <span class="sc">+</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="st">"name"</span>, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distributions of backtransformed GEV parameters from Max step"</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>d_prior <span class="ot">&lt;-</span> <span class="fu">crossing</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="fu">c</span>(<span class="st">"phi"</span>, <span class="st">"gamma"</span>),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">len =</span> <span class="dv">200</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, x <span class="sc">*</span> <span class="fl">0.8</span>, x <span class="sc">*</span> <span class="fl">0.01</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, <span class="fu">prior_shape</span>(x) <span class="sc">|&gt;</span> <span class="fu">exp</span>(), <span class="fu">prior_trend</span>(x) <span class="sc">|&gt;</span> <span class="fu">exp</span>()),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, y <span class="sc">*</span> <span class="dv">2000000</span>, y <span class="sc">*</span> <span class="dv">20</span>),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, <span class="fu">link_shape_inverse</span>(x), <span class="fu">link_trend_inverse</span>(x)),</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="fu">ifelse</span>(name <span class="sc">==</span> <span class="st">"phi"</span>, <span class="st">"xi"</span>, <span class="st">"delta"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mu =</span> <span class="fu">exp</span>(psi),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">sigma =</span> <span class="fu">exp</span>(tau <span class="sc">+</span> psi),</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">xi =</span> <span class="fu">link_shape_inverse</span>(phi),</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">delta =</span> <span class="fu">link_trend_inverse</span>(gamma)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>psi, <span class="sc">-</span>tau, <span class="sc">-</span>phi, <span class="sc">-</span>gamma, <span class="sc">-</span>proj_x, <span class="sc">-</span>proj_y) <span class="sc">|&gt;</span> </span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>station)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"mu"</span>, <span class="st">"sigma"</span>, <span class="st">"xi"</span>, <span class="st">"delta"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(value)) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">100</span>) <span class="sc">+</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> d_prior,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y),</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> F</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="st">"name"</span>, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distributions of backtransformed GEV parameters from Max step"</span>,</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"The superimposed curves are the implied prior distributions"</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell" data-fig.asp="1">
@@ -460,7 +532,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggpairs</span>(<span class="at">progress =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -493,7 +565,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -520,7 +592,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -550,7 +622,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -578,7 +650,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -608,7 +680,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -636,7 +708,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -666,7 +738,7 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
@@ -694,9 +766,10 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i &g
 <span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+
 
 
 </section>

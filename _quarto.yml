@@ -60,6 +60,7 @@ website:
               contents: 
                 - phd/articles/results/max/index.qmd
                 - phd/articles/results/spatial/index.qmd
+                - phd/articles/results/copula/index.qmd
         
 format:
   html:

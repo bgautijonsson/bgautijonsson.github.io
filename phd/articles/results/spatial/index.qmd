@@ -6,6 +6,7 @@ title: "The Smooth Step"
 library(bggjphd)
 library(tidyverse)
 library(bayesplot)
+library(posterior)
 library(GGally)
 library(scales)
 library(cowplot)
@@ -65,7 +66,8 @@ n_iter <- theta_results |>
 
 ```{r}
 theta_results |> 
-  filter(.iteration > 2000) |>
+  filter(.chain != 4) |> 
+  filter(.iteration > 1) |>
   mcmc_trace()
 ```
 
@@ -73,7 +75,7 @@ theta_results |>
 
 ```{r}
 theta_results |> 
-  filter(.iteration > 2000) |> 
+  filter(.iteration > 1) |> 
   mcmc_acf_bar()
 ```
 
@@ -116,7 +118,7 @@ theta_results |>
 
 ```{r}
 theta_results |> 
-  filter(.iteration > 2000) |> 
+  filter(.iteration > 1) |> 
   summarise_draws() |> 
   kable(digits = 3) |> 
   kable_styling(bootstrap_options = c("striped", "hover"))
@@ -125,7 +127,7 @@ theta_results |>
 ```{r}
 #| fig.asp: 0.8
 theta_results |> 
-  filter(.iteration > 2000) |> 
+  filter(.iteration > 1) |> 
   mcmc_hist_by_chain(
   )
 ```
@@ -134,7 +136,7 @@ theta_results |>
 
 ```{r}
 theta_results |> 
-  filter(.iteration > 2000) |> 
+  filter(.iteration > 1) |> 
   summarise_draws() |> 
   kable(digits = 3) |> 
   kable_styling(bootstrap_options = c("striped", "hover"))
@@ -143,7 +145,7 @@ theta_results |>
 ```{r}
 #| fig.asp: 0.8
 theta_results |> 
-  filter(.iteration > 2000) |> 
+  filter(.iteration > 1) |> 
   mcmc_hist_by_chain(
     transformations = function(x) exp(-x/2)
   )
@@ -188,7 +190,34 @@ station_results |>
 
 ```{r}
 #| fig.asp: 0.8
+#| out-width: 100%
 station_results |> 
+  ggplot(aes(ml_estimate, mcmc_mean)) +
+  geom_abline(intercept = 0, slope = 1, lty = 2) +
+  geom_point(alpha = 0.1) +
+  facet_wrap("variable", scales = "free") +
+  labs(
+    x = "ML Estimate (Max step)",
+    y = "Posterior Mean (Smooth step)",
+    title = "Comparing estimates from the Max and the Smooth steps"
+  )
+```
+
+```{r}
+#| fig.asp: 0.8
+#| out-width: 100%
+station_results |> 
+  pivot_longer(c(ml_estimate, mcmc_mean)) |> 
+  pivot_wider(names_from = variable) |> 
+  mutate(
+    mu = exp(psi),
+    sigma = exp(psi + tau),
+    xi = link_shape_inverse(phi),
+    delta = link_trend_inverse(gamma)
+  ) |> 
+  select(-(gamma:tau)) |> 
+  pivot_longer(c(mu:delta), names_to = "variable") |> 
+  pivot_wider() |> 
   ggplot(aes(ml_estimate, mcmc_mean)) +
   geom_abline(intercept = 0, slope = 1, lty = 2) +
   geom_point(alpha = 0.1) +
@@ -315,10 +344,8 @@ station_results |>
   filter(variable == "phi") |> 
   mutate(variable = "xi") |> 
   mutate_at(
-    vars(ml_estimate, mcmc_mean), 
-    function(x) {
-      2 * 0.5 * 1 / (1 + exp(-x)) - 0.5
-    }
+    vars(mcmc_mean, ml_estimate),
+    link_shape_inverse
   ) |> 
   proj_plot()
 ```
@@ -340,11 +367,9 @@ station_results |>
   filter(variable == "gamma") |> 
   mutate(variable = "delta") |> 
   mutate_at(
-    vars(ml_estimate, mcmc_mean), 
-    function(x) {
-      2 * 0.01 * 1 / (1 + exp(-x)) - 0.01
-    }
-  ) |> 
+    vars(mcmc_mean, ml_estimate),
+    link_trend_inverse
+    ) |> 
   proj_plot()
 ```
 

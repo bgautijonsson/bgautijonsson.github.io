@@ -1,10 +1,11 @@
 ---
 title: "The Max Step"
+bibliography: references.bib
+reference-location: margin
+citation-location: margin
 ---
 
-
 # The GEV Model
-
 
 $$
 \mathrm{GEV(y|\mu, \sigma, \xi)} = \begin{cases}
@@ -38,20 +39,35 @@ $$
 
 Having performed the Max step and saved the ML estimates we can easily load them by fetching the object `station_estimates`. Here we plot the distribution of transformed estimates.
 
-$$
+```{=tex}
 \begin{aligned}
 \psi &= \log(\mu) \\
 \tau &= \log(\frac{\sigma}{\mu}) = \log(\sigma) - \log(\mu) \\
-\phi &= \mathrm{logit}(\xi, \text{ scale}=1.6) - 0.8 \\
-\gamma &= \mathrm{logit}(\Delta, \text{ scale}=0.02) - 0.01.
+\phi &= h(\xi) \\
+\gamma &= d(\Delta),
 \end{aligned}
-$$
+```
 
-These transformations make it so that $\xi$ can take values between $-0.8$ and $0.8$, and $\Delta$ can take values between $-0.01$ and $0.01$. 
+where the link functions for the shape and trend parameters are defined according to @johannesson2021
+
+
+```{=tex}
+\begin{aligned}
+h(\xi) &= a_\phi + b_\phi \log\left(-\log\left[1 - \left(\xi + \frac12\right)^{c_\phi}\right]\right) \\
+c_\phi &= 0.8 \\
+b_\phi &= -\frac{1}{c_\phi}\log\left(1 - \frac{1}{2^{c_\phi}}\right)\left(1 - \frac{1}{2^{c_\phi}}\right) 2^{c_\phi - 1} \\
+a_\phi &= -b_\phi \log\left(-\log(1 - \frac{1}{2^{c_\phi}})\right) \\
+
+\newline
+
+d(\Delta) &= \frac12 \delta_0 \left(\log(\delta_0 + \Delta) - \log(\delta_0 - \Delta_i)\right) \\
+\delta_0 &= 0.008.
+\end{aligned}
+```
 
 # Results
 
-```{r}
+```{r setup}
 #| message: false
 #| warning: false
 library(bggjphd)
@@ -78,14 +94,31 @@ d <- station_estimates |>
 ### Transformed Scale
 
 ```{r}
+d_prior <- crossing(
+  name = c("phi", "gamma"),
+  x = seq(-1, 1, len = 200)
+) |> 
+  mutate(
+    x = ifelse(name == "phi", x * 0.8, x * 0.01),
+    y = ifelse(name == "phi", prior_shape(x) |> exp(), prior_trend(x) |> exp()),
+    y = ifelse(name == "phi", y * 6000, y * 0.05)
+  )
+
+
 d |> 
   ggplot(aes(value)) +
   geom_histogram(bins = 60) +
+  geom_line(
+    data = d_prior,
+    aes(x = x, y = y * 1e3),
+    inherit.aes = F
+  ) +
   facet_wrap("name", scales = "free") +
   labs(
     x = NULL,
     y = NULL,
-    title = "Distributions of GEV parameters from Max step"
+    title = "Distributions of GEV parameters from Max step",
+    subtitle = "The superimposed curves are the implied prior distributions"
   )
 ```
 
@@ -97,10 +130,21 @@ d |>
   ggpairs(progress = FALSE)
 ```
 
-
 ### Original Scale
 
 ```{r}
+d_prior <- crossing(
+  name = c("phi", "gamma"),
+  x = seq(-1, 1, len = 200)
+) |> 
+  mutate(
+    x = ifelse(name == "phi", x * 0.8, x * 0.01),
+    y = ifelse(name == "phi", prior_shape(x) |> exp(), prior_trend(x) |> exp()),
+    y = ifelse(name == "phi", y * 2000000, y * 20),
+    x = ifelse(name == "phi", link_shape_inverse(x), link_trend_inverse(x)),
+    name = ifelse(name == "phi", "xi", "delta")
+  )
+
 d |> 
   pivot_wider() |> 
   mutate(mu = exp(psi),
@@ -112,14 +156,19 @@ d |>
   mutate(name = fct_relevel(name, "mu", "sigma", "xi", "delta")) |> 
   ggplot(aes(value)) +
   geom_histogram(bins = 100) +
+  geom_line(
+    data = d_prior,
+    aes(x = x, y = y),
+    inherit.aes = F
+  ) +
   facet_wrap("name", scales = "free") +
   labs(
     x = NULL,
     y = NULL,
-    title = "Distributions of backtransformed GEV parameters from Max step"
+    title = "Distributions of backtransformed GEV parameters from Max step",
+    subtitle = "The superimposed curves are the implied prior distributions"
   )
 ```
-
 
 ```{r}
 #| fig-asp: 1
@@ -132,7 +181,6 @@ d |>
   select(-psi, -tau, -phi, -gamma, -station, -proj_x, -proj_y) |> 
   ggpairs(progress = FALSE)
 ```
-
 
 ## Spatial Distribution
 
