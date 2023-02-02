@@ -158,7 +158,35 @@
     "href": "phd/index.html",
     "title": "About my PhD",
     "section": "",
-    "text": "I’m developing and maintaining this package to go along with my PhD studies for reproducibility and to held me keep my sanity intact for the next years.\nThe main gist of my PhD research will be adding to the Max-and-Smooth method previously developed and published by my advisor, Birgir Hrafnkelsson, and others here"
+    "text": "I’m developing and maintaining this part of my page to go along with my PhD studies for reproducibility and to held me keep my sanity intact for the next years.\nThe main gist of my PhD research will be adding to the Max-and-Smooth method previously developed and published by my advisor, Birgir Hrafnkelsson, and others here"
+  },
+  {
+    "objectID": "phd/index.html#r-package-on-github",
+    "href": "phd/index.html#r-package-on-github",
+    "title": "About my PhD",
+    "section": "R package on Github",
+    "text": "R package on Github\nI’ve put the code and data for any modeling into an R package, bggjphd, which I keep up to date on Github"
+  },
+  {
+    "objectID": "phd/index.html#docker-container",
+    "href": "phd/index.html#docker-container",
+    "title": "About my PhD",
+    "section": "Docker Container",
+    "text": "Docker Container\nFor reproducibility I keep a Docker container on Docker Hub that sets up an R environment and all the packages needed to run code from the bggjphd package."
+  },
+  {
+    "objectID": "phd/index.html#data",
+    "href": "phd/index.html#data",
+    "title": "About my PhD",
+    "section": "Data",
+    "text": "Data\n\nUKCP\nUKCP Data\nGather data on hourly precipitation"
+  },
+  {
+    "objectID": "phd/index.html#models",
+    "href": "phd/index.html#models",
+    "title": "About my PhD",
+    "section": "Models",
+    "text": "Models\n\nMaximum Likelihood Estimation\n\n\nSpatial Smoothing of MLEs"
   },
   {
     "objectID": "talks/hi-vefur/index.html",
