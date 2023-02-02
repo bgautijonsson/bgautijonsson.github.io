@@ -7,31 +7,35 @@ citation-location: margin
 
 # The GEV Model
 
-$$
+```{=tex}
 \mathrm{GEV(y|\mu, \sigma, \xi)} = \begin{cases}
 e^{- \left(1 + \xi \frac{y - \mu}{\sigma}\right)_+^{-1/\xi}}, \xi\neq0 \\
 e^{- e^{- \frac{y - \mu}{\sigma}
 }}, \xi=0
 \end{cases}
-$$
+```
+
 
 In our case we want $\mu$ to vary with time. If we write $y_{it}$ for the observed hourly maximum at station $i$ during year $t$ we will then have
 
-$$
+```{=tex}
 y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i), \quad \mu_{it}, \sigma_i > 0, \quad \xi_i \in (-0.5, 0.5),
-$$
+```
+
 
 where
 
-$$
+```{=tex}
 \mu_{it} = \mu_i \cdot (1 + \Delta_i \cdot (t - t_0)),
-$$
+```
+
 
 and
 
-$$
+```{=tex}
 1 + \xi_i \frac{y_{it} - \mu_{it}}{\sigma_i} > 0, \quad \forall i, t.
-$$
+```
+
 
 # Maximum Likelihood Estimation
 

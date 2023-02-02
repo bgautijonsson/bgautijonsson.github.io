@@ -200,3 +200,142 @@ precip |>
     subtitle = "Shown for each of the three modelled periods"
   )
 ```
+
+# How the data was processed
+
+An easy way to programmatically generate the dataset used in this research in R is via [FTP(https://help.ceda.ac.uk/article/280-ftp) connections to the CEDA archive]. To do this we need the following:
+
+* A CEDA Archive account
+* A CEDA FTP password
+
+All the files we want to download live inside the folder designated below
+
+```{r}
+#| eval: false
+#| code-fold: show
+url <- "ftp://ftp.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km/rcp85/01/pr/1hr/v20210615/"
+```
+
+We're going to need to input our username and password into the URL to download the data. In order to hide my login info when coding I put it in my R Environment *(easy to edit with `usethis::edit_r_environ()`)* and can thus write a function to input it in requests. I never assign my info to variables, but rather just use functions to input them.
+
+```{r}
+#| eval: false
+#| code-fold: show
+userpwd <- function() str_c(Sys.getenv("CEDA_USER"), Sys.getenv("CEDA_PWD"), sep = ":")
+```
+
+Now we can send a request to the FTP server in order to get a list of all the files we want to download
+
+```{r}
+#| eval: false
+#| code-fold: show
+filenames <- getURL(
+  url,
+  userpwd = userpwd(),
+  dirlistonly = TRUE
+)
+```
+
+We get a single string with all the file names. It's easy to split them up into separate strings ands remove the trailing empty line.
+
+```{r}
+#| eval: false
+#| code-fold: show
+files <- filenames |>
+  str_split_1(pattern = "\n")
+
+files <- files[-length(files)]
+```
+
+Now comes the tricky part. We are going to download 720 files *(one for each month)* that are around 120MB each. If we just download them and keep them on our hard drive that's going to be upwards of 70GB. Instead of doing that we will use the function `process_data()` below to do the following:
+
+* For each dataset
+  1. Create a temporary file
+  2. Download the data into the temporary file
+  3. For each location, throw away all measurements except for the maximum
+  4. Create a tidy table with information about the coordinates of the location, the max precipitation and the observation date-range
+  5. Delete the temporary file
+  
+Before we can iterate we will need to create a new helper function. Since we will now be using `download.file()` to download our datasets, we need to input our username and password into the URL. As before, in order to not reveal our information we use functions instead of creating global variables in the environment. Thus we won't accidentally leak our information when f.ex. taking screenshots.
+
+```{r}
+#| eval: false
+#| code-fold: show
+make_download_path <- function(filename) {
+  url |>
+    str_replace("//", str_c("//", userpwd(), "@")) |>
+    str_c(filename)
+}
+```
+
+
+```{r}
+#| eval: false
+#| code-fold: show
+process_data <- function(filename) {
+  
+  Sys.sleep(0.1)
+  
+  from_to <- str_extract_all(filename, "_[0-9]{8}-[0-9]{8}")[[1]] |>
+    str_replace("_", "") |>
+    str_split_1("-")
+  
+  from <- as.Date(from_to[1], format = "%Y%m%d")
+  to <- from + months(1, abbreviate = FALSE) - days(1)
+  
+  tmp <- tempfile()
+  
+  download.file(
+    make_download_path(filename),
+    tmp,
+    mode = "wb",
+    quiet = TRUE
+  )
+  
+  temp_d <- nc_open(tmp)
+  
+  max_pr <- ncvar_get(temp_d, "pr") |>
+    apply(MARGIN = c(1, 2), FUN = max)
+  
+  lat <- ncvar_get(temp_d, "latitude")
+  long <- ncvar_get(temp_d, "longitude")
+  
+  out <- crossing(
+    proj_x = 1:180,
+    proj_y = 1:244,
+    from_date = from,
+    to_date = to
+  ) |>
+    arrange(proj_y, proj_x) |>
+    mutate(
+      precip = as.numeric(max_pr),
+      longitude = as.numeric(long),
+      latitude = as.numeric(lat),
+      station = row_number()
+    )
+  
+  out
+}
+```
+
+Having defined our function we throw it into `purrr::map_dfr()` *(`map_dfr()` tells R that the output should be a dataframe in which the iteration results are concatenated rowwise)* for iteration and say yes please to a progress bar.
+
+```{r}
+#| eval: false
+#| code-fold: show
+d <- files |>
+  map_dfr(process_data, .progress = TRUE)
+```
+
+Having created our dataset we write it out to disk using everyone's favourite new format [parquet](https://arrow-user2022.netlify.app/). This way we can efficiently query the data without reading it into memory using `arrow::open_dataset()`.
+
+**This whole process took 3 hours and 21 minutes on my computer. The largest bottleneck by far was downloading the data.**
+
+```{r}
+#| eval: false
+#| code-fold: show
+d |>
+  write_parquet("precip_data.parquet")
+```
+
+

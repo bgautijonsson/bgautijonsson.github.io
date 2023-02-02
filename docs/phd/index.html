@@ -20,6 +20,25 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
 </style>
 
 
@@ -70,7 +89,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-sidebar floating nav-fixed fullcontent">
+<body class="nav-sidebar floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -244,18 +263,22 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
     </div>
 </nav>
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
 
 
 
 
-<section id="introduction" class="level1">
+<section id="introduction" class="level1 page-columns page-full">
 <h1>Introduction</h1>
 <p>I’m developing and maintaining this part of my page to go along with my PhD studies for reproducibility and to held me keep my sanity intact for the next years.</p>
-<p>The main gist of my PhD research will be adding to the <code>Max-and-Smooth</code> method previously developed and published by my advisor, Birgir Hrafnkelsson, and others <a href="https://arxiv.org/abs/1907.11969" target="_blank">here</a></p>
-</section>
+<p>The main gist of my PhD research will be adding to the Max-and-Smooth method by <span class="citation" data-cites="hrafnkelssonMaxandSmoothTwostepApproach2020">Hrafnkelsson et al. (<a href="#ref-hrafnkelssonMaxandSmoothTwostepApproach2020" role="doc-biblioref">2020</a>)</span>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-hrafnkelssonMaxandSmoothTwostepApproach2020" class="csl-entry" role="doc-biblioentry">
+Hrafnkelsson, Birgir, Stefan Siegert, Raphaël Huser, Haakon Bakka, and Árni V. Jóhannesson. 2020. <span>“Max-and-<span>Smooth</span>: A Two-Step Approach for Approximate <span>Bayesian</span> Inference in Latent <span>Gaussian</span> Models.”</span> <span>arXiv</span>. <a href="https://doi.org/10.48550/arXiv.1907.11969">https://doi.org/10.48550/arXiv.1907.11969</a>.
+</div></div></section>
 <section id="other-materials" class="level1">
 <h1>Other materials</h1>
 <section id="r-package-on-github" class="level2">
@@ -284,6 +307,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 </section>
 <section id="spatial-smoothing-of-mles" class="level3">
 <h3 class="anchored" data-anchor-id="spatial-smoothing-of-mles">Spatial Smoothing of MLEs</h3>
+
 
 
 </section>

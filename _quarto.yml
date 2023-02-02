@@ -67,6 +67,7 @@ format:
     theme: [flatly, theme.scss]
     code-fold: true
     title-block-banner: true
+    citation-location: margin
     execute:
       freeze: auto
       warning: false

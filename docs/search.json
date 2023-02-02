@@ -39,7 +39,7 @@
     "href": "phd/articles/results/max/index.html",
     "title": "The Max Step",
     "section": "",
-    "text": "\\[\n\\mathrm{GEV(y|\\mu, \\sigma, \\xi)} = \\begin{cases}\ne^{- \\left(1 + \\xi \\frac{y - \\mu}{\\sigma}\\right)_+^{-1/\\xi}}, \\xi\\neq0 \\\\\ne^{- e^{- \\frac{y - \\mu}{\\sigma}\n}}, \\xi=0\n\\end{cases}\n\\]\nIn our case we want \\(\\mu\\) to vary with time. If we write \\(y_{it}\\) for the observed hourly maximum at station \\(i\\) during year \\(t\\) we will then have\n\\[\ny_{it} \\sim \\mathrm{GEV}(\\mu_{it}, \\sigma_i, \\xi_i), \\quad \\mu_{it}, \\sigma_i > 0, \\quad \\xi_i \\in (-0.5, 0.5),\n\\]\nwhere\n\\[\n\\mu_{it} = \\mu_i \\cdot (1 + \\Delta_i \\cdot (t - t_0)),\n\\]\nand\n\\[\n1 + \\xi_i \\frac{y_{it} - \\mu_{it}}{\\sigma_i} > 0, \\quad \\forall i, t.\n\\]"
+    "text": "In our case we want \\(\\mu\\) to vary with time. If we write \\(y_{it}\\) for the observed hourly maximum at station \\(i\\) during year \\(t\\) we will then have\nwhere\nand"
   },
   {
     "objectID": "phd/articles/results/max/index.html#transformed-parameters",
@@ -158,7 +158,7 @@
     "href": "phd/index.html",
     "title": "About my PhD",
     "section": "",
-    "text": "I’m developing and maintaining this part of my page to go along with my PhD studies for reproducibility and to held me keep my sanity intact for the next years.\nThe main gist of my PhD research will be adding to the Max-and-Smooth method previously developed and published by my advisor, Birgir Hrafnkelsson, and others here"
+    "text": "I’m developing and maintaining this part of my page to go along with my PhD studies for reproducibility and to held me keep my sanity intact for the next years.\nThe main gist of my PhD research will be adding to the Max-and-Smooth method by Hrafnkelsson et al. (2020).\n\nHrafnkelsson, Birgir, Stefan Siegert, Raphaël Huser, Haakon Bakka, and Árni V. Jóhannesson. 2020. “Max-and-Smooth: A Two-Step Approach for Approximate Bayesian Inference in Latent Gaussian Models.” arXiv. https://doi.org/10.48550/arXiv.1907.11969."
   },
   {
     "objectID": "phd/index.html#r-package-on-github",
