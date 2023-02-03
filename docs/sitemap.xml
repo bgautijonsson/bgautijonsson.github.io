@@ -1,51 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://www.bggj.is/posts/ceda-archive/index.html</loc>
+    <lastmod>2023-02-03T10:47:25.192Z</lastmod>
+  </url>
+  <url>
     <loc>https://www.bggj.is/posts/forest-plot-table/index.html</loc>
-    <lastmod>2023-02-02T17:39:52.713Z</lastmod>
+    <lastmod>2023-02-03T10:46:52.390Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/articles/methods/code/max/index.html</loc>
-    <lastmod>2023-02-02T17:39:55.324Z</lastmod>
+    <lastmod>2023-02-03T10:46:54.894Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/articles/methods/data/ukcp/index.html</loc>
-    <lastmod>2023-02-02T17:40:01.525Z</lastmod>
+    <lastmod>2023-02-03T10:46:55.824Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/articles/results/max/index.html</loc>
-    <lastmod>2023-02-02T17:40:02.409Z</lastmod>
+    <lastmod>2023-02-03T10:46:56.726Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/articles/results/copula/index.html</loc>
-    <lastmod>2023-02-02T17:40:03.110Z</lastmod>
+    <lastmod>2023-02-03T10:46:57.430Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/articles/results/spatial/index.html</loc>
-    <lastmod>2023-02-02T17:40:03.694Z</lastmod>
+    <lastmod>2023-02-03T10:46:58.028Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/index.html</loc>
-    <lastmod>2023-02-02T17:40:04.038Z</lastmod>
+    <lastmod>2023-02-03T10:46:58.334Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/talks/covid-model/index.html</loc>
-    <lastmod>2023-02-02T17:40:04.364Z</lastmod>
+    <lastmod>2023-02-03T10:46:58.660Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/talks/hi-vefur/index.html</loc>
-    <lastmod>2023-02-02T17:40:04.669Z</lastmod>
+    <lastmod>2023-02-03T10:46:58.959Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/talks/databeers_2022_09_16/index.html</loc>
-    <lastmod>2023-02-02T17:40:04.981Z</lastmod>
+    <lastmod>2023-02-03T10:46:59.266Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/index.html</loc>
-    <lastmod>2023-02-02T17:40:05.301Z</lastmod>
+    <lastmod>2023-02-03T10:47:24.117Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/about.html</loc>
-    <lastmod>2023-02-02T17:40:05.644Z</lastmod>
+    <lastmod>2023-02-03T10:46:59.942Z</lastmod>
   </url>
 </urlset>

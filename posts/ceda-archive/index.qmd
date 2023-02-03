@@ -1,0 +1,242 @@
+---
+title: "Fetching FTP data from the Ceda Archives"
+subtitle: "Using R and FTP to programmatically fetch a large amount of data for processing"
+description: |
+  For my PhD modeling I needed to fetch a large amount of data from the CEDA Archive, specifically I use hourly precipitation projections from [UKCP Local Projections on a 5km grid over the UK for 1980-2080](https://catalogue.ceda.ac.uk/uuid/e304987739e04cdc960598fa5e4439d0). The hourly precipitation projections are stored in 720 files that are all approximately 120mb to 130mb. Here I write out my processing in case someone needs help with doing something similar.
+author: 
+    -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
+        url: "bggj.is"
+        affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
+        affiliation-url: "https://www.hi.is/tolfraedi_0"
+date: "2022/06/28"
+format: 
+    html:
+        code-fold: true
+        toc: true
+execute: 
+  echo: true
+  warning: false
+editor: source
+theme: flatly
+title-block-banner: true
+categories:
+    - english
+    - R
+    - phd
+    - big data
+    - scraping
+---
+
+
+```{r setup}
+library(tidyverse)
+library(bggjphd)
+theme_set(theme_bggj())
+```
+
+# UKCP Projections
+
+![Figure 1. Screenshot of the data page](Figures/ceda_data.png){.column-margin}
+
+For my PhD modeling I needed to fetch a large amount of data from the [CEDA Archive FTP server](https://help.ceda.ac.uk/article/280-ftp), specifically I use hourly precipitation projections from [UKCP Local Projections on a 5km grid over the UK for 1980-2080](https://catalogue.ceda.ac.uk/uuid/e304987739e04cdc960598fa5e4439d0). The hourly precipitation projections are stored in 720 files that are all approximately 120mb to 130mb. 
+
+I could go through the list of files and click on each one to download it, but being a lazy programmer that's not good enough, so I wrote a program that 
+
+* uses my CEDA FTP credentials to download the 720 files one at a time into a temporary file
+* does some transformations on it *(I only need the yearly maximums of hourly precipitation per location)*
+* deletes the temporary file and moves onto the next one
+
+The hardest part was getting my FTP connection to work, so I thought I might write out my process so that some future googlers might find this post.
+
+# How-To
+
+## Setup
+
+The first things you're going to need are the following:
+
+* A CEDA Archive account
+* A CEDA FTP password
+* The location of the files you want to download.
+- On your dataset page, press download and navigate to the subset you want to fetch
+
+## File Location
+
+In my case the 720 files are located at
+
+```{r}
+#| code-fold: show
+url <- "ftp://ftp.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km/rcp85/01/pr/1hr/v20210615/"
+```
+
+## Authentication
+
+We're going to need to input our username and password into the URL to download the data. In order to hide my login info when coding I put it in my R Environment *(easy to edit with `usethis::edit_r_environ()`)* and can thus write a function to input it in requests. I never assign my info to variables, but rather just use functions to input them.
+
+```{r}
+#| code-fold: show
+userpwd <- function() {
+  str_c(
+    Sys.getenv("CEDA_USR"), 
+    Sys.getenv("CEDA_PWD"), 
+    sep = ":"
+  )
+}
+```
+
+Now we can send a request to the FTP server in order to get a list of all the files we want to download
+
+```{r}
+#| code-fold: show
+#| cache: true
+filenames <- RCurl::getURL(
+  url,
+  userpwd = userpwd(),
+  dirlistonly = TRUE
+)
+```
+
+As you can see below, the result is given to us as one long string.
+
+```{r}
+stringr::str_sub(
+  filenames,
+  start = 1,
+  end = 160
+)
+```
+
+
+## Cleaning up the file names
+
+We get a single string with all the file names. It's easy to split them up into separate strings ands remove the trailing empty line.
+
+```{r}
+#| code-fold: show
+files <- filenames |>
+  stringr::str_split_1(pattern = "\n")
+
+files <- files[-length(files)]
+
+head(files)
+```
+
+## Writing data processing functions
+
+Now comes the tricky part. We are going to download 720 files *(one for each month)* that are around 120MB each. If we just download them and keep them on our hard drive that's going to be upwards of 70GB. Instead of doing that we will use the function `process_data()` below to do the following:
+
+* For each dataset
+1. Create a temporary file
+2. Download the data into the temporary file
+3. For each location, throw away all measurements except for the maximum
+4. Create a tidy table with information about the coordinates of the location, the max precipitation and the observation date-range
+5. Delete the temporary file
+
+Before we can iterate we will need to create a new helper function. Since we will now be using `download.file()` to download our data sets, we need to input our username and password into the URL. As before, in order to not reveal our information we use functions instead of creating global variables in the environment. Thus we won't accidentally leak our information when for example taking screenshots.
+
+```{r}
+#| eval: false
+#| code-fold: show
+make_download_path <- function(filename) {
+  url |>
+    stringr::str_replace("//", stringr::str_c("//", userpwd(), "@")) |>
+    stringr::str_c(filename)
+}
+```
+
+The data files are stored in `.nc` form. The `ncdf4` package lets us connect to these kinds of files and pull in the variables we need.
+
+```{r}
+#| eval: false
+#| code-fold: show
+process_data <- function(filename) {
+  
+  Sys.sleep(0.1)
+  
+  from_to <- stringr::str_extract_all(filename, "_[0-9]{8}-[0-9]{8}")[[1]] |>
+    stringr::str_replace("_", "") |>
+    stringr::str_split_1("-")
+  
+  from <- as.Date(from_to[1], format = "%Y%m%d")
+  to <- from + lubridate::months(1, abbreviate = FALSE) - lubridate::days(1)
+  
+  tmp <- tempfile()
+  
+  download.file(
+    make_download_path(filename),
+    tmp,
+    mode = "wb",
+    quiet = TRUE
+  )
+  
+  temp_d <- ncdf4::nc_open(tmp)
+  
+  max_pr <- ncdf4::ncvar_get(temp_d, "pr") |>
+    apply(MARGIN = c(1, 2), FUN = max)
+  
+  lat <- ncdf4::ncvar_get(temp_d, "latitude")
+  long <- ncdf4::ncvar_get(temp_d, "longitude")
+  
+  out <- tidyr::crossing(
+    proj_x = 1:180,
+    proj_y = 1:244,
+    from_date = from,
+    to_date = to
+  ) |>
+    dplyr::arrange(proj_y, proj_x) |>
+    dplyr::mutate(
+      precip = as.numeric(max_pr),
+      longitude = as.numeric(long),
+      latitude = as.numeric(lat),
+      station = row_number()
+    )
+  
+  out
+}
+```
+
+## Putting it all together
+
+Having defined our function we throw it into `purrr::map_dfr()` *(`map_dfr()` tells R that the output should be a dataframe in which the iteration results are concatenated rowwise)* for iteration and say yes please to a progress bar. I could have used the `furrr` package to reduce the time by downloading multiple files in parallel, but I was afraid of getting timed out from the CEDA FTP server so I decided to just be patient.
+
+```{r}
+#| eval: false
+#| code-fold: show
+d <- files |>
+  purrr::map_dfr(process_data, .progress = TRUE)
+```
+
+Having created our dataset we write it out to disk using everyone's favorite new format [parquet](https://arrow-user2022.netlify.app/). This way we can efficiently query the data without reading it into memory using `arrow::open_dataset()`.
+
+**This whole process took 3 hours and 21 minutes on my computer. The largest bottleneck by far was downloading the data.**
+
+```{r}
+#| eval: false
+#| code-fold: show
+d |>
+  arrow::write_parquet("monthly_data.parquet")
+```
+
+## Final processing
+
+I mentioned above that I only needed the yearly data, but currently the dataset contains monthly maxima. Since I might need to do seasonal modeling later in my PhD I decided it would be smart to keep the monthly data, but it's also very easy to further summarise the data into yearly maxima.
+
+Since the data for 1980 contain only one month, I decided to not include that year as it is not really a true yearly maximum.
+
+```{r}
+#| eval: false
+#| code-fold: show
+
+d <- d |>
+  dplyr::mutate(year = lubridate::year(from_date)) |>
+  dplyr::filter(year > 1980) |>
+  dplyr::group_by(year, station, proj_x, proj_y, longitude, latitude) |>
+  dplyr::summarise(
+    precip = max(precip),
+    .groups = "drop"
+  )
+
+d |>
+  arrow::write_parquet("yearly_data.parquet")
+```
+
+

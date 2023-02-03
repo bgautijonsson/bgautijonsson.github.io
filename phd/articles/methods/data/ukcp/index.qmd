@@ -203,7 +203,7 @@ precip |>
 
 # How the data was processed
 
-An easy way to programmatically generate the dataset used in this research in R is via [FTP(https://help.ceda.ac.uk/article/280-ftp) connections to the CEDA archive]. To do this we need the following:
+An easy way to programmatically generate the dataset used in this research in R is via [FTP](https://help.ceda.ac.uk/article/280-ftp) connections to the CEDA archive]. To do this we need the following:
 
 * A CEDA Archive account
 * A CEDA FTP password
@@ -337,5 +337,4 @@ Having created our dataset we write it out to disk using everyone's favourite ne
 d |>
   write_parquet("precip_data.parquet")
 ```
-
 

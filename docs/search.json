@@ -1,10 +1,66 @@
 [
   {
+    "objectID": "posts/ceda-archive/index.html",
+    "href": "posts/ceda-archive/index.html",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "",
+    "text": "Code\nlibrary(tidyverse)\nlibrary(bggjphd)\ntheme_set(theme_bggj())"
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#setup",
+    "href": "posts/ceda-archive/index.html#setup",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "Setup",
+    "text": "Setup\nThe first things you’re going to need are the following:\n\nA CEDA Archive account\nA CEDA FTP password\nThe location of the files you want to download.\nOn your dataset page, press download and navigate to the subset you want to fetch"
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#file-location",
+    "href": "posts/ceda-archive/index.html#file-location",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "File Location",
+    "text": "File Location\nIn my case the 720 files are located at\n\n\nCode\nurl <- \"ftp://ftp.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km/rcp85/01/pr/1hr/v20210615/\""
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#authentication",
+    "href": "posts/ceda-archive/index.html#authentication",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "Authentication",
+    "text": "Authentication\nWe’re going to need to input our username and password into the URL to download the data. In order to hide my login info when coding I put it in my R Environment (easy to edit with usethis::edit_r_environ()) and can thus write a function to input it in requests. I never assign my info to variables, but rather just use functions to input them.\n\n\nCode\nuserpwd <- function() {\n  str_c(\n    Sys.getenv(\"CEDA_USR\"), \n    Sys.getenv(\"CEDA_PWD\"), \n    sep = \":\"\n  )\n}\n\n\nNow we can send a request to the FTP server in order to get a list of all the files we want to download\n\n\nCode\nfilenames <- RCurl::getURL(\n  url,\n  userpwd = userpwd(),\n  dirlistonly = TRUE\n)\n\n\nAs you can see below, the result is given to us as one long string.\n\n\nCode\nstringr::str_sub(\n  filenames,\n  start = 1,\n  end = 160\n)\n\n\n[1] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19801201-19801230.nc\\npr_rcp85_land-cpm_uk_5km_01_1hr_19810101-19810130.nc\\npr_rcp85_land-cpm_uk_5km_01_1hr_19810201-19810230.nc\\np\""
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#cleaning-up-the-file-names",
+    "href": "posts/ceda-archive/index.html#cleaning-up-the-file-names",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "Cleaning up the file names",
+    "text": "Cleaning up the file names\nWe get a single string with all the file names. It’s easy to split them up into separate strings ands remove the trailing empty line.\n\n\nCode\nfiles <- filenames |>\n  stringr::str_split_1(pattern = \"\\n\")\n\nfiles <- files[-length(files)]\n\nhead(files)\n\n\n[1] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19801201-19801230.nc\"\n[2] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19810101-19810130.nc\"\n[3] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19810201-19810230.nc\"\n[4] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19810301-19810330.nc\"\n[5] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19810401-19810430.nc\"\n[6] \"pr_rcp85_land-cpm_uk_5km_01_1hr_19810501-19810530.nc\""
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#writing-data-processing-functions",
+    "href": "posts/ceda-archive/index.html#writing-data-processing-functions",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "Writing data processing functions",
+    "text": "Writing data processing functions\nNow comes the tricky part. We are going to download 720 files (one for each month) that are around 120MB each. If we just download them and keep them on our hard drive that’s going to be upwards of 70GB. Instead of doing that we will use the function process_data() below to do the following:\n\nFor each dataset\n\n\nCreate a temporary file\nDownload the data into the temporary file\nFor each location, throw away all measurements except for the maximum\nCreate a tidy table with information about the coordinates of the location, the max precipitation and the observation date-range\nDelete the temporary file\n\nBefore we can iterate we will need to create a new helper function. Since we will now be using download.file() to download our data sets, we need to input our username and password into the URL. As before, in order to not reveal our information we use functions instead of creating global variables in the environment. Thus we won’t accidentally leak our information when for example taking screenshots.\n\n\nCode\nmake_download_path <- function(filename) {\n  url |>\n    stringr::str_replace(\"//\", stringr::str_c(\"//\", userpwd(), \"@\")) |>\n    stringr::str_c(filename)\n}\n\n\nThe data files are stored in .nc form. The ncdf4 package lets us connect to these kinds of files and pull in the variables we need.\n\n\nCode\nprocess_data <- function(filename) {\n  \n  Sys.sleep(0.1)\n  \n  from_to <- stringr::str_extract_all(filename, \"_[0-9]{8}-[0-9]{8}\")[[1]] |>\n    stringr::str_replace(\"_\", \"\") |>\n    stringr::str_split_1(\"-\")\n  \n  from <- as.Date(from_to[1], format = \"%Y%m%d\")\n  to <- from + lubridate::months(1, abbreviate = FALSE) - lubridate::days(1)\n  \n  tmp <- tempfile()\n  \n  download.file(\n    make_download_path(filename),\n    tmp,\n    mode = \"wb\",\n    quiet = TRUE\n  )\n  \n  temp_d <- ncdf4::nc_open(tmp)\n  \n  max_pr <- ncdf4::ncvar_get(temp_d, \"pr\") |>\n    apply(MARGIN = c(1, 2), FUN = max)\n  \n  lat <- ncdf4::ncvar_get(temp_d, \"latitude\")\n  long <- ncdf4::ncvar_get(temp_d, \"longitude\")\n  \n  out <- tidyr::crossing(\n    proj_x = 1:180,\n    proj_y = 1:244,\n    from_date = from,\n    to_date = to\n  ) |>\n    dplyr::arrange(proj_y, proj_x) |>\n    dplyr::mutate(\n      precip = as.numeric(max_pr),\n      longitude = as.numeric(long),\n      latitude = as.numeric(lat),\n      station = row_number()\n    )\n  \n  out\n}"
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#putting-it-all-together",
+    "href": "posts/ceda-archive/index.html#putting-it-all-together",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "Putting it all together",
+    "text": "Putting it all together\nHaving defined our function we throw it into purrr::map_dfr() (map_dfr() tells R that the output should be a dataframe in which the iteration results are concatenated rowwise) for iteration and say yes please to a progress bar. I could have used the furrr package to reduce the time by downloading multiple files in parallel, but I was afraid of getting timed out from the CEDA FTP server so I decided to just be patient.\n\n\nCode\nd <- files |>\n  purrr::map_dfr(process_data, .progress = TRUE)\n\n\nHaving created our dataset we write it out to disk using everyone’s favorite new format parquet. This way we can efficiently query the data without reading it into memory using arrow::open_dataset().\nThis whole process took 3 hours and 21 minutes on my computer. The largest bottleneck by far was downloading the data.\n\n\nCode\nd |>\n  arrow::write_parquet(\"monthly_data.parquet\")"
+  },
+  {
+    "objectID": "posts/ceda-archive/index.html#final-processing",
+    "href": "posts/ceda-archive/index.html#final-processing",
+    "title": "Fetching FTP data from the Ceda Archives",
+    "section": "Final processing",
+    "text": "Final processing\nI mentioned above that I only needed the yearly data, but currently the dataset contains monthly maxima. Since I might need to do seasonal modeling later in my PhD I decided it would be smart to keep the monthly data, but it’s also very easy to further summarise the data into yearly maxima.\nSince the data for 1980 contain only one month, I decided to not include that year as it is not really a true yearly maximum.\n\n\nCode\nd <- d |>\n  dplyr::mutate(year = lubridate::year(from_date)) |>\n  dplyr::filter(year > 1980) |>\n  dplyr::group_by(year, station, proj_x, proj_y, longitude, latitude) |>\n  dplyr::summarise(\n    precip = max(precip),\n    .groups = \"drop\"\n  )\n\nd |>\n  arrow::write_parquet(\"yearly_data.parquet\")"
+  },
+  {
     "objectID": "posts/forest-plot-table/index.html",
     "href": "posts/forest-plot-table/index.html",
-    "title": "Forest Plots with Built-In Tables",
+    "title": "Fetching FTP data from the Ceda Archives",
     "section": "",
-    "text": "I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.\nTo start with I have some fake data, d.\n\n\nCode\nd |> \n    kable(format = \"html\") |> \n    kable_styling(full_width = F)\n\n\n\n\n \n  \n    name \n    mean \n    lower \n    upper \n  \n \n\n  \n    Covfefe \n    1.1989430 \n    1.0707825 \n    1.358700 \n  \n  \n    Coffee \n    1.8509518 \n    1.5589701 \n    2.227752 \n  \n  \n    Variable \n    1.2181512 \n    1.0834045 \n    1.411683 \n  \n  \n    Covariate \n    1.1970336 \n    1.0699671 \n    1.342737 \n  \n  \n    Predictor \n    0.9085823 \n    0.8049225 \n    1.000000 \n  \n  \n    Smoking \n    0.8770238 \n    0.7447709 \n    1.000000 \n  \n  \n    Age \n    0.9344551 \n    0.8305984 \n    1.000000 \n  \n  \n    Uranium \n    0.9177338 \n    0.8021060 \n    1.000000 \n  \n  \n    Stuff \n    1.0760010 \n    1.0000000 \n    1.216474 \n  \n  \n    Thing \n    0.9143605 \n    0.7753231 \n    1.000000 \n  \n  \n    Koffing \n    1.0686924 \n    1.0000000 \n    1.178642 \n  \n  \n    Coughing \n    1.0648236 \n    1.0000000 \n    1.194998 \n  \n  \n    Polvo \n    0.9227277 \n    0.8097846 \n    1.000000 \n  \n\n\n\n\n\n\nThe Forest Plot\nThe forest plot itself is not hard to do. Notice how I create this striped pattern with geom_vline(aes(xintercept = name), col = \"grey95\", size = 5). I’ll do the same thing to the table part of the figure later.\n\n\nCode\np1 <- d |> \n    mutate(name = fct_reorder(name, mean)) |> \n    ggplot(aes(x = name, y = mean,\n                  ymin = lower, ymax = upper)) +\n    geom_vline(aes(xintercept = name), col = \"grey95\", size = 5) +\n    geom_hline(yintercept = 1, lty = 2) +\n    geom_point() +\n    geom_linerange() +\n    coord_flip() +\n    labs(x = NULL, y = NULL) +\n    theme(plot.margin = margin(t = 5, r = -4, b = 5, l = 5))\n\np1\n\n\n\n\n\n\n\nThe Table\nTo make the table look nice I convert the numbers to text and clean them up so that the text is justified nicely when plotting it. I did some manual tuning of the margins to make the plot and table line up nicely.\n\n\nCode\np2 <- d |> \n    mutate(name = fct_reorder(name, mean),\n           mean = round(mean, 2),\n           mean = str_pad(mean, width = 4, side = \"right\", pad = \"0\"),\n           lower = round(lower, 2),\n           lower = as.character(lower),\n           lower = ifelse(lower == \"1\", \"1.00\", lower),\n           lower = str_pad(lower, width = 4, side = \"right\", pad = \"0\"),\n           upper = round(upper, 2),\n           upper = as.character(upper),\n           upper = ifelse(upper == \"1\", \"1.00\", upper),\n           upper = str_pad(upper, width = 4, side = \"right\", pad = \"0\"),\n           ci = str_c(lower, \", \", upper)) |> \n    ggplot(aes(x = name)) +\n    geom_vline(aes(xintercept = name), col = \"grey95\", size = 5) +\n    geom_text(aes(label = mean, y = 1)) +\n    geom_text(aes(label = ci, y = 1.07)) +\n    coord_flip(ylim = c(0.99, 1.1)) +\n    theme(axis.title = element_blank(),\n          axis.text = element_blank(),\n          axis.ticks = element_blank(),\n          axis.line.y = element_blank(),\n          panel.border = element_blank(), \n          panel.grid = element_blank(), \n          plot.background = element_blank(),\n          plot.margin = margin(t = 5, r = 5, b = 19.3, l = 0))\n\np2\n\n\n\n\n\n\nThe finished bottom row\nNow we have alligned the plot and table. If you zoom in you might see that they don’t line up perfectly. I am not liable for any bodily harm caused by this.\n\n\nCode\nbottom_row <- plot_grid(p1, p2, nrow = 1, rel_widths = c(1, 0.3)) \n\nbottom_row\n\n\n\n\n\n\n\n\nThe headers\nI admit that this is a pretty handwavy manual way to make the header fit, and there is probably a nice way to automatically fit this using the coordinate system.\n\n\nCode\ntop_row <- ggplot(data = tibble()) +\n    geom_text(aes(y = 1, x = 0.02, label = \"Variable\"), size = 5) +\n    geom_text(aes(y = 1, x = 0.84, label = \"Mean\"), size = 5) +\n    geom_text(aes(y = 1, x = 0.98, label = \"95% CI\"), size = 5) +\n    coord_cartesian(xlim = c(0, 1)) +\n    theme_void() +\n    theme(plot.margin = margin(t = 0, r = 5, b = 0, l = 5),\n          axis.line.x.bottom = element_line())\n\n\ntop_row\n\n\n\n\n\n\n\nPutting it all together\nAnd so we come to the finished plot. If we wrangle the rel_heights setting a little bit we can get a pretty nice looking forest plot and table hybrid.\n\n\nCode\nplot_grid(top_row, bottom_row, ncol = 1, rel_heights = c(0.07, 1))\n\n\n\n\n\nThis was actually less of an inconvenience than I thought. The mixture of ggplot2 and cowplot made this a pretty easy task."
+    "text": "Code\nlibrary(tidyverse)\nlibrary(bggjphd)\ntheme_set(theme_bggj())\n\n\nFor my PhD modeling I needed to fetch a large amount of data from the CEDA Archive, specifically UKCP Local Projections on a 5km grid over the UK for 1980-2080.\n\n\n\nScreenshot of the data page"
   },
   {
     "objectID": "phd/articles/methods/code/max/index.html",
@@ -207,7 +263,7 @@
     "href": "index.html",
     "title": "bggj",
     "section": "",
-    "text": "Forest Plots with Built-In Tables\n\n\nCreating forest plots with coefficient tables in ggplot2 with cowplot\n\n\n\n\nenglish\n\n\nR\n\n\nplots\n\n\ntutorial\n\n\n\n\nI’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.\n\n\n\n\n\n\nJun 28, 2022\n\n\nBrynjólfur Gauti Guðrúnar Jónsson\n\n\n\n\n\n\nNo matching items"
+    "text": "Fetching FTP data from the Ceda Archives\n\n\nUsing R and FTP to programmatically fetch a large amount of data for processing\n\n\n\n\nenglish\n\n\nR\n\n\nphd\n\n\nbig data\n\n\nscraping\n\n\n\n\nFor my PhD modeling I needed to fetch a large amount of data from the CEDA Archive, specifically I use hourly precipitation projections from UKCP Local Projections on a 5km grid over the UK for 1980-2080. The hourly precipitation projections are stored in 720 files that are all approximately 120mb to 130mb. Here I write out my processing in case someone needs help with doing something similar.\n\n\n\n\n\n\nJun 28, 2022\n\n\nBrynjólfur Gauti Guðrúnar Jónsson\n\n\n\n\n\n\n  \n\n\n\n\nForest Plots with Built-In Tables\n\n\nCreating forest plots with coefficient tables in ggplot2 with cowplot\n\n\n\n\nenglish\n\n\nR\n\n\nplots\n\n\ntutorial\n\n\n\n\nI’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the ggplot2 and cowplot packages.\n\n\n\n\n\n\nJun 28, 2022\n\n\nBrynjólfur Gauti Guðrúnar Jónsson\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
