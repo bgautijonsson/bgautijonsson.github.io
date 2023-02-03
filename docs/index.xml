@@ -10,7 +10,7 @@
 <atom:link href="https://www.bggj.is/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blogg um tölfræði og gögn</description>
 <generator>quarto-1.2.313</generator>
-<lastBuildDate>Tue, 28 Jun 2022 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 03 Feb 2023 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Fetching FTP data from the Ceda Archives</title>
   <dc:creator>Brynjólfur Gauti Guðrúnar Jónsson</dc:creator>
@@ -258,7 +258,7 @@
   <category>big data</category>
   <category>scraping</category>
   <guid>https://www.bggj.is/posts/ceda-archive/index.html</guid>
-  <pubDate>Tue, 28 Jun 2022 00:00:00 GMT</pubDate>
+  <pubDate>Fri, 03 Feb 2023 00:00:00 GMT</pubDate>
   <media:content url="https://www.bggj.is/posts/ceda-archive/Figures/ceda_data.png" medium="image" type="image/png" height="94" width="144"/>
 </item>
 <item>
