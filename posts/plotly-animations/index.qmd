@@ -2,7 +2,7 @@
 title: "Making interactive animations with ggplotly"
 subtitle: "Simple examples of how to use the `frame` aesthetic in `ggplotly()` for easy animations"
 description: |
-  I've recently been making a lot of `plotly` graphs for my Icelandic website [metill.is](https://metill.is/), where I look at official data on current topics. Since it is so simple to make animations with `ggplotly` I thought I might write a short tutorial on it.
+  I've recently been making a lot of `plotly` graphs for my Icelandic website [metill.is](https://www.metill.is/), where I look at official data on current topics. Since it is so simple to make animations with `ggplotly` I thought I might write a short tutorial on it.
 author: 
     -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
         url: "bggj.is"
@@ -226,7 +226,7 @@ Next we create the `ggplot()` object. It will not look very good, since all the 
 
 Things to note here:
 
-* The percent change variables are between 0 and 1, i.e. percentages. I want to use a log-scale such that -50% will be as far away from 0 as +100%. To do this I add 1 to the percentages and use a custom labeling function, `labels = function(x) percent(x - 1)`, in `scale_y_continuous()`
+* The percent change variables are between 0 and 1, i.e. percentages. I want to use a log-scale such that -50% will be as far away from 0 as +100%. To do this I add 1 to the percentages and use a custom labeling function, `labels = function(x) percent(x - 1)`, in `scale_y_continuous()`. This means that no change in the y-variable is represented by 1 in the data but 0 in the plot.
 * I capitalized the `year` variable beforehand. I could change the labeling of the animation slider after the fact, but I find this to be quicker. 
 * There are some differences between `ggplot` and `ggplotly` output when it comes to text sizes and aspect ratios, so it's good to tune the sizing after the animation is ready.
 
@@ -269,7 +269,7 @@ p <- plot_dat |>
   labs(
     x = "Income Quantile",
     y = "Percent change since 1990",
-    title = "How has total and salary income changed by age- and income-groups since 1990? (Adjusted for inflation)"
+    title = "How has total and salary income changed by age-groups and income-brackets since 1990? (Adjusted for inflation)"
   )
 
 p
