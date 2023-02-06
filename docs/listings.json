@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/plotly-animations/index.html",
       "/posts/ceda-archive/index.html",
       "/posts/forest-plot-table/index.html"
     ]

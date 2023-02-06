@@ -61,5 +61,8 @@
   },
   "posts/ceda-archive/index.qmd": {
     "index.html": "f67b7cad"
+  },
+  "posts/plotly-animations/index.qmd": {
+    "index.html": "3c570d59"
   }
 }

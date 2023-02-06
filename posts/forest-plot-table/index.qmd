@@ -49,6 +49,8 @@ I've seen this kind of figure poking around, but I didn't really think about the
 
 To start with I have some fake data, `d`.
 
+
+
 ```{r}
 d |> 
     kable(format = "html") |> 
