@@ -8,9 +8,9 @@
 
 <meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
 <meta name="dcterms.date" content="2023-08-28">
-<meta name="description" content="For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.">
+<meta name="description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
 
-<title>bggj - Spatially Dependent Generalized Extreme Value Parameters</title>
+<title>bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,7 +23,61 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -62,21 +116,30 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 </script>
+<script src="../../site_libs/core-js-2.5.3/shim.min.js"></script>
+<script src="../../site_libs/react-18.2.0/react.min.js"></script>
+<script src="../../site_libs/react-18.2.0/react-dom.min.js"></script>
+<script src="../../site_libs/reactwidget-1.0.0/react-tools.js"></script>
+<script src="../../site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="../../site_libs/reactable-0.4.4/reactable.css" rel="stylesheet">
+<script src="../../site_libs/reactable-binding-0.4.4/reactable.js"></script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<meta property="og:title" content="bggj - Spatially Dependent Generalized Extreme Value Parameters">
-<meta property="og:description" content="For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.">
+<meta property="og:title" content="bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins">
+<meta property="og:description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
 <meta property="og:image" content="https://www.bggj.is/posts/gev_copula_ar1/Figures/spatial_gamma.png">
 <meta property="og:site_name" content="bggj">
-<meta name="twitter:title" content="bggj - Spatially Dependent Generalized Extreme Value Parameters">
-<meta name="twitter:description" content="For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.">
+<meta name="twitter:title" content="bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins">
+<meta name="twitter:description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
 <meta name="twitter:image" content="https://www.bggj.is/posts/gev_copula_ar1/Figures/spatial_gamma.png">
 <meta name="twitter:creator" content="@bggjonsson">
 <meta name="twitter:site" content="@bggjonsson">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="floating nav-fixed">
+<body class="floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -127,11 +190,11 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Spatially Dependent Generalized Extreme Value Parameters</h1>
-            <p class="subtitle lead">Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters</p>
+      <h1 class="title">Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins</h1>
+            <p class="subtitle lead">A simulation study of the differences between AR(1) copula and i.i.d copula</p>
                   <div>
         <div class="description">
-          <p>For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.</p>
+          <p>Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent <em>(parameter)</em> level.</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -141,7 +204,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
                 <div class="quarto-category">stan</div>
                 <div class="quarto-category">bayesian</div>
                 <div class="quarto-category">spatial statistics</div>
-                <div class="quarto-category">hierarchical modeling</div>
+                <div class="quarto-category">copulas</div>
               </div>
                   </div>
   </div>
@@ -183,8 +246,21 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#copulas" id="toc-copulas" class="nav-link" data-scroll-target="#copulas">Copulas</a></li>
+  </ul></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
+  <ul class="collapse">
+  <li><a href="#correlation-matrix" id="toc-correlation-matrix" class="nav-link" data-scroll-target="#correlation-matrix">1. Correlation Matrix</a></li>
+  <li><a href="#generating-multivariate-normal-data" id="toc-generating-multivariate-normal-data" class="nav-link" data-scroll-target="#generating-multivariate-normal-data">2. Generating Multivariate Normal Data</a></li>
+  <li><a href="#transforming-to-multivariate-gev" id="toc-transforming-to-multivariate-gev" class="nav-link" data-scroll-target="#transforming-to-multivariate-gev">3. Transforming to Multivariate GEV</a></li>
+  </ul></li>
+  <li><a href="#checking-the-data" id="toc-checking-the-data" class="nav-link" data-scroll-target="#checking-the-data">Checking the data</a></li>
+  <li><a href="#modeling" id="toc-modeling" class="nav-link" data-scroll-target="#modeling">Modeling</a></li>
+  </ul></li>
   <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
   </ul>
 </nav>
@@ -194,20 +270,1415 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
 
 
 
 
 
-<section id="introduction" class="level1">
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bggjphd)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bggj</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="introduction" class="level1 page-columns page-full">
 <h1>Introduction</h1>
+<p><a href="https://bggj.is/posts/icar_gev/">In a previous post, I wrote about applying the BYM2 model to spatially dependent Generalized Extreme Value (GEV) data</a> and mentioned in passing that I was working on applying copulas as well. In this post I will outline and show results from a simulation study I’ve been running where I:</p>
+<ul>
+<li>Learn how to generate multivariate data that have GEV margins and dependence structures based on an AR(1) Gaussian copula</li>
+<li>Learn how to code simple Gaussian copulas in Stan</li>
+<li>Compare the model fits of the AR(1) copula to a model where I assume i.i.d. observations</li>
+</ul>
+<section id="copulas" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="copulas">Copulas</h2>
+<p>In the book <em>Elements of Copula Modeling with R</em>, <span class="citation" data-cites="hofertElementsCopulaModeling2018">Hofert et al. (<a href="#ref-hofertElementsCopulaModeling2018" role="doc-biblioref">2018</a>)</span> define a copula as</p>
+<div class="no-row-height column-margin column-container"><div id="ref-hofertElementsCopulaModeling2018" class="csl-entry" role="listitem">
+Hofert, Marius, Ivan Kojadinovic, Martin Mächler, and Jun Yan. 2018. <em>Elements of <span>Copula Modeling</span> with <span>R</span></em>. Use <span>R</span>! <span>Cham</span>: <span>Springer International Publishing</span>. <a href="https://doi.org/10.1007/978-3-319-89635-9">https://doi.org/10.1007/978-3-319-89635-9</a>.
+</div></div><blockquote class="blockquote">
+<p>a multivariate distribution function with standard uniform univariate margins, that is, U(0, 1) margins.</p>
+</blockquote>
+<p>So, a Copula is any multivariate distribution whose margins is U(0,1 ) distributed. A simple example is the <em>independence copula</em></p>
+<p><span class="math display">\[
+\Pi(u) = \prod_{j=1}^{d}{u_j}, \quad \mathbf U \in [0, 1]^d.
+\]</span></p>
+<p>The central theorem of copula theory is Sklar’s theorem <span class="citation" data-cites="sklarRandomVariablesDistribution1996">(<a href="#ref-sklarRandomVariablesDistribution1996" role="doc-biblioref">Sklar 1996</a>)</span> <em>[the original paper is from 1959]</em>. The theorem basically states that for any d-dimensional distribution function, <span class="math inline">\(H\)</span>, with univariate margins <span class="math inline">\(F_1, \dots, F_d\)</span>, there exists a d-dimensional copula <span class="math inline">\(C\)</span> such that</p>
+<div class="no-row-height column-margin column-container"><div id="ref-sklarRandomVariablesDistribution1996" class="csl-entry" role="listitem">
+Sklar, A. 1996. <span>“Random <span>Variables</span>, <span>Distribution Functions</span>, and <span>Copulas</span>: <span>A Personal Look Backward</span> and <span>Forward</span>.”</span> <em>Lecture Notes-Monograph Series</em> 28: 1–14. <a href="https://www.jstor.org/stable/4355880">https://www.jstor.org/stable/4355880</a>.
+</div></div><p><span class="math display">\[
+H(\mathbf x) = C(F_1(x_1), \dots, F_d(x_d)).
+\]</span></p>
+<p>Alternatively, we can write</p>
+<p><span class="math display">\[
+C(\mathbf u) = H(F_1^{-1}(u_1), \dots, F_d^{-1}(u_d))
+\]</span></p>
 </section>
-<section id="methods" class="level1">
+</section>
+<section id="methods" class="level1 page-columns page-full">
 <h1>Methods</h1>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p><a href="https://github.com/bgautijonsson/stan_experiments/blob/master/R/data.R">R scripts used for simulating the data</a></p>
+<p>The simulated data have GEV margins and an AR(1) Gaussian copula. The steps in simulating the data are as follows.</p>
+<ol type="1">
+<li>Generate a correlation matrix, R, based on an AR(1) process</li>
+<li>Generate multivariate normal variates with mean zero and covariance matrix R.</li>
+<li>Transform to GEV by applying normal CDF and GEV quantile functions</li>
+</ol>
+<section id="correlation-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="correlation-matrix">1. Correlation Matrix</h3>
+<p>First, a correlation matrix is generated that encodes an AR(1) process with correlation <span class="math inline">\(\rho\)</span>. To create this correlation matrix, we specify the precision matrix, <span class="math inline">\(Q\)</span>, via</p>
+<p><span class="math display">\[
+Q = \frac{1}{1 - \rho^2}\begin{bmatrix}
+1 &amp; -\rho &amp; \dots &amp; \dots &amp; \vdots\\
+-\rho &amp; 1 + \rho^2 &amp; -\rho &amp; \ddots &amp; \vdots \\
+\vdots &amp; \ddots &amp; \ddots &amp; \ddots &amp; \vdots \\
+\vdots &amp; \ddots &amp;-\rho &amp; 1 + \rho^2 &amp; -\rho \\
+\vdots &amp; \dots &amp; \dots &amp; -\rho &amp; 1
+\end{bmatrix}.
+\]</span></p>
+<p>This gives us the correlation matrix, R, where</p>
+<p><span class="math display">\[
+R = Q^{-1} = \begin{bmatrix}
+1 &amp; \rho &amp; \rho^2 &amp; \dots &amp; \rho^n\\
+\rho &amp; 1 &amp; \rho &amp; \ddots &amp; \rho^{n-1} \\
+\vdots &amp; \ddots &amp; \ddots &amp; \ddots &amp; \vdots \\
+\rho^{n-1} &amp; \ddots &amp;\rho &amp; 1 &amp; \rho \\
+\rho^n &amp; \dots &amp; \dots &amp; \rho &amp; 1
+\end{bmatrix}.
+\]</span></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>make_AR_cor_matrix_1d <span class="ot">&lt;-</span> <span class="cf">function</span>(n_id, <span class="at">rho =</span> <span class="fl">0.5</span>) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> n_id,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> n_id</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">diag</span>(P) <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n_id <span class="sc">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    P[i, i <span class="sc">+</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span>rho</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, n_id)) {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    P[i, i <span class="sc">-</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span>rho</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, n_id <span class="sc">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    P[i, i] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> rho<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> P <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> rho<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  P_cor <span class="ot">&lt;-</span> <span class="fu">solve</span>(P)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  P_cor</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>n_id <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">make_AR_cor_matrix_1d</span>(<span class="at">n_id =</span> n_id, <span class="at">rho =</span> rho)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       [,1]  [,2] [,3]  [,4]   [,5]
+[1,] 1.0000 0.500 0.25 0.125 0.0625
+[2,] 0.5000 1.000 0.50 0.250 0.1250
+[3,] 0.2500 0.500 1.00 0.500 0.2500
+[4,] 0.1250 0.250 0.50 1.000 0.5000
+[5,] 0.0625 0.125 0.25 0.500 1.0000</code></pre>
+</div>
+</div>
 </section>
-<section id="results" class="level1">
+<section id="generating-multivariate-normal-data" class="level3">
+<h3 class="anchored" data-anchor-id="generating-multivariate-normal-data">2. Generating Multivariate Normal Data</h3>
+<p>We then use the well-known fact that if</p>
+<p><span class="math display">\[
+\mathbf X \sim \mathrm{MVNorm}\left(\boldsymbol \mu, \Sigma\right),
+\]</span></p>
+<p>then</p>
+<p><span class="math display">\[
+\boldsymbol X = \boldsymbol \mu +  L \boldsymbol Z,
+\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol Z \sim \mathrm{Normal}(\boldsymbol 0, I)\)</span> and <span class="math inline">\(L\)</span> is the Cholesky decomposition of <span class="math inline">\(R\)</span>, or <span class="math inline">\(LL^T = \Sigma\)</span>.</p>
+<p>In our case, we want <span class="math inline">\(\mathbf X\)</span> to have mean 0 and covariance matrix <span class="math inline">\(R\)</span>, so we write</p>
+<p><span class="math display">\[
+\mathbf X = L\mathbf Z
+\]</span></p>
+<p>where <span class="math inline">\(LL^T = R\)</span>.</p>
+<p>We can skip the manual Cholesky factorization and simply use the <code>{mvtnorm}</code> package.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sample_gaussian_variables <span class="ot">&lt;-</span> <span class="cf">function</span>(cor_matrix, n_replicates) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> n_replicates,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma =</span> cor_matrix</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>R <span class="sc">|&gt;</span> </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         [,1]      [,2]     [,3]      [,4]      [,5]
+[1,] 1.304272 0.4298426 1.080875 0.7894652 -1.122778</code></pre>
+</div>
+</div>
+<p>We will want more than one observation from each <em>“site”</em>, so we write a helped function for tidying this output into a tibble.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tidy_mvgauss <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_matrix) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(mvnorm_matrix) <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="fu">ncol</span>(mvnorm_matrix))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  mvnorm_matrix <span class="sc">|&gt;</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">replicate =</span> dplyr<span class="sc">::</span><span class="fu">row_number</span>(),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">.before =</span> <span class="st">`</span><span class="at">1</span><span class="st">`</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="sc">-</span>replicate),</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">names_to =</span> <span class="st">"id"</span>, <span class="at">names_transform =</span> as.numeric,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">values_to =</span> <span class="st">"Z"</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>n_replicates <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="ot">&lt;-</span> R <span class="sc">|&gt;</span> </span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> n_replicates) <span class="sc">|&gt;</span> </span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy_mvgauss</span>()</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="sc">|&gt;</span> </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="vbfxsxapnl" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#vbfxsxapnl table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#vbfxsxapnl thead, #vbfxsxapnl tbody, #vbfxsxapnl tfoot, #vbfxsxapnl tr, #vbfxsxapnl td, #vbfxsxapnl th {
+  border-style: none;
+}
+
+#vbfxsxapnl p {
+  margin: 0;
+  padding: 0;
+}
+
+#vbfxsxapnl .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#vbfxsxapnl .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#vbfxsxapnl .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#vbfxsxapnl .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#vbfxsxapnl .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#vbfxsxapnl .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#vbfxsxapnl .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#vbfxsxapnl .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#vbfxsxapnl .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#vbfxsxapnl .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#vbfxsxapnl .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#vbfxsxapnl .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#vbfxsxapnl .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#vbfxsxapnl .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#vbfxsxapnl .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vbfxsxapnl .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#vbfxsxapnl .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#vbfxsxapnl .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#vbfxsxapnl .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vbfxsxapnl .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#vbfxsxapnl .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vbfxsxapnl .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#vbfxsxapnl .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vbfxsxapnl .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#vbfxsxapnl .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#vbfxsxapnl .gt_left {
+  text-align: left;
+}
+
+#vbfxsxapnl .gt_center {
+  text-align: center;
+}
+
+#vbfxsxapnl .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#vbfxsxapnl .gt_font_normal {
+  font-weight: normal;
+}
+
+#vbfxsxapnl .gt_font_bold {
+  font-weight: bold;
+}
+
+#vbfxsxapnl .gt_font_italic {
+  font-style: italic;
+}
+
+#vbfxsxapnl .gt_super {
+  font-size: 65%;
+}
+
+#vbfxsxapnl .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#vbfxsxapnl .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#vbfxsxapnl .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#vbfxsxapnl .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#vbfxsxapnl .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#vbfxsxapnl .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#vbfxsxapnl .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<div id="vbfxsxapnl" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="vbfxsxapnl">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.838842054133869,0.735920544274324,0.0257686834715345,-0.0155799106379054,0.237591341644598,-0.779602109716935,-1.74937774762662,-1.69896541747752,-0.693498111753161,-1.69121848490616,-0.662883123115692,-0.161964412472335,-0.685085709031592,-0.157860986879714,0.267569682315178,-0.396551752757115,-0.917550877860917,-1.82408114795539,-0.582749746467878,-0.496202317095872,0.873027049743963,-1.02157995850379,-0.967764390657677,-0.764371735772087,1.52020202479684,1.89090853670885,1.58725534048482,0.574391209613349,-0.45289200712016,0.0199308499513609,-0.553019511044624,0.301408138112527,0.565867015662667,0.0935196089064788,1.70241349727378,0.449603346572939,1.44472936846097,0.371681948306045,0.125517002817499,-1.16312290934035,-1.11787545023083,-0.107504539676316,0.00518327202733099,-0.0968483951362571,-0.839977204360986,0.132748781027452,-0.444638310201653,0.257456213586652,-0.540523600957891,0.511760244094851]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.838842054","0.735920544","0.025768683","-0.015579911","0.237591342","-0.779602110","-1.749377748","-1.698965417","-0.693498112","-1.691218485","-0.662883123","-0.161964412","-0.685085709","-0.157860987","0.267569682","-0.396551753","-0.917550878","-1.824081148","-0.582749746","-0.496202317","0.873027050","-1.021579959","-0.967764391","-0.764371736","1.520202025","1.890908537","1.587255340","0.574391210","-0.452892007","0.019930850","-0.553019511","0.301408138","0.565867016","0.093519609","1.702413497","0.449603347","1.444729368","0.371681948","0.125517003","-1.163122909","-1.117875450","-0.107504540","0.005183272","-0.096848395","-0.839977204","0.132748781","-0.444638310","0.257456214","-0.540523601","0.511760244"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"vbfxsxapnl","dataKey":"23cbc57c80e9db727b4d199aaf25a303"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</section>
+<section id="transforming-to-multivariate-gev" class="level3">
+<h3 class="anchored" data-anchor-id="transforming-to-multivariate-gev">3. Transforming to Multivariate GEV</h3>
+<p>Now our data, <span class="math inline">\(\mathbf X\)</span>, is multivariate normal with dependence structure according to an AR(1) process, but marginally each <span class="math inline">\(X_1\)</span> is standard normal. To transform this data to a GEV dataset, we simply use the standard normal CDF on each <span class="math inline">\(X_i\)</span> to transform it to <span class="math inline">\([0, 1]\)</span>, then we use the GEV quantile function to transform that to a GEV distributed variable.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mvnorm_to_gev <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_data, gev_params) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  mvnorm_data <span class="sc">|&gt;</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">U =</span> <span class="fu">pnorm</span>(Z)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      gev_params,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> purrr<span class="sc">:::</span><span class="fu">pmap_dbl</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(U, mu, sigma, xi), </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        \(U, mu, sigma, xi) evd<span class="sc">::</span><span class="fu">qgev</span>(<span class="at">p =</span> U, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>gev_params <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="dv">6</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="dv">3</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">xi =</span> <span class="fl">0.1</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">seq_len</span>(n_id)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>gev_data <span class="ot">&lt;-</span> mvnorm_data <span class="sc">|&gt;</span> </span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mvnorm_to_gev</span>(<span class="at">gev_params =</span> gev_params)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>mu, <span class="sc">-</span>sigma, <span class="sc">-</span>xi) <span class="sc">|&gt;</span> </span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="dpebnsrahf" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#dpebnsrahf table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#dpebnsrahf thead, #dpebnsrahf tbody, #dpebnsrahf tfoot, #dpebnsrahf tr, #dpebnsrahf td, #dpebnsrahf th {
+  border-style: none;
+}
+
+#dpebnsrahf p {
+  margin: 0;
+  padding: 0;
+}
+
+#dpebnsrahf .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#dpebnsrahf .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#dpebnsrahf .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#dpebnsrahf .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#dpebnsrahf .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#dpebnsrahf .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#dpebnsrahf .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#dpebnsrahf .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#dpebnsrahf .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#dpebnsrahf .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#dpebnsrahf .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#dpebnsrahf .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#dpebnsrahf .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#dpebnsrahf .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#dpebnsrahf .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dpebnsrahf .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#dpebnsrahf .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#dpebnsrahf .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#dpebnsrahf .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dpebnsrahf .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#dpebnsrahf .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dpebnsrahf .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#dpebnsrahf .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dpebnsrahf .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#dpebnsrahf .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#dpebnsrahf .gt_left {
+  text-align: left;
+}
+
+#dpebnsrahf .gt_center {
+  text-align: center;
+}
+
+#dpebnsrahf .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#dpebnsrahf .gt_font_normal {
+  font-weight: normal;
+}
+
+#dpebnsrahf .gt_font_bold {
+  font-weight: bold;
+}
+
+#dpebnsrahf .gt_font_italic {
+  font-style: italic;
+}
+
+#dpebnsrahf .gt_super {
+  font-size: 65%;
+}
+
+#dpebnsrahf .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#dpebnsrahf .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#dpebnsrahf .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#dpebnsrahf .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#dpebnsrahf .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#dpebnsrahf .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#dpebnsrahf .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<div id="dpebnsrahf" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="dpebnsrahf">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.838842054133869,0.735920544274324,0.0257686834715345,-0.0155799106379054,0.237591341644598,-0.779602109716935,-1.74937774762662,-1.69896541747752,-0.693498111753161,-1.69121848490616,-0.662883123115692,-0.161964412472335,-0.685085709031592,-0.157860986879714,0.267569682315178,-0.396551752757115,-0.917550877860917,-1.82408114795539,-0.582749746467878,-0.496202317095872,0.873027049743963,-1.02157995850379,-0.967764390657677,-0.764371735772087,1.52020202479684,1.89090853670885,1.58725534048482,0.574391209613349,-0.45289200712016,0.0199308499513609,-0.553019511044624,0.301408138112527,0.565867015662667,0.0935196089064788,1.70241349727378,0.449603346572939,1.44472936846097,0.371681948306045,0.125517002817499,-1.16312290934035,-1.11787545023083,-0.107504539676316,0.00518327202733099,-0.0968483951362571,-0.839977204360986,0.132748781027452,-0.444638310201653,0.257456213586652,-0.540523600957891,0.511760244094851],"U":[0.20077897407215,0.769110473116809,0.510279079740086,0.493784766363703,0.593900966693018,0.217812556867556,0.0401128723679771,0.0446628498895528,0.243998505204445,0.0453975409144492,0.253702705702293,0.435666939263814,0.246644918848604,0.437283170243163,0.605484714864777,0.345849018545748,0.179427022514119,0.0340699025703967,0.280030889654523,0.309875838190323,0.808675832945678,0.153489873614208,0.166581025832996,0.222322873586756,0.93576989565606,0.97068172265958,0.943772587244681,0.717148449991673,0.325313253355008,0.507950732336581,0.290125024988631,0.61844835531071,0.714257907238826,0.537254613846867,0.9556610591918,0.673501762697159,0.925733041347448,0.644935166585019,0.549942867407798,0.12238981920154,0.131810095705926,0.457194362027699,0.502067817103418,0.461423395390294,0.200460583937946,0.552803968725663,0.32829057859639,0.601586693633563,0.294417994710031,0.695590591309735],"y":[4.61270088473726,10.292954693913,7.21280639872279,7.06432909081315,8.02092869250737,4.7620162047883,2.69247641239193,2.78333082690064,4.98551871383578,2.79742906791106,5.06690262400358,6.56100057633001,5.0077793683975,6.57465400580371,8.14212586784137,5.82077367072186,4.41968596097224,2.56061056295164,5.28487327855353,5.52867275984235,11.0279375948844,4.17354518322048,4.29963457696841,4.80098317118733,15.3471988379662,18.634664984808,15.8910871759442,9.49235553003182,5.65408764002376,7.19166848152655,5.36761802938953,8.28108746738126,9.45193980456587,7.46243249987788,16.8753646121944,8.91792530442612,14.7593740415799,8.57720711506798,7.58314904659169,3.85403228064959,3.95431700158665,6.74430501077826,7.13852719108893,6.78071013490713,4.60987415171019,7.61068918688009,5.6782537619253,8.10103998582916,5.40270713304784,9.1994819808429]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.838842054","0.735920544","0.025768683","-0.015579911","0.237591342","-0.779602110","-1.749377748","-1.698965417","-0.693498112","-1.691218485","-0.662883123","-0.161964412","-0.685085709","-0.157860987","0.267569682","-0.396551753","-0.917550878","-1.824081148","-0.582749746","-0.496202317","0.873027050","-1.021579959","-0.967764391","-0.764371736","1.520202025","1.890908537","1.587255340","0.574391210","-0.452892007","0.019930850","-0.553019511","0.301408138","0.565867016","0.093519609","1.702413497","0.449603347","1.444729368","0.371681948","0.125517003","-1.163122909","-1.117875450","-0.107504540","0.005183272","-0.096848395","-0.839977204","0.132748781","-0.444638310","0.257456214","-0.540523601","0.511760244"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.20077897","0.76911047","0.51027908","0.49378477","0.59390097","0.21781256","0.04011287","0.04466285","0.24399851","0.04539754","0.25370271","0.43566694","0.24664492","0.43728317","0.60548471","0.34584902","0.17942702","0.03406990","0.28003089","0.30987584","0.80867583","0.15348987","0.16658103","0.22232287","0.93576990","0.97068172","0.94377259","0.71714845","0.32531325","0.50795073","0.29012502","0.61844836","0.71425791","0.53725461","0.95566106","0.67350176","0.92573304","0.64493517","0.54994287","0.12238982","0.13181010","0.45719436","0.50206782","0.46142340","0.20046058","0.55280397","0.32829058","0.60158669","0.29441799","0.69559059"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["4.612701","10.292955","7.212806","7.064329","8.020929","4.762016","2.692476","2.783331","4.985519","2.797429","5.066903","6.561001","5.007779","6.574654","8.142126","5.820774","4.419686","2.560611","5.284873","5.528673","11.027938","4.173545","4.299635","4.800983","15.347199","18.634665","15.891087","9.492356","5.654088","7.191668","5.367618","8.281087","9.451940","7.462432","16.875365","8.917925","14.759374","8.577207","7.583149","3.854032","3.954317","6.744305","7.138527","6.780710","4.609874","7.610689","5.678254","8.101040","5.402707","9.199482"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"dpebnsrahf","dataKey":"75d43d40a736fc1f6512ba320113afef"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="checking-the-data" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="checking-the-data">Checking the data</h2>
+<p>Let’s create a function that plots heat maps for each of the three representations of the data</p>
+<ul>
+<li>Z: The multivariate normal</li>
+<li>U: The multivariate uniform</li>
+<li>y: The multivariate GEV</li>
+</ul>
+<p>We want the color scales to be free, so we use <code>group_map()</code> and <code>wrap_plots()</code> instead of <code>facet_wrap()</code></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(replicate, id, Z, U, y) <span class="sc">|&gt;</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>replicate, <span class="sc">-</span>id)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"Z"</span>, <span class="st">"U"</span>, <span class="st">"y"</span>),</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">name2 =</span> name</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(name) <span class="sc">|&gt;</span> </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_map</span>(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>(data, ...) {</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        data <span class="sc">|&gt;</span> </span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>          <span class="fu">ggplot</span>(<span class="fu">aes</span>(id, replicate, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_raster</span>() <span class="sc">+</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_cartesian</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle =</span> data<span class="sc">$</span>name2</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>          )</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">wrap_plots</span>() <span class="sc">+</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_annotation</span>(</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Heatmaps of the three data representations"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Z: Normal | U: Uniform | y: GEV"</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell page-columns page-full">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display column-page">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+<p>It’s nice to wrap this process in a single function</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>make_data <span class="ot">&lt;-</span> <span class="cf">function</span>(gev_params, n_replicate, rho) {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">make_AR_cor_matrix_1d</span>(<span class="at">n_id =</span> <span class="fu">nrow</span>(gev_params), <span class="at">rho =</span> rho) <span class="sc">|&gt;</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> n_replicate) <span class="sc">|&gt;</span> </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tidy_mvgauss</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">U =</span> <span class="fu">pnorm</span>(Z)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      gev_params,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> purrr<span class="sc">::</span><span class="fu">pmap_dbl</span>(</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(U, mu, sigma, xi), </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        \(U, mu, sigma, xi) evd<span class="sc">::</span><span class="fu">qgev</span>(<span class="at">p =</span> U, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s see how the data look if we make it larger and increase the correlation</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n_id <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>n_replicates <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>gev_params <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="dv">6</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="dv">3</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xi =</span> <span class="fl">0.1</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">seq_len</span>(n_id)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">make_data</span>(gev_params, n_replicates, <span class="at">rho =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We see that with higher neighbor correlations we get obvious horizontal stripes corresponding to a large amount of dependence within each replicate.</p>
+<div class="cell page-columns page-full">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display column-page">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
+<section id="modeling" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="modeling">Modeling</h2>
+<p><a href="https://github.com/bgautijonsson/stan_experiments/blob/master/R/modeling.R">R scripts used for modeling</a></p>
+<p>I wrote two different models in stan.</p>
+<ol type="1">
+<li>A model that wraps the GEV margins into an AR(1) Gaussian copula</li>
+<li>A model that assumes i.i.d. GEV margins</li>
+</ol>
+<div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">AR(1) Copula</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">i.i.d.</a></li></ul>
+<div class="tab-content page-columns page-full">
+<div id="tabset-1-1" class="tab-pane active page-columns page-full" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell column-page-inset" data-output.var="model1">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_copula_prec_lpdf(<span class="dt">vector</span> U, <span class="dt">matrix</span> L) {</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(U);</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] mu = rep_vector(<span class="dv">0</span>, N);</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[N, N] I = diag_matrix(rep_vector(<span class="dv">1</span>, N));</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Defining the precision matrix Q</span></span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>      Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i &lt; n_id) {</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>      Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>      U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> normal_copula_prec_lpdf(U | Omega);</span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Creating Q inside brackets, since I don't want to include it in the model output</span></span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>    Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>        Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &lt; n_id) {</span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>        Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>      log_lik += normal_copula_prec_lpdf(U | Omega);</span>
+<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell column-page-inset" data-output.var="model2">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="results" class="level1 page-columns page-full">
 <h1>Results</h1>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_means.png" class="column-page img-fluid"></p>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png" class="column-page img-fluid"></p>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/diff_elppd.png" class="column-page img-fluid"></p>
+
 
 
 </section>
