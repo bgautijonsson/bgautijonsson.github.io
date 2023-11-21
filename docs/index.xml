@@ -151,6 +151,11 @@ Simpson, Daniel P., Håvard Rue, Thiago G. Martins, Andrea Riebler, and Sigrunn 
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft(%20%5Csqrt%7B%5Crho%7D%20%5Ccdot%20%5Cfrac%7B%5Cphi%5E*%7D%7B%5Csqrt%20s%7D%20+%20%5Csqrt%7B1%20-%20%5Crho%7D%20%5Ccdot%5Ctheta%5E*%20%5Cright),%0A"> where <img src="https://latex.codecogs.com/png.latex?0%20%5Cleq%20%5Crho%20%5Cleq%201"> determines the amount of spatial/non-spatial error, <img src="https://latex.codecogs.com/png.latex?%5Cphi%5E*"> is the ICAR model, <img src="https://latex.codecogs.com/png.latex?%5Ctheta%5E*"> is an iid random effect, <img src="https://latex.codecogs.com/png.latex?s"> is the scaling factor for the neighborhood graph, <img src="https://latex.codecogs.com/png.latex?%5Csigma%20%5Cgeq%200"> is the overall standard deviation of the combined random effects.</p>
 </section>
 </section>
+<section id="copulas" class="level2">
+<h2 class="anchored" data-anchor-id="copulas">Copulas</h2>
+<p>Even if we use the aforementioned models to allow spatial dependence between the paremeters in our GEV distributions, there is still one problem: We’re not modeling spatial distributions on the data level.</p>
+<p>This means that our model as it is currently set up can allow spatial dependence in how often extreme precipitation happens in neighboring regions, but it does not allow for spatial dependence in when we observe extreme precipitation. To do this, we will need to apply copulas. I will not write about them here, but I have a post on the way about applying copulas to data with GEV margins.</p>
+</section>
 </section>
 <section id="data" class="level1 page-columns page-full">
 <h1>Data</h1>

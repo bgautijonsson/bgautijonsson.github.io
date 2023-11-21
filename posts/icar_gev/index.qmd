@@ -196,6 +196,12 @@ $$
 $$
 where $0 \leq \rho \leq 1$ determines the amount of spatial/non-spatial error, $\phi^*$ is the ICAR model, $\theta^*$ is an iid random effect, $s$ is the scaling factor for the neighborhood graph, $\sigma \geq 0$ is the overall standard deviation of the combined random effects.
 
+## Copulas
+
+Even if we use the aforementioned models to allow spatial dependence between the paremeters in our GEV distributions, there is still one problem: We're not modeling spatial distributions on the data level.
+
+This means that our model as it is currently set up can allow spatial dependence in how often extreme precipitation happens in neighboring regions, but it does not allow for spatial dependence in when we observe extreme precipitation. To do this, we will need to apply copulas. I will not write about them here, but I have a post on the way about applying copulas to data with GEV margins.
+
 
 # Data
 

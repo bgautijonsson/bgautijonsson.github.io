@@ -253,6 +253,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
   <li><a href="#besag-york-mollié-bym-model" id="toc-besag-york-mollié-bym-model" class="nav-link" data-scroll-target="#besag-york-mollié-bym-model">Besag York Mollié (BYM) Model</a></li>
   <li><a href="#bym2-model" id="toc-bym2-model" class="nav-link" data-scroll-target="#bym2-model">BYM2 Model</a></li>
   </ul></li>
+  <li><a href="#copulas" id="toc-copulas" class="nav-link" data-scroll-target="#copulas">Copulas</a></li>
   </ul></li>
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
   <ul class="collapse">
@@ -423,6 +424,11 @@ Simpson, Daniel P., Håvard Rue, Thiago G. Martins, Andrea Riebler, and Sigrunn 
 \left( \sqrt{\rho} \cdot \frac{\phi^*}{\sqrt s} + \sqrt{1 - \rho} \cdot\theta^* \right),
 \]</span> where <span class="math inline">\(0 \leq \rho \leq 1\)</span> determines the amount of spatial/non-spatial error, <span class="math inline">\(\phi^*\)</span> is the ICAR model, <span class="math inline">\(\theta^*\)</span> is an iid random effect, <span class="math inline">\(s\)</span> is the scaling factor for the neighborhood graph, <span class="math inline">\(\sigma \geq 0\)</span> is the overall standard deviation of the combined random effects.</p>
 </section>
+</section>
+<section id="copulas" class="level2">
+<h2 class="anchored" data-anchor-id="copulas">Copulas</h2>
+<p>Even if we use the aforementioned models to allow spatial dependence between the paremeters in our GEV distributions, there is still one problem: We’re not modeling spatial distributions on the data level.</p>
+<p>This means that our model as it is currently set up can allow spatial dependence in how often extreme precipitation happens in neighboring regions, but it does not allow for spatial dependence in when we observe extreme precipitation. To do this, we will need to apply copulas. I will not write about them here, but I have a post on the way about applying copulas to data with GEV margins.</p>
 </section>
 </section>
 <section id="data" class="level1 page-columns page-full">
