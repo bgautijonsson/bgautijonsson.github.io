@@ -2,7 +2,7 @@
 title: "Spatially Dependent Generalized Extreme Value Parameters"
 subtitle: "Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters"
 description: |
-  For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.
+  For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors.
 author: 
     -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
         url: "bggj.is"
@@ -359,6 +359,40 @@ stan_data <- list(
 
 # Model
 
+The model is written below in math and Stan code.
+
+::: {.panel-tabset}
+
+## Math
+
+$$
+\begin{gathered}
+y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i) \\
+\mu_{it} = \mu_i^0 \cdot(1 + \Delta_i (t - t_0)) \\
+\begin{pmatrix}
+\psi_i \\ \tau_i \\ \phi_i \\ \gamma_i
+\end{pmatrix} = 
+\begin{pmatrix}
+\log(\mu_{i}^0) \\ 
+\log(\sigma_i) - \psi_i \\
+f_\phi(\xi) \\
+f_\gamma(\Delta)
+\end{pmatrix} \\
+\psi \sim \mathrm{Normal}(\mu_\psi, \sigma_\psi^*) \quad
+\sigma_\psi^* \sim \mathrm{BYM2}_\psi(\sigma_\psi, \rho_\psi) \\
+\tau \sim \mathrm{Normal}(\mu_\tau, \sigma^*_\tau) \quad
+\sigma^*_\tau \sim \mathrm{BYM2}_\tau(\sigma_\tau, \rho_\tau) \\
+\phi \sim \mathrm{Normal}(\mu_\phi, \sigma^*_\phi) \quad
+\sigma^*_\phi \sim \mathrm{BYM2}_\phi(\sigma_\phi, \rho_\phi) \\
+\gamma \sim \mathrm{Normal}(\mu_\gamma, \sigma^*_\gamma) \quad
+\sigma^*_\gamma \sim \mathrm{BYM2}_\gamma(\sigma_\gamma, \rho_\gamma) \\
+\sigma_\psi, \sigma_\tau, \sigma_\phi, \sigma_\gamma \sim \mathrm{Exponential}(1) \\
+\mathrm{logit}(\rho_\phi), \dots, \mathrm{logit(\rho_\gamma)} \sim \mathrm{Normal}(0, 1)
+\end{gathered}
+$$
+
+## Stan
+
 ```{stan, output.var = "model"}
 
 functions{
@@ -489,6 +523,8 @@ model {
 }
 ```
 
+:::
+
 
 ```{r}
 #| output: false
@@ -517,92 +553,17 @@ fit$save_object(file = "Stan/Model_Objects/fit.RDS")
 
 # Results
 
+I won't show convergence analytics here, but after doing our due diligence we can move on to looking at parameter estimates.
+
 ```{r}
+#| code-fold: true
 draws <- fit$draws() |> as_draws_df()
 ```
 
-## Convergence
+## Pairs Plot for Station 5
 
 ```{r}
-p <- fit |>
-  bayesplot::rhat() |>
-  mcmc_rhat(size = 2)
-
-ggsave(
-  plot = p,
-  filename = "Figures/rhats.png",
-  width = 8, height = 0.621 * 8, scale = 1.3
-)
-```
-
-![](Figures/rhats.png)
-
-## Hyperparamters
-
-```{r}
-draws |> 
-  subset_draws(variable = c("rho", "sigma_", "mu_"), regex = TRUE) |> 
-  summarise_draws() |> 
-  gt() |> 
-  fmt_number(
-    decimals = 3
-  ) |> 
-  gtsave(
-    filename = "Tables/hyperparam_table.html", inline_css = TRUE
-  )
-```
-
-<iframe src="Tables/hyperparam_table.html" width="100%" height="700px"></iframe>
-
-
-```{r}
-p <- draws |> 
-  mcmc_trace(
-    regex_pars = "mu_"
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/trace_mu.png",
-  width = 8, height = 0.621 * 8, scale = 1.3
-)
-```
-
-![](Figures/trace_mu.png)
-
-```{r}
-p <- draws |> 
-  mcmc_trace(
-    regex_pars = "sigma_"
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/trace_sigma.png",
-  width = 8, height = 0.621 * 8, scale = 1.3
-)
-```
-
-![](Figures/trace_sigma.png)
-
-```{r}
-p <- draws |> 
-  mcmc_trace(
-    regex_pars = "^rho_"
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/trace_rho.png",
-  width = 8, height = 0.621 * 8, scale = 1.3
-)
-```
-
-![](Figures/trace_rho.png)
-
-## Station Results
-
-```{r}
+#| code-fold: true
 station_pairs_plot <- function(station, link = TRUE) {
   if (link == TRUE) {
     my_pars <- c(glue("psi[{station}]"), glue("tau[{station}]"), glue("phi[{station}]"), glue("gamma[{station}]"))
@@ -620,7 +581,12 @@ station_pairs_plot <- function(station, link = TRUE) {
 }
 ```
 
+::: {.panel-tabset}
+
+### Unconstrained Scale
+
 ```{r}
+#| code-fold: true
 p <- station_pairs_plot(5)
 
 ggsave(
@@ -630,9 +596,12 @@ ggsave(
 )
 ```
 
-![](Figures/station_pairs_plot_link.png)
+![Here we see a pairs plot of all four GEV parameters for station 5. The plot is shown on the unconstrained scale.](Figures/station_pairs_plot_link.png){.fig-cap-location-margin}
+
+### Original Scale
 
 ```{r}
+#| code-fold: true
 p <- station_pairs_plot(5, link = FALSE)
 
 ggsave(
@@ -642,11 +611,15 @@ ggsave(
 )
 ```
 
-![](Figures/station_pairs_plot_no_link.png)
+![Here we see a pairs plot of all four GEV parameters for station 5. The plot is shown on the original scale.](Figures/station_pairs_plot_no_link.png)
+
+
+:::
 
 ## Spatial Distribution
 
 ```{r}
+#| code-fold: true
 spatial_plot <- function(variable) {
   
   draws |>
@@ -669,6 +642,7 @@ spatial_plot <- function(variable) {
 ### Location
 
 ```{r}
+#| code-fold: true
 p <- spatial_plot("psi")
 
 p <- p +
@@ -707,7 +681,7 @@ ggsave(
 )
 ```
 
-::: {layout-ncol=2}
+::: {layout-ncol=2 .column-page}
 ![](Figures/spatial_psi.png)
 
 ![](Figures/spatial_mu0.png)
@@ -717,6 +691,7 @@ ggsave(
 ### Scale
 
 ```{r}
+#| code-fold: true
 p <- spatial_plot("tau")
 
 p <- p +
@@ -755,7 +730,7 @@ ggsave(
 )
 ```
 
-::: {layout-ncol=2}
+::: {layout-ncol=2 .column-page}
 ![](Figures/spatial_tau.png)
 
 ![](Figures/spatial_sigma.png)
@@ -763,6 +738,7 @@ ggsave(
 ### Shape
 
 ```{r}
+#| code-fold: true
 p <- spatial_plot("phi")
 
 p <- p +
@@ -801,7 +777,7 @@ ggsave(
 )
 ```
 
-::: {layout-ncol=2}
+::: {layout-ncol=2 .column-page}
 ![](Figures/spatial_phi.png)
 
 ![](Figures/spatial_xi.png)
@@ -810,6 +786,7 @@ ggsave(
 ### Trend
 
 ```{r}
+#| code-fold: true
 p <- spatial_plot("gamma")
 
 p <- p +
@@ -848,7 +825,7 @@ ggsave(
 )
 ```
 
-::: {layout-ncol=2}
+::: {layout-ncol=2 .column-page}
 ![](Figures/spatial_gamma.png)
 
 ![](Figures/spatial_delta.png)
