@@ -10,6 +10,7 @@ library(tidyverse)
 library(GGally)
 library(cowplot)
 library(glue)
+library(leaflet)
 theme_set(theme_bggj())
 ```
 
@@ -53,6 +54,14 @@ ggsave(
 ```
 
 ![](Figures/figure1.png)
+
+```{r}
+full_data |> 
+  stations_to_sf() |> 
+  points_to_grid() |> 
+  spatial_plot(max_precip)
+```
+
 
 ```{r}
 #| eval: false

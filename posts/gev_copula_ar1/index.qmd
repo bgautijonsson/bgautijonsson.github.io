@@ -1,0 +1,43 @@
+---
+title: "Spatially Dependent Generalized Extreme Value Parameters"
+subtitle: "Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters"
+description: |
+  For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.
+author: 
+    -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
+        url: "bggj.is"
+        affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
+        affiliation-url: "https://www.hi.is/tolfraedi_0"
+date: "2023/08/28"
+draft: true
+format: 
+    html:
+        code-fold: true
+        toc: true
+        toc-location: left
+execute: 
+  echo: true
+  warning: false
+  eval: false
+editor: source
+theme: flatly
+title-block-banner: true
+image: Figures/spatial_gamma.png
+categories:
+    - english
+    - R
+    - phd
+    - stan
+    - bayesian
+    - spatial statistics
+    - hierarchical modeling
+---
+
+# Introduction
+
+
+
+# Methods
+
+# Results
+

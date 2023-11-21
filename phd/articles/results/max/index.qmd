@@ -80,10 +80,27 @@ library(GGally)
 library(cowplot)
 library(arrow)
 library(here)
+library(future)
+library(progressr)
 theme_set(theme_bggj())
 ```
 
 ```{r}
+#| eval: false
+#| include: false
+
+plan(multisession, workers = 4)
+with_progress({
+  station_estimates <- ms_max(precip)
+})
+plan(sequential)
+station_estimates |> 
+  write_rds("station_estimates.rds")
+```
+
+
+```{r}
+station_estimates <- read_rds("station_estimates.rds")
 d <- station_estimates |> 
   select(station, par) |> 
   unnest(par) |> 
@@ -374,3 +391,100 @@ d |>
     title = "Spatial distribution of Delta"
   )
 ```
+
+# Fit
+
+```{r}
+pgev <- function(y, loc, scale, shape) {
+  out <- 1 + shape * (y - loc) / scale
+  out <- out ^ (-1/shape)
+  out <- exp(-out)
+  out
+} 
+```
+
+
+```{r}
+plot_dat <- d |> 
+  pivot_wider(names_from = name, values_from = value) |>
+  mutate(
+    mu0 = exp(psi),
+    sigma = exp(tau + psi),
+    xi = link_shape_inverse(phi),
+    delta = link_trend_inverse(gamma)
+  ) |> 
+  select(-(psi:gamma)) |> 
+  inner_join(
+    precip,
+    by = join_by(station), 
+    multiple = "all"
+  ) |> 
+  mutate(
+    mu = mu0 * (1 + delta * (year - 1981)),
+    p = pgev(precip, mu, sigma, xi)
+  ) |> 
+  arrange(station, (precip - mu)) |> 
+  select(station, year, precip, p) |> 
+  mutate(
+    q = row_number() / (n() + 1),
+    station_diff = sqrt(mean((p - q)^2)),
+    .by = station
+  ) |> 
+  mutate(
+    year_diff = sqrt(mean((p - q)^2)),
+    .by = year
+  )
+```
+
+
+```{r}
+plot_dat |>
+  nest(data = -c(station, station_diff)) |> 
+  arrange(desc(station_diff)) |> 
+  slice(1:9) |> 
+  unnest(data) |> 
+  ggplot(aes(p, q)) +
+  geom_abline(intercept = 0, slope = 1, lty = 2) +
+  geom_line() +
+  facet_wrap("station")
+```
+
+```{r}
+plot_dat |>
+  nest(data = -c(station, station_diff)) |> 
+  arrange(station_diff) |> 
+  slice(1:9) |> 
+  unnest(data) |> 
+  ggplot(aes(p, q)) +
+  geom_abline(intercept = 0, slope = 1, lty = 2) +
+  geom_line() +
+  facet_wrap("station")
+```
+
+
+```{r}
+plot_dat |> 
+  distinct(station, station_diff) |> 
+  inner_join(
+    stations
+  ) |> 
+  ggplot(aes(proj_x, proj_y, fill = station_diff)) +
+  geom_raster() +
+  scale_fill_viridis_c() +
+  coord_cartesian(expand = FALSE)
+```
+
+```{r}
+plot_dat |> 
+  distinct(year, year_diff) |> 
+  mutate(
+    period = case_when(
+      year < 2020 ~ 1,
+      year < 2060 ~ 2,
+      TRUE ~ 3
+    )
+  ) |> 
+  ggplot(aes(year, year_diff, group = period)) +
+  geom_line()
+```
+

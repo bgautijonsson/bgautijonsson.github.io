@@ -1,59 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.bggj.is/posts/ceda-archive/index.html</loc>
-    <lastmod>2023-02-10T19:20:12.393Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/posts/plotly-animations/index.html</loc>
-    <lastmod>2023-02-10T19:20:13.246Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/posts/forest-plot-table/index.html</loc>
-    <lastmod>2023-02-10T19:20:13.811Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/phd/articles/methods/code/max/index.html</loc>
-    <lastmod>2023-02-10T19:20:16.370Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/phd/articles/methods/data/ukcp/index.html</loc>
-    <lastmod>2023-02-10T19:20:17.303Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/phd/articles/results/max/index.html</loc>
-    <lastmod>2023-02-10T19:20:18.217Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/phd/articles/results/copula/index.html</loc>
-    <lastmod>2023-02-10T19:20:18.920Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/phd/articles/results/spatial/index.html</loc>
-    <lastmod>2023-02-10T19:20:19.523Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/phd/index.html</loc>
-    <lastmod>2023-02-10T19:20:19.853Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/talks/covid-model/index.html</loc>
-    <lastmod>2023-02-10T19:20:20.179Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/talks/hi-vefur/index.html</loc>
-    <lastmod>2023-02-10T19:20:20.487Z</lastmod>
+    <loc>https://www.bggj.is/about.html</loc>
+    <lastmod>2023-01-27T10:16:04.531Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/talks/databeers_2022_09_16/index.html</loc>
-    <lastmod>2023-02-10T19:20:20.784Z</lastmod>
+    <lastmod>2023-01-27T10:16:04.588Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/talks/covid-model/index.html</loc>
+    <lastmod>2023-01-27T10:16:04.587Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/articles/results/spatial/index.html</loc>
+    <lastmod>2023-01-31T17:13:32.081Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/articles/results/max/index.html</loc>
+    <lastmod>2023-08-28T14:02:30.271Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/articles/methods/code/max/index.html</loc>
+    <lastmod>2023-01-27T22:38:08.841Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/posts/plotly-animations/index.html</loc>
+    <lastmod>2023-02-06T17:07:57.531Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/posts/icar_gev/index.html</loc>
+    <lastmod>2023-11-21T11:21:21.778Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/posts/ceda-archive/index.html</loc>
+    <lastmod>2023-02-03T10:53:38.603Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/posts/forest-plot-table/index.html</loc>
+    <lastmod>2023-02-03T11:02:39.190Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/articles/methods/data/ukcp/index.html</loc>
+    <lastmod>2023-03-25T19:13:27.808Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/articles/theory/precision/index.html</loc>
+    <lastmod>2023-08-22T11:04:03.967Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/articles/results/copula/index.html</loc>
+    <lastmod>2023-02-01T09:12:32.248Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/phd/index.html</loc>
+    <lastmod>2023-02-02T12:40:12.625Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/talks/hi-vefur/index.html</loc>
+    <lastmod>2023-01-27T10:16:04.589Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/index.html</loc>
-    <lastmod>2023-02-10T19:20:21.172Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/about.html</loc>
-    <lastmod>2023-02-10T19:20:21.520Z</lastmod>
+    <lastmod>2023-01-27T14:33:12.691Z</lastmod>
   </url>
 </urlset>

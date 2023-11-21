@@ -1,0 +1,126 @@
+---
+title: "Constructing Precision Matrices based on Correlated Gaussian Samples"
+---
+
+
+# Introduction
+
+Here is a draft of a method to construct precision matrices based on correlated Gaussian samples with mean zero and variance one.
+
+# Method
+
+Let $y_t$ be a random vector of size $J$ and $t \in \left\{1, \dots, T\right\}$, where $T$ is the number of temporal replicates. We assume that $y_t \sim \mathcal N(0, Q^{-1})$ and that the marginal variance of the $i$-th element of $y_t$, $y_{i,t}$, is $1$. This means that the diagonal of $Q^{-1}$ is a vector of ones, and that
+
+$$
+E(y_t) = 0, \qquad \mathrm{cov}(y_t) = Q^{-1}.
+$$
+
+Furthermore, it is assumed that Q is a sparse precision matrix. Using the properties of Gaussian conditional distributions, we have
+
+$$
+E(y_{i,t}|y_{-i,t})=-Q_{i,i}^{-1} \sum_{j\in\mathcal A_i, j\neq i} Q_{i,j}y_{j,t},
+$$
+
+$$
+\mathrm{Prec}(y_{i,t}|y_{-i, t})   = Q_{i,i} = (\mathrm{var(y_{i,t}|y_{-i, t})})^{-1}=\tau_i^{-2},
+$$
+
+where $\mathcal A_i$ is the set containing the neighbors of site $i$, i.e. the sites that are such that $Q_{i,j} \neq 0$ if $j \in \mathcal A_i$.
+
+Assume that we have realizations of $y_1, \dots y_t$ that can be used to infer the precision matrix $Q$. We set up a regression model to estimate the non-zero elements of $Q$. Here, we consider $y_{i,t}$ as a realization, i.e. as an observation. The regression model for each site, $i$, will be
+
+$$
+y_{i,t} = \sum_{j\in\mathcal A, j\neq i} \beta_{i,j}y_{j,t} + \varepsilon_{i, t}, \quad t\in \left\{1, \dots, T\right\}.
+$$
+
+At each site $i$, we estimate the parameter vector $\beta_i$ with
+
+$$
+\hat\beta_i = (X_i^TX_i)^{-1}X_i^Ty_i,
+$$
+
+where
+
+$$
+X_i = \begin{pmatrix}
+y_{j_{1, i}, 1} & \dots & y_{j_{m, i}, 1} \\
+\vdots & \vdots & \vdots \\
+y_{j_{1, i}, T} & \dots & y_{j_{m, i}, T}
+\end{pmatrix},
+$$
+
+and $y_{j_{l, i}, 1}$ is the $l$-th neighbor oy $y_{i, t}$ at time $t$. The variance of $\varepsilon_{i, t}$ is $\tau_i^2$ and it is estimated with
+
+$$
+\hat\tau_i^2 = T^{-1}(y_i - X_i\hat\beta_i)^T(y_i - X_i\hat\beta_i).
+$$
+
+The next step is to transform $\hat\beta_i$ and $\hat\tau_i^2$ such that they give estimates of the elements of $Q$, namely
+
+$$
+\hat Q_{i, j} = \begin{cases}
+-\hat\tau_i^2\hat\beta_{i, j}, \quad \text{if } i \neq j, \\
+\hat\tau_i^2, \qquad \quad \text{ if } i = j,
+\end{cases}
+$$
+
+where $\hat\beta_{i, j}$ is the $j$-th element og $\hat\beta_i$. Let $\hat B$ be a matrix with $(i, j)$-th element $\hat\beta_{i, j}$. Note that $\hat \beta_{i, i} = 0$, and thus $\hat B_{i, i} = 0$. Furthermore let $\hat K$ be a diagonal matrix such that 
+
+$$
+\hat K = \mathrm{diag}\left(\hat\tau_1^{-2}, \dots, \hat\tau_J^{-2}\right).
+$$
+
+An estimate of Q can now be presented as 
+
+$$
+\hat Q = \hat K(I + \hat B),
+$$
+
+where $I$ is an identity matrix of size $J$.
+
+We have to make sure that $\hat Q$ is symmetric. This can be achieved by setting
+
+$$
+\tilde Q{i, j} = \tilde Q_{j, i} = \frac12(\hat\tau_i^{-2}\hat\beta_{i, j} + \hat\tau_j^{-2}\hat\beta_{j, i}),
+$$
+
+and defining new regression parameters $\tilde \beta_{i, j}$ that are such that
+
+$$
+\hat\tau_i^{-2}\tilde\beta_{i,j} = \tilde Q_{ij} = \tilde Q_{j, i} = \hat \tau_j^{-2}\tilde \beta_{j, i},
+$$
+
+which gives
+
+$$
+\tilde\beta_{i, j} = \hat\tau_i^{2}\tilde Q_{i, j}, \quad \tilde\beta_{j, i} = \hat\tau_j^{2}\tilde Q_{i, j},
+$$
+
+and let $\tilde Q$ and $\tilde B$ be the matrices containing the $\tilde Q_{i,j}$'s and the $\tilde \beta_{i, j}$'s.
+
+We can not be sure of $\tilde Q$ being positive definite. One way to check whether the matrix is positive definite or not, is to compute the Cholesky decomposition of $\tilde Q$, that is, $\tilde Q = LL^T$, and check whether all the diagonal elements of L are positive. If the matrix $\tilde Q$ is invertible then it is more likely that it is positive definite, while if $\tilde Q$ is not invertible then it is not positive definite. The estimated precision matrix, $\tilde Q$, is invertible if $(i + \tilde B)$ is invertible, where $\tilde Q = \hat K(I + \tilde B)$. Strictly diagonally dominant matrices are invertible. In general, the $n \times n$ A, with elements $\left\{a_{i, j}\right\}_{i, j}$, is strictly diagonally dominant if
+
+$$
+\vert a_{i, i}\vert > \sum_{j\neq i} \vert a_{i, j}\vert, \qquad 1\leq i \leq n.
+$$
+
+The matrix $(I + \tilde B)$ is strictly diagonally dominant if 
+
+$$
+1 > \sum_{j \in \mathcal A_i} \vert \tilde \beta_{i, j}|, \qquad 1 \leq i \leq J,
+$$
+
+for all $i \in \left\{1, \dots, J \right\}$. Alternatively, $\lambda_i \in (0, 1)$ is found for each $i$ to tune $\tilde Q$ such taht it is strictly diagonally dominant, using
+
+$$
+\hat\tau_i^{-2} > \lambda_i \sum_{j\in\mathcal A_i, j\neq i} \vert \tilde Q_{i, j} \vert, \qquad 1\leq i \leq J,
+$$
+
+
+
+
+
+
+
+
+

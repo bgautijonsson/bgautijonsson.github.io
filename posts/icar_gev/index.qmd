@@ -1,0 +1,849 @@
+---
+title: "Spatially Dependent Generalized Extreme Value Parameters"
+subtitle: "Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters"
+description: |
+  For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.
+author: 
+    -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
+        url: "bggj.is"
+        affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
+        affiliation-url: "https://www.hi.is/tolfraedi_0"
+date: "2023/11/21"
+bibliography: references.bib
+format: 
+    html:
+        toc: true
+        toc-location: left
+        code-overflow: scroll
+execute: 
+  echo: true
+  warning: false
+  eval: false
+code-fold: show
+editor: source
+theme: flatly
+title-block-banner: true
+image: Figures/spatial_gamma.png
+categories:
+    - english
+    - R
+    - phd
+    - stan
+    - bayesian
+    - spatial statistics
+    - hierarchical modeling
+---
+
+**Note:** I'm still working on this post, but I thought I might put it out there while I work on it.
+
+```{r}
+library(bggjphd)
+library(tidyverse)
+library(cmdstanr)
+library(posterior)
+library(bayesplot)
+library(progressr)
+library(future)
+library(glue)
+library(skimr)
+library(here)
+library(gt)
+theme_set(theme_bggj())
+```
+
+# Introduction
+
+My PhD research is mostly about three things:
+
+-   Extreme Value Statistics
+-   Spatial Statistics
+-   Copulas
+
+In this post I will write a little about the first two. 
+
+## Extreme Value Statistics
+
+Up until now I have mostly been working with the generalized extreme value distribution. The cumulative distribution function of the Generalized Extreme Value distribution is
+
+$$
+\mathrm{GEV}(y \vert \mu, \sigma, \xi) = \begin{cases}
+\begin{aligned}
+&e^{- \left(1 + \xi \frac{y - \mu}{\sigma}\right)_+^{-1/\xi}}, \quad &\xi \neq 0 \\
+&e^{-e^{- \frac{y - \mu}{\sigma}}}, \qquad &\xi = 0
+\end{aligned}
+\end{cases}
+$$
+
+The log-likelihood of the GEV distribution is
+
+$$
+\ell(\mu, \sigma, \xi) = - n\log\sigma - (1 + \frac{1}{\xi})
+$$
+
+Instead of $\mu$ I will be using the parameter $\mu_t$ where
+
+$$
+\mu_t = \mu_0 \cdot (1 + \Delta(t - t_0)) = \mu_0 + \Delta(t - t_0) \cdot \mu_0.
+$$
+
+This gives us to paramters to estimate, $\mu_0$ and $\Delta$.
+
+## Spatial Statistics
+
+In our formulation, the GEV distribution has four parameters:
+
+-   $\mu$: Location
+-   $\sigma$: Scale
+-   $\xi$: Shape
+-   $\Delta$: Trend
+
+You could also just say that there are three parameters and that we're using a linear model to allow a trend in the location parameter, but we'll keep this wording for now.
+
+I will be fitting a GEV distribution to each area in the [CEDA Archived data I've written about before](https://bggj.is/posts/ceda-archive/). It's logical to assume that these areas are not completely independent and that there is some sort of spatial dependency, i.e. that all other things being equal; areas that are near each other are more similar that areas that are far away from each other.
+
+We could apply a model structure based on the distance between points, but we will end up having a lot of areas *(around 40,000 or so)*, so we need a spatial model that allows for sparsity in the spatial dependence.
+
+One way to do this is to model the areas as jointly multivariate normal distributed with a sparse precision matrix. Precision matrices can be better than covariance matrices for this type of modeling since the off-diagonal elements in a precision matrix stand for conditional dependencies.
+
+More formally, let $\mathbf x$ be multivariate normal distributed with mean $\boldsymbol \mu$ and semi positive definite precision matrix $\mathbf Q$. Then for $i \neq j$
+
+$$
+x_i \perp x_j \vert \mathbf x_{-ij} \iff Q_{ij} = 0.
+$$
+
+This means that any two elements in $\mathbf x$ are conditionally independent conditional on the other elements of $\mathbf x$ if and only if the corresponding value in the precision matrix $\mathbf Q$ is zero.
+
+We can easily use this to our advantage so that our precision matrix becomes very sparse. For example we might set $Q_{ij} \neq 0$ only if $i$ and $j$ are neighbors on our map.
+
+The rest of this chapter on spatial statistics is based heavily on the paper by @morrisBayesianHierarchicalSpatial2019.
+
+### Conditional Autoregression (CAR) Models
+
+In a CAR prior, the prior distribution of $x_i$ given its neighbors can be written
+
+$$
+x_i \vert x_{-i} \sim \mathrm{Normal}\left( \sum_{j\in S_i} w_{ij}x_j, \sigma^2 \right),
+$$
+
+where $x_{-i}$ means every element of $x$ except for $x_i$, $S_i$ is the set of neighbors of $x_i$, and $w_{ij}$ are weights.
+
+This can be written as a multivariate normal variate with mean 0 and a precision matrix, $\mathbf Q$, which is defined as
+
+$$
+Q = D(I - \alpha A).
+$$
+
+Here, D is a diagonal matrix with $D_{ii} = d_i$ being equal to the number of neighbors of $x_i$, $A$ is the adjacency matrix 
+
+$$
+A_{ij} = 1 \iff x_j \in S_i,
+$$
+
+$I$ is the identity matrix, and $0 < \alpha < 1$ is a parameter that encodes the amount of spatial dependence. If $\alpha = 0$ then there is no spatial dependence and if $\alpha = 1$ we get what is called an ICAR model.
+
+
+### Intrinsic Conditional Autoregression (ICAR) Models
+
+In an ICAR model the spatial dependence parameter $\alpha = 1$ and so, the precision matrix, $Q$, is singular since then
+
+$$
+Q = D(I - A).
+$$
+
+Recall that $D_{ii} = d_i$ is equal to the number of neighbors of $x_i$ and so the diagonal of $Q$ will be equal to the sum of its off-diagonal elements. This can still be used as a prior, but we must take care since it is an improper prior. 
+
+The conditional distribution of $x_i$ given all other observations is
+
+$$
+x_i \vert x_{-i} \sim \mathrm{Normal}\left( \frac{ \sum_{j\in S_i}{x_j}}{d_i}, \frac{\sigma_i^2}{d_i}\right).
+$$
+
+If we specify that $x$ as mean 0 and variance 1, then the joint distribution of $x$ becomes
+
+$$
+x \sim \exp\left(-\frac12 \sum_{j\in S_i}{(x_i - x_j)^2}\right).
+$$
+
+We can easily see that this is not proper, since any constant added to all of the $x_i$'s will give the same density. One way around this issue is to add the constraint $\sum x_i = 0$.
+
+### Besag York Mollié (BYM) Model
+
+The BYM model is composed of two different types of random effects:
+
+* An ICAR component $\phi$
+* An iid non-spatial component $\theta$
+
+Here, both $\phi$ and $\theta$ are assumed to follow normal distributions with means 0  and precision parameters $\tau_\phi$ and $\tau_\theta$. We can see that if $\tau_\phi$ is estimated to be much higher than $\tau_\theta$ then our data is implying more spatial than non-spatial dependence *(and vice versa)*. 
+
+One difficulty in using this model is that apriori we want *"fair"* hyperpriors for the precision parameters, i.e. we do not want our prior to weight our model in the direction of more or less spatial dependence. One way to choose these priors is the formula from [@lBayesianEstimatesDisease1995]:
+
+
+
+$$
+sd(\theta_i) = \frac{1}{\sqrt{\tau_\phi}} \approx \frac{1}{0.7\sqrt{\bar m \tau_\theta}} \approx sd(\phi_i),
+$$
+
+where $\bar m$ is the average number of neighbors for each $x_i$.
+
+### BYM2 Model
+
+The BYM2 model [@rieblerIntuitiveBayesianSpatial2016] rewrites the hyperpriors from the BYM model in a way that follows the *Penalized Complexity Priors* framework [@simpsonPenalisingModelComponent2015]. The prior is rewritten so that a single scale parameter, $\sigma$, determines the variance of both components, and a mixing parameter, $\rho$, determines the amount of spatial/non-spatial random effect.
+
+The combined effects, $\phi + \theta$, are thus rewritten as
+
+$$
+\left( \sqrt{\rho} \cdot \frac{\phi^*}{\sqrt s} + \sqrt{1 - \rho} \cdot\theta^* \right),
+$$
+where $0 \leq \rho \leq 1$ determines the amount of spatial/non-spatial error, $\phi^*$ is the ICAR model, $\theta^*$ is an iid random effect, $s$ is the scaling factor for the neighborhood graph, $\sigma \geq 0$ is the overall standard deviation of the combined random effects.
+
+
+# Data
+
+The data used in this research are downloaded from the CEDA Archive:
+
+* [UKCP Local Projections on a 5km grid over the UK for 1980-2080](https://data.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km)
+
+The raw data contain climate projections for the UK on a 5km grid from 1980 to 2080 for a high emissions scenario, *RCP8.5*, and contain hourly precipitation rates of $43.920$ squares on a $180 \times 244$ grid. The projections are calculated for $1980 - 2000$, $2020 - 2040$, and $2060 - 2080$, thus giving $60 \times 365 \times 24 \times 180 \times 244 \approx 2.3 \cdot 10^{10}$ data points. 
+
+The raw data were processed by calculating the yearly maximum over the hourly precipitation rates for each station, thus reducing the number of data points to $60 \times 180 \times 244 \approx 2.6 \cdot 10^6$.
+
+For a description of how to download the data, see my post on [Fetching FTP data from the Ceda Archives](https://bggj.is/posts/ceda-archive/).
+
+## Subset of the data
+
+For this analysis, I will be subsetting the data to save time. I'm going to use 10.201 stations with X projections between 50 and 150, and Y projections between 100 and 200.
+
+### Stations
+
+To be able to index the stations in my Stan program, I give the stations new names according to their row number. In the filtered dataset.
+
+```{r}
+model_stations <- stations |>
+  filter(
+    between(proj_x, 50, 150),
+    between(proj_y, 100, 200)
+  )
+
+new_names <- model_stations |> 
+  mutate(new_name = row_number()) |> 
+  distinct(station, new_name)
+
+model_stations |> 
+  skim()
+```
+
+### Precipitation
+
+```{r}
+model_precip <- precip |>
+  semi_join(
+    model_stations,
+    by = join_by(station)
+  )
+
+model_precip |> 
+  skim()
+```
+
+
+```{r}
+#| fig-asp: 1
+#| fig-width: 8
+#| out-width: 100%
+p <- model_precip |> 
+  filter(
+    station %in% sample(station, size = 3)
+  ) |> 
+  mutate(
+    period = 1 + (year >= 2020) + (year >= 2060),
+    period = c("1980 - 2000", "2020 - 2040", "2060 - 2080")[period],
+    station = str_c("Station\n", station)
+  ) |> 
+  ggplot(aes(year, precip)) +
+  geom_point() +
+  geom_segment(
+    aes(
+      yend = 0, xend = year
+    ),
+    lty = 2,
+    alpha = 0.5,
+    linewidth = 0.6
+  ) +
+  facet_grid(
+    cols = vars(period),
+    rows = vars(station),
+    scales = "free_x"
+  ) +
+  labs(
+    x = NULL,
+    y = NULL,
+    title = "An example of extreme value observations",
+    subtitle = "Annual values of maximum daily precipitation for a sample of stations in the data"
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/ts_extreme_plot.png",
+  width = 8, height = 0.621 * 8, scale = 1.3
+)
+```
+
+![](Figures/ts_extreme_plot.png){.column-page}
+
+## Prepare the data for Stan
+
+```{r}
+precip_matrix <- model_precip |>
+  pivot_wider(names_from = station, values_from = precip) |>
+  column_to_rownames("year") |>
+  as.matrix()
+
+N_stations <- ncol(precip_matrix)
+N_years <- nrow(precip_matrix)
+```
+
+
+
+```{r}
+update_names <- function(table, variable) {
+  table |> 
+    inner_join(
+      new_names,
+      by = join_by({{ variable }} == station)
+    ) |> 
+    mutate(
+      "{{variable}}" := new_name
+    ) |> 
+    select(-new_name)
+}
+```
+
+```{r}
+edges <- twelve_neighbors |>
+  filter(
+    type %in% c("e", "n", "w", "s")
+  ) |>
+  inner_join(
+    model_stations,
+    by = join_by(station)
+  ) |>
+  semi_join(
+    model_stations,
+    by = join_by(neighbor == station)
+  ) |>
+  select(station, neighbor) |> 
+  update_names(station) |> 
+  update_names(neighbor)
+
+N_neighbors = nrow(edges)
+node1 <- edges$station
+node2 <- edges$neighbor
+```
+
+```{r}
+stan_data <- list(
+  N_stations = N_stations,
+  N_years = N_years,
+  precip = precip_matrix,
+  N_neighbors = N_neighbors,
+  node1 = node1,
+  node2 = node2
+)
+```
+
+# Model
+
+```{stan, output.var = "model"}
+
+functions{
+  /*
+  Fit a GEV distribution with trend
+  */
+  real gevt_lpdf(vector y, real mu0, real sigma, real xi, real delta) {
+    int N = rows(y);
+    vector[N] z;
+    vector[N] mu;
+    real lp = 0;
+
+    for (i in 1:N) {
+      mu[i] = mu0 * (1 + delta * (i - 1));
+
+
+      if (z[i] <= -1) {
+        reject("found incompatible variable values");
+      }
+      
+      if (abs(xi) < 1e-12) {
+        z[i] = (y[i] - mu[i]) / sigma;
+        lp += - z[i] - exp(-z[i]);
+      } else {
+        z[i] = xi * (y[i] - mu[i]) / sigma;
+        lp += - (1 + 1 / xi) * log(1 + z[i]) - pow((1 + z[i]), -1/xi);
+      }
+    }
+
+    lp += -N * log(sigma);
+
+    return lp;
+  }
+  /*
+  Put an ICAR prior on coefficients
+  */
+  real icar_normal_lpdf(vector phi, int N, array[] int node1, array[] int node2) {
+    return - 0.5 * dot_self((phi[node1] - phi[node2])) 
+      + normal_lpdf(sum(phi) | 0, 0.001 * N);
+  }
+}
+
+data {
+  int<lower = 0> N_years;
+  int<lower = 0> N_stations;
+  matrix[N_years, N_stations] precip;
+
+
+  int<lower = 0> N_neighbors;
+  array[N_neighbors] int node1;
+  array[N_neighbors] int node2;
+}
+
+
+
+parameters {
+  vector[N_stations] psi_random;
+  vector[N_stations] psi_spatial;
+  real<lower = 0> sigma_psi;
+  real mu_psi;
+  real logit_rho_psi;
+  
+  vector[N_stations] tau_random;
+  vector[N_stations] tau_spatial;
+  real<lower = 0> sigma_tau;
+  real mu_tau;
+  real logit_rho_tau;
+  
+  vector[N_stations] phi_random;
+  vector[N_stations] phi_spatial;
+  real<lower = 0> sigma_phi;
+  real mu_phi;
+  real logit_rho_phi;
+  
+  vector[N_stations] gamma_random;
+  vector[N_stations] gamma_spatial;
+  real<lower = 0> sigma_gamma;
+  real mu_gamma;
+  real logit_rho_gamma;
+}
+
+transformed parameters {
+  real<lower = 0, upper = 1> rho_psi = inv_logit(logit_rho_psi);
+  real<lower = 0, upper = 1> rho_tau = inv_logit(logit_rho_tau);
+  real<lower = 0, upper = 1> rho_phi = inv_logit(logit_rho_phi);
+  real<lower = 0, upper = 1> rho_gamma = inv_logit(logit_rho_gamma);
+  
+  vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
+  vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
+  vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
+  vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
+  
+  vector<lower = 0>[N_stations] mu0 = exp(psi);
+  vector<lower = 0>[N_stations] sigma = exp(psi + tau);
+  vector<lower = -0.5, upper = 0.5>[N_stations] xi = 0.5 * inv_logit(phi);
+  vector<lower = -0.008, upper = 0.008>[N_stations] delta = 0.008 * inv_logit(gamma);
+}
+
+model {
+  for (i in 1:N_stations) {
+    precip[ , i] ~ gevt(mu0[i], sigma[i], xi[i], delta[i]);
+  }
+
+  psi_spatial ~ icar_normal(N_neighbors, node1, node2);
+  psi_random ~ std_normal();
+  sigma_psi ~ exponential(1);
+  logit_rho_psi ~ std_normal();
+  mu_psi ~ normal(2.2, 1);
+  
+  tau_spatial ~ icar_normal(N_neighbors, node1, node2);
+  tau_random ~ std_normal();
+  sigma_tau ~ exponential(1);
+  logit_rho_tau ~ std_normal();
+  mu_tau ~ normal(-0.9, 1);
+  
+  phi_spatial ~ icar_normal(N_neighbors, node1, node2);
+  phi_random ~ std_normal();
+  sigma_phi ~ exponential(1);
+  logit_rho_phi ~ std_normal();
+  mu_phi ~ normal(0, 1);
+  
+  gamma_spatial ~ icar_normal(N_neighbors, node1, node2);
+  gamma_random ~ std_normal();
+  sigma_gamma ~ exponential(1);
+  logit_rho_gamma ~ std_normal();
+  mu_gamma ~ normal(0, 1);
+
+}
+```
+
+
+```{r}
+#| output: false
+#| eval: false
+model_file <- here("posts", "icar_gev", "Stan", "BYM_GEV_LOGIT.stan")
+
+mod <- cmdstan_model(model_file)
+```
+
+```{r}
+#| output: false
+#| eval: false
+fit <- mod$sample(
+  data = stan_data,
+  chains = 4,
+  parallel_chains = 4,
+  refresh = 100,
+  # init = 0,
+  iter_warmup = 1000, 
+  iter_sampling = 1000,
+  output_dir = here("posts", "icar_gev", "Stan", "Draws")
+)
+
+fit$save_object(file = "Stan/Model_Objects/fit.RDS")
+```
+
+# Results
+
+```{r}
+draws <- fit$draws() |> as_draws_df()
+```
+
+## Convergence
+
+```{r}
+p <- fit |>
+  bayesplot::rhat() |>
+  mcmc_rhat(size = 2)
+
+ggsave(
+  plot = p,
+  filename = "Figures/rhats.png",
+  width = 8, height = 0.621 * 8, scale = 1.3
+)
+```
+
+![](Figures/rhats.png)
+
+## Hyperparamters
+
+```{r}
+draws |> 
+  subset_draws(variable = c("rho", "sigma_", "mu_"), regex = TRUE) |> 
+  summarise_draws() |> 
+  gt() |> 
+  fmt_number(
+    decimals = 3
+  ) |> 
+  gtsave(
+    filename = "Tables/hyperparam_table.html", inline_css = TRUE
+  )
+```
+
+<iframe src="Tables/hyperparam_table.html" width="100%" height="700px"></iframe>
+
+
+```{r}
+p <- draws |> 
+  mcmc_trace(
+    regex_pars = "mu_"
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/trace_mu.png",
+  width = 8, height = 0.621 * 8, scale = 1.3
+)
+```
+
+![](Figures/trace_mu.png)
+
+```{r}
+p <- draws |> 
+  mcmc_trace(
+    regex_pars = "sigma_"
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/trace_sigma.png",
+  width = 8, height = 0.621 * 8, scale = 1.3
+)
+```
+
+![](Figures/trace_sigma.png)
+
+```{r}
+p <- draws |> 
+  mcmc_trace(
+    regex_pars = "^rho_"
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/trace_rho.png",
+  width = 8, height = 0.621 * 8, scale = 1.3
+)
+```
+
+![](Figures/trace_rho.png)
+
+## Station Results
+
+```{r}
+station_pairs_plot <- function(station, link = TRUE) {
+  if (link == TRUE) {
+    my_pars <- c(glue("psi[{station}]"), glue("tau[{station}]"), glue("phi[{station}]"), glue("gamma[{station}]"))
+  } else {
+    my_pars <- c(glue("mu0[{station}]"), glue("sigma[{station}]"), glue("xi[{station}]"), glue("delta[{station}]"))
+  }
+  
+  
+  draws |>
+    mcmc_pairs(
+      pars = my_pars,
+      off_diag_fun = "hex",
+      diag_fun = "dens"
+    )
+}
+```
+
+```{r}
+p <- station_pairs_plot(5)
+
+ggsave(
+  plot = p,
+  filename = "Figures/station_pairs_plot_link.png",
+  width = 8, height = 1 * 8, scale = 1.3
+)
+```
+
+![](Figures/station_pairs_plot_link.png)
+
+```{r}
+p <- station_pairs_plot(5, link = FALSE)
+
+ggsave(
+  plot = p,
+  filename = "Figures/station_pairs_plot_no_link.png",
+  width = 8, height = 1 * 8, scale = 1.3
+)
+```
+
+![](Figures/station_pairs_plot_no_link.png)
+
+## Spatial Distribution
+
+```{r}
+spatial_plot <- function(variable) {
+  
+  draws |>
+    subset_draws(variable = glue("^{variable}\\["), regex = TRUE) |>
+    summarise_draws() |> 
+    mutate(station = parse_number(str_replace(variable, "mu0", "mu"))) |>
+    inner_join(
+      model_stations |> 
+        update_names(station),
+      by = join_by(station)
+    ) |>
+    ggplot(aes(proj_x, proj_y)) +
+    geom_raster(interpolate = F, aes(fill = mean)) +
+    scale_fill_viridis_c() +
+    coord_cartesian(expand = FALSE)
+}
+
+```
+
+### Location
+
+```{r}
+p <- spatial_plot("psi")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\psi$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_psi.png",
+  width = 8, height = 8, scale = 1.3
+)
+
+
+p <- spatial_plot("mu0")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\mu_0$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_mu0.png",
+  width = 8, height = 8, scale = 1.3
+)
+```
+
+::: {layout-ncol=2}
+![](Figures/spatial_psi.png)
+
+![](Figures/spatial_mu0.png)
+:::
+
+
+### Scale
+
+```{r}
+p <- spatial_plot("tau")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\tau$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_tau.png",
+  width = 8, height = 8, scale = 1.3
+)
+
+
+p <- spatial_plot("sigma")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\sigma$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_sigma.png",
+  width = 8, height = 8, scale = 1.3
+)
+```
+
+::: {layout-ncol=2}
+![](Figures/spatial_tau.png)
+
+![](Figures/spatial_sigma.png)
+:::
+### Shape
+
+```{r}
+p <- spatial_plot("phi")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\phi$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_phi.png",
+  width = 8, height = 8, scale = 1.3
+)
+
+
+p <- spatial_plot("xi")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\xi$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_xi.png",
+  width = 8, height = 8, scale = 1.3
+)
+```
+
+::: {layout-ncol=2}
+![](Figures/spatial_phi.png)
+
+![](Figures/spatial_xi.png)
+:::
+
+### Trend
+
+```{r}
+p <- spatial_plot("gamma")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\gamma$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_gamma.png",
+  width = 8, height = 8, scale = 1.3
+)
+
+
+p <- spatial_plot("delta")
+
+p <- p +
+  labs(
+    x = "X Projection",
+    y = "Y Projection",
+    fill = "Posterior mean"
+  ) +
+  ggtitle(
+    label = latex2exp::TeX("Spatial distribution of $\\Delta$")
+  )
+
+ggsave(
+  plot = p,
+  filename = "Figures/spatial_delta.png",
+  width = 8, height = 8, scale = 1.3
+)
+```
+
+::: {layout-ncol=2}
+![](Figures/spatial_gamma.png)
+
+![](Figures/spatial_delta.png)
+:::

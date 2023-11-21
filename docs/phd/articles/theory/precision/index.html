@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.449">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>bggj - Constructing Precision Matrices based on Correlated Gaussian Samples</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../../../favicon.ico" rel="icon">
+<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-EGQ9KVCY2C"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta property="og:title" content="bggj - Constructing Precision Matrices based on Correlated Gaussian Samples">
+<meta property="og:description" content="Blogg um tölfræði og gögn">
+<meta property="og:site_name" content="bggj">
+<meta name="twitter:title" content="bggj - Constructing Precision Matrices based on Correlated Gaussian Samples">
+<meta name="twitter:description" content="Blogg um tölfræði og gögn">
+<meta name="twitter:creator" content="@bggjonsson">
+<meta name="twitter:site" content="@bggjonsson">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../../../index.html">
+    <span class="navbar-title">bggj</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../index.html"> 
+<span class="menu-text">blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../about.html"> 
+<span class="menu-text">about</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../../phd/index.html"> 
+<span class="menu-text">phd</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/bggjonsson"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bgautijonsson/bgautijonsson.github.io"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Constructing Precision Matrices based on Correlated Gaussian Samples</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Here is a draft of a method to construct precision matrices based on correlated Gaussian samples with mean zero and variance one.</p>
+</section>
+<section id="method" class="level1">
+<h1>Method</h1>
+<p>Let <span class="math inline">\(y_t\)</span> be a random vector of size <span class="math inline">\(J\)</span> and <span class="math inline">\(t \in \left\{1, \dots, T\right\}\)</span>, where <span class="math inline">\(T\)</span> is the number of temporal replicates. We assume that <span class="math inline">\(y_t \sim \mathcal N(0, Q^{-1})\)</span> and that the marginal variance of the <span class="math inline">\(i\)</span>-th element of <span class="math inline">\(y_t\)</span>, <span class="math inline">\(y_{i,t}\)</span>, is <span class="math inline">\(1\)</span>. This means that the diagonal of <span class="math inline">\(Q^{-1}\)</span> is a vector of ones, and that</p>
+<p><span class="math display">\[
+E(y_t) = 0, \qquad \mathrm{cov}(y_t) = Q^{-1}.
+\]</span></p>
+<p>Furthermore, it is assumed that Q is a sparse precision matrix. Using the properties of Gaussian conditional distributions, we have</p>
+<p><span class="math display">\[
+E(y_{i,t}|y_{-i,t})=-Q_{i,i}^{-1} \sum_{j\in\mathcal A_i, j\neq i} Q_{i,j}y_{j,t},
+\]</span></p>
+<p><span class="math display">\[
+\mathrm{Prec}(y_{i,t}|y_{-i, t})   = Q_{i,i} = (\mathrm{var(y_{i,t}|y_{-i, t})})^{-1}=\tau_i^{-2},
+\]</span></p>
+<p>where <span class="math inline">\(\mathcal A_i\)</span> is the set containing the neighbors of site <span class="math inline">\(i\)</span>, i.e.&nbsp;the sites that are such that <span class="math inline">\(Q_{i,j} \neq 0\)</span> if <span class="math inline">\(j \in \mathcal A_i\)</span>.</p>
+<p>Assume that we have realizations of <span class="math inline">\(y_1, \dots y_t\)</span> that can be used to infer the precision matrix <span class="math inline">\(Q\)</span>. We set up a regression model to estimate the non-zero elements of <span class="math inline">\(Q\)</span>. Here, we consider <span class="math inline">\(y_{i,t}\)</span> as a realization, i.e.&nbsp;as an observation. The regression model for each site, <span class="math inline">\(i\)</span>, will be</p>
+<p><span class="math display">\[
+y_{i,t} = \sum_{j\in\mathcal A, j\neq i} \beta_{i,j}y_{j,t} + \varepsilon_{i, t}, \quad t\in \left\{1, \dots, T\right\}.
+\]</span></p>
+<p>At each site <span class="math inline">\(i\)</span>, we estimate the parameter vector <span class="math inline">\(\beta_i\)</span> with</p>
+<p><span class="math display">\[
+\hat\beta_i = (X_i^TX_i)^{-1}X_i^Ty_i,
+\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+X_i = \begin{pmatrix}
+y_{j_{1, i}, 1} &amp; \dots &amp; y_{j_{m, i}, 1} \\
+\vdots &amp; \vdots &amp; \vdots \\
+y_{j_{1, i}, T} &amp; \dots &amp; y_{j_{m, i}, T}
+\end{pmatrix},
+\]</span></p>
+<p>and <span class="math inline">\(y_{j_{l, i}, 1}\)</span> is the <span class="math inline">\(l\)</span>-th neighbor oy <span class="math inline">\(y_{i, t}\)</span> at time <span class="math inline">\(t\)</span>. The variance of <span class="math inline">\(\varepsilon_{i, t}\)</span> is <span class="math inline">\(\tau_i^2\)</span> and it is estimated with</p>
+<p><span class="math display">\[
+\hat\tau_i^2 = T^{-1}(y_i - X_i\hat\beta_i)^T(y_i - X_i\hat\beta_i).
+\]</span></p>
+<p>The next step is to transform <span class="math inline">\(\hat\beta_i\)</span> and <span class="math inline">\(\hat\tau_i^2\)</span> such that they give estimates of the elements of <span class="math inline">\(Q\)</span>, namely</p>
+<p><span class="math display">\[
+\hat Q_{i, j} = \begin{cases}
+-\hat\tau_i^2\hat\beta_{i, j}, \quad \text{if } i \neq j, \\
+\hat\tau_i^2, \qquad \quad \text{ if } i = j,
+\end{cases}
+\]</span></p>
+<p>where <span class="math inline">\(\hat\beta_{i, j}\)</span> is the <span class="math inline">\(j\)</span>-th element og <span class="math inline">\(\hat\beta_i\)</span>. Let <span class="math inline">\(\hat B\)</span> be a matrix with <span class="math inline">\((i, j)\)</span>-th element <span class="math inline">\(\hat\beta_{i, j}\)</span>. Note that <span class="math inline">\(\hat \beta_{i, i} = 0\)</span>, and thus <span class="math inline">\(\hat B_{i, i} = 0\)</span>. Furthermore let <span class="math inline">\(\hat K\)</span> be a diagonal matrix such that</p>
+<p><span class="math display">\[
+\hat K = \mathrm{diag}\left(\hat\tau_1^{-2}, \dots, \hat\tau_J^{-2}\right).
+\]</span></p>
+<p>An estimate of Q can now be presented as</p>
+<p><span class="math display">\[
+\hat Q = \hat K(I + \hat B),
+\]</span></p>
+<p>where <span class="math inline">\(I\)</span> is an identity matrix of size <span class="math inline">\(J\)</span>.</p>
+<p>We have to make sure that <span class="math inline">\(\hat Q\)</span> is symmetric. This can be achieved by setting</p>
+<p><span class="math display">\[
+\tilde Q{i, j} = \tilde Q_{j, i} = \frac12(\hat\tau_i^{-2}\hat\beta_{i, j} + \hat\tau_j^{-2}\hat\beta_{j, i}),
+\]</span></p>
+<p>and defining new regression parameters <span class="math inline">\(\tilde \beta_{i, j}\)</span> that are such that</p>
+<p><span class="math display">\[
+\hat\tau_i^{-2}\tilde\beta_{i,j} = \tilde Q_{ij} = \tilde Q_{j, i} = \hat \tau_j^{-2}\tilde \beta_{j, i},
+\]</span></p>
+<p>which gives</p>
+<p><span class="math display">\[
+\tilde\beta_{i, j} = \hat\tau_i^{2}\tilde Q_{i, j}, \quad \tilde\beta_{j, i} = \hat\tau_j^{2}\tilde Q_{i, j},
+\]</span></p>
+<p>and let <span class="math inline">\(\tilde Q\)</span> and <span class="math inline">\(\tilde B\)</span> be the matrices containing the <span class="math inline">\(\tilde Q_{i,j}\)</span>’s and the <span class="math inline">\(\tilde \beta_{i, j}\)</span>’s.</p>
+<p>We can not be sure of <span class="math inline">\(\tilde Q\)</span> being positive definite. One way to check whether the matrix is positive definite or not, is to compute the Cholesky decomposition of <span class="math inline">\(\tilde Q\)</span>, that is, <span class="math inline">\(\tilde Q = LL^T\)</span>, and check whether all the diagonal elements of L are positive. If the matrix <span class="math inline">\(\tilde Q\)</span> is invertible then it is more likely that it is positive definite, while if <span class="math inline">\(\tilde Q\)</span> is not invertible then it is not positive definite. The estimated precision matrix, <span class="math inline">\(\tilde Q\)</span>, is invertible if <span class="math inline">\((i + \tilde B)\)</span> is invertible, where <span class="math inline">\(\tilde Q = \hat K(I + \tilde B)\)</span>. Strictly diagonally dominant matrices are invertible. In general, the <span class="math inline">\(n \times n\)</span> A, with elements <span class="math inline">\(\left\{a_{i, j}\right\}_{i, j}\)</span>, is strictly diagonally dominant if</p>
+<p><span class="math display">\[
+\vert a_{i, i}\vert &gt; \sum_{j\neq i} \vert a_{i, j}\vert, \qquad 1\leq i \leq n.
+\]</span></p>
+<p>The matrix <span class="math inline">\((I + \tilde B)\)</span> is strictly diagonally dominant if</p>
+<p><span class="math display">\[
+1 &gt; \sum_{j \in \mathcal A_i} \vert \tilde \beta_{i, j}|, \qquad 1 \leq i \leq J,
+\]</span></p>
+<p>for all <span class="math inline">\(i \in \left\{1, \dots, J \right\}\)</span>. Alternatively, <span class="math inline">\(\lambda_i \in (0, 1)\)</span> is found for each <span class="math inline">\(i\)</span> to tune <span class="math inline">\(\tilde Q\)</span> such taht it is strictly diagonally dominant, using</p>
+<p><span class="math display">\[
+\hat\tau_i^{-2} &gt; \lambda_i \sum_{j\in\mathcal A_i, j\neq i} \vert \tilde Q_{i, j} \vert, \qquad 1\leq i \leq J,
+\]</span></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    const typesetMath = (el) => {
+      if (window.MathJax) {
+        // MathJax Typeset
+        window.MathJax.typeset([el]);
+      } else if (window.katex) {
+        // KaTeX Render
+        var mathElements = el.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            window.katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains('display'),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false
+            });
+          }
+        }
+      }
+    }
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        for (let i = 0; i < 2; i++) {
+          container.appendChild(note.children[i].cloneNode(true));
+        }
+        typesetMath(container);
+        return container.innerHTML
+      } else {
+        typesetMath(note);
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      typesetMath(note);
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

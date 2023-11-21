@@ -64,5 +64,14 @@
   },
   "posts/plotly-animations/index.qmd": {
     "index.html": "3c570d59"
+  },
+  "phd/articles/theory/precision/index.qmd": {
+    "index.html": "a32b3a2c"
+  },
+  "posts/icar_gev/index.qmd": {
+    "index.html": "f20917e0"
+  },
+  "posts/gev_copula_ar1/index.qmd": {
+    "index.html": "7bdd2245"
   }
 }
