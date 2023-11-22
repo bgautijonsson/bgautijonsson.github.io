@@ -334,7 +334,7 @@ c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \
 <p>where <span class="math inline">\(\phi_d\)</span> is the density of the same multivariate Gaussian, and <span class="math inline">\(\phi\)</span> is the density of a standard gaussian.</p>
 <section id="sampling-from-the-gaussian-copula" class="level4">
 <h4 class="anchored" data-anchor-id="sampling-from-the-gaussian-copula">Sampling from the Gaussian copula</h4>
-<p>Given the correlation matrix, <span class="math inline">\(R\)</span>:</p>
+<p>Given the <span class="math inline">\(d\times d\)</span> correlation matrix, <span class="math inline">\(R\)</span>:</p>
 <ol type="1">
 <li>Compute the Cholesky factor <span class="math inline">\(L\)</span> of the correlation matrix, <span class="math inline">\(R\)</span>.</li>
 <li>Sample <span class="math inline">\(Z_1, \dots, Z_d \overset{iid}{\sim}\mathrm{Normal}(0, 1)\)</span>.</li>
@@ -351,51 +351,52 @@ c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">100</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> R</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>X <span class="sc">|&gt;</span> </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="fu">row_number</span>()</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>id), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"Z"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">U =</span> <span class="fu">pnorm</span>(Z),</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> evd<span class="sc">::</span><span class="fu">qgev</span>(U, <span class="at">loc =</span> <span class="dv">8</span>, <span class="at">scale =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fl">0.05</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>id, <span class="sc">-</span>variable)) <span class="sc">|&gt;</span> </span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> variable, <span class="at">values_from =</span> value) <span class="sc">|&gt;</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"Z"</span>, <span class="st">"U"</span>, <span class="st">"Y"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fct_recode</span>(</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z (Gaussian)"</span> <span class="ot">=</span> <span class="st">"Z"</span>,</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"U (Uniform)"</span> <span class="ot">=</span> <span class="st">"U"</span>,</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Y (GEV)"</span> <span class="ot">=</span> <span class="st">"Y"</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="at">name2 =</span> name) <span class="sc">|&gt;</span> </span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_map</span>(</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(data, ...) {</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      data <span class="sc">|&gt;</span> </span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(<span class="fu">aes</span>(V1, V2)) <span class="sc">+</span></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_density_2d_filled</span>() <span class="sc">+</span></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>(<span class="at">col =</span> <span class="st">"grey70"</span>) <span class="sc">+</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">coord_cartesian</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">labs</span>(</span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="cn">NULL</span>,</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="cn">NULL</span>,</span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> data<span class="sc">$</span>name</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wrap_plots</span>() <span class="sc">+</span></span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian copula"</span></span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">200</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> R</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>X <span class="sc">|&gt;</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="fu">row_number</span>()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>id), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"Z"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">U =</span> <span class="fu">pnorm</span>(Z),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> evd<span class="sc">::</span><span class="fu">qgev</span>(U, <span class="at">loc =</span> <span class="dv">8</span>, <span class="at">scale =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fl">0.05</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>id, <span class="sc">-</span>variable)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> variable, <span class="at">values_from =</span> value) <span class="sc">|&gt;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"Z"</span>, <span class="st">"U"</span>, <span class="st">"Y"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fct_recode</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z (Gaussian)"</span> <span class="ot">=</span> <span class="st">"Z"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"U (Uniform)"</span> <span class="ot">=</span> <span class="st">"U"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Y (GEV)"</span> <span class="ot">=</span> <span class="st">"Y"</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="at">name2 =</span> name) <span class="sc">|&gt;</span> </span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_map</span>(</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(data, ...) {</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>      data <span class="sc">|&gt;</span> </span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(<span class="fu">aes</span>(V1, V2)) <span class="sc">+</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_density_2d_filled</span>() <span class="sc">+</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>(<span class="at">col =</span> <span class="st">"grey70"</span>) <span class="sc">+</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">coord_cartesian</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">labs</span>(</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> data<span class="sc">$</span>name</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wrap_plots</span>() <span class="sc">+</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian correlation 0.7"</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display column-page">
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" style="width:100.0%"></p>
@@ -512,8 +513,8 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>           [,1]     [,2]       [,3]       [,4]       [,5]
-[1,] -0.6014966 -1.62685 -0.6193135 -0.7935626 -0.9967508</code></pre>
+<pre><code>         [,1]     [,2]       [,3]       [,4]       [,5]
+[1,] 1.427875 1.837133 -0.1348893 -0.3970323 -0.4613493</code></pre>
 </div>
 </div>
 <p>We will want more than one observation from each <em>“site”</em>, so we write a helped function for tidying this output into a tibble.</p>
@@ -547,23 +548,23 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="hqrkpgksss" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#hqrkpgksss table {
+<div id="allyryhvel" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#allyryhvel table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#hqrkpgksss thead, #hqrkpgksss tbody, #hqrkpgksss tfoot, #hqrkpgksss tr, #hqrkpgksss td, #hqrkpgksss th {
+#allyryhvel thead, #allyryhvel tbody, #allyryhvel tfoot, #allyryhvel tr, #allyryhvel td, #allyryhvel th {
   border-style: none;
 }
 
-#hqrkpgksss p {
+#allyryhvel p {
   margin: 0;
   padding: 0;
 }
 
-#hqrkpgksss .gt_table {
+#allyryhvel .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -589,12 +590,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_caption {
+#allyryhvel .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#hqrkpgksss .gt_title {
+#allyryhvel .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -606,7 +607,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#hqrkpgksss .gt_subtitle {
+#allyryhvel .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -618,7 +619,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#hqrkpgksss .gt_heading {
+#allyryhvel .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -630,13 +631,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_bottom_border {
+#allyryhvel .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_col_headings {
+#allyryhvel .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -651,7 +652,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_col_heading {
+#allyryhvel .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -671,7 +672,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#hqrkpgksss .gt_column_spanner_outer {
+#allyryhvel .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -683,15 +684,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#hqrkpgksss .gt_column_spanner_outer:first-child {
+#allyryhvel .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#hqrkpgksss .gt_column_spanner_outer:last-child {
+#allyryhvel .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#hqrkpgksss .gt_column_spanner {
+#allyryhvel .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -703,11 +704,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#hqrkpgksss .gt_spanner_row {
+#allyryhvel .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#hqrkpgksss .gt_group_heading {
+#allyryhvel .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -733,7 +734,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#hqrkpgksss .gt_empty_group_heading {
+#allyryhvel .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -748,15 +749,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#hqrkpgksss .gt_from_md > :first-child {
+#allyryhvel .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#hqrkpgksss .gt_from_md > :last-child {
+#allyryhvel .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#hqrkpgksss .gt_row {
+#allyryhvel .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -775,7 +776,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#hqrkpgksss .gt_stub {
+#allyryhvel .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -788,7 +789,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#hqrkpgksss .gt_stub_row_group {
+#allyryhvel .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -802,15 +803,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#hqrkpgksss .gt_row_group_first td {
+#allyryhvel .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#hqrkpgksss .gt_row_group_first th {
+#allyryhvel .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#hqrkpgksss .gt_summary_row {
+#allyryhvel .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -820,16 +821,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#hqrkpgksss .gt_first_summary_row {
+#allyryhvel .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_first_summary_row.thick {
+#allyryhvel .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#hqrkpgksss .gt_last_summary_row {
+#allyryhvel .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -839,7 +840,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_grand_summary_row {
+#allyryhvel .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -849,7 +850,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#hqrkpgksss .gt_first_grand_summary_row {
+#allyryhvel .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -859,7 +860,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_last_grand_summary_row_top {
+#allyryhvel .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -869,11 +870,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_striped {
+#allyryhvel .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#hqrkpgksss .gt_table_body {
+#allyryhvel .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -882,7 +883,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_footnotes {
+#allyryhvel .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -896,7 +897,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_footnote {
+#allyryhvel .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -905,7 +906,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#hqrkpgksss .gt_sourcenotes {
+#allyryhvel .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -919,7 +920,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#hqrkpgksss .gt_sourcenote {
+#allyryhvel .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -927,68 +928,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#hqrkpgksss .gt_left {
+#allyryhvel .gt_left {
   text-align: left;
 }
 
-#hqrkpgksss .gt_center {
+#allyryhvel .gt_center {
   text-align: center;
 }
 
-#hqrkpgksss .gt_right {
+#allyryhvel .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#hqrkpgksss .gt_font_normal {
+#allyryhvel .gt_font_normal {
   font-weight: normal;
 }
 
-#hqrkpgksss .gt_font_bold {
+#allyryhvel .gt_font_bold {
   font-weight: bold;
 }
 
-#hqrkpgksss .gt_font_italic {
+#allyryhvel .gt_font_italic {
   font-style: italic;
 }
 
-#hqrkpgksss .gt_super {
+#allyryhvel .gt_super {
   font-size: 65%;
 }
 
-#hqrkpgksss .gt_footnote_marks {
+#allyryhvel .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#hqrkpgksss .gt_asterisk {
+#allyryhvel .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#hqrkpgksss .gt_indent_1 {
+#allyryhvel .gt_indent_1 {
   text-indent: 5px;
 }
 
-#hqrkpgksss .gt_indent_2 {
+#allyryhvel .gt_indent_2 {
   text-indent: 10px;
 }
 
-#hqrkpgksss .gt_indent_3 {
+#allyryhvel .gt_indent_3 {
   text-indent: 15px;
 }
 
-#hqrkpgksss .gt_indent_4 {
+#allyryhvel .gt_indent_4 {
   text-indent: 20px;
 }
 
-#hqrkpgksss .gt_indent_5 {
+#allyryhvel .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="hqrkpgksss" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="hqrkpgksss">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.0689463971460363,-0.670105863351373,-0.183052302013022,0.330986067228553,-0.68430374288241,1.35453248917346,0.432299629869385,0.0153089985407423,0.459466585101133,0.994071284557335,0.808221056949301,0.212634004549346,-1.2059926749568,-0.114047661020352,0.163956781434002,-0.171628843327521,0.194668157162326,-0.412305580304896,2.25610038005334,0.0287347825649252,0.224295767888284,-0.315836069399563,-1.05346621929327,0.169034384893002,0.257823592198335,1.95523285041982,2.36911434871492,2.38873061406698,3.03393112472058,0.762015656896846,-0.755391534627675,0.254442927997106,1.58227789142672,0.427854736395368,0.0344610831309483,-0.304559674039165,-0.789716067878631,-1.08191724688507,-0.457638001623641,0.0768987280649691,-0.362155452496405,0.12954523768725,-1.33649544787323,-1.48541401835805,-0.0524511351287447,-0.0149526483126476,-0.314617198984162,0.0770878350368148,0.252686936653335,0.0956333690519049]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.06894640","-0.67010586","-0.18305230","0.33098607","-0.68430374","1.35453249","0.43229963","0.01530900","0.45946659","0.99407128","0.80822106","0.21263400","-1.20599267","-0.11404766","0.16395678","-0.17162884","0.19466816","-0.41230558","2.25610038","0.02873478","0.22429577","-0.31583607","-1.05346622","0.16903438","0.25782359","1.95523285","2.36911435","2.38873061","3.03393112","0.76201566","-0.75539153","0.25444293","1.58227789","0.42785474","0.03446108","-0.30455967","-0.78971607","-1.08191725","-0.45763800","0.07689873","-0.36215545","0.12954524","-1.33649545","-1.48541402","-0.05245114","-0.01495265","-0.31461720","0.07708784","0.25268694","0.09563337"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"hqrkpgksss","dataKey":"55c05ca1d7ade8772874963f324b77a9"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+<div id="allyryhvel" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="allyryhvel">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.436400693613395,-0.40175394594592,-0.116143721596351,1.05004059845307,-0.360788206156438,-0.14431056795981,0.692354091128984,0.932831442470785,-0.529776983043089,-0.556892197284997,0.708063052719815,0.954481648015603,-0.122866398581155,-0.853032844402126,1.31445524907948,1.13887233483044,-0.459560365435904,-0.46891641177034,-1.52273778348423,0.100601628655834,1.03303903081493,-1.39864863141536,-1.18843981440738,-1.0434808918175,-0.925507829156898,-1.96758543411807,-0.389680366650337,-1.44549204520968,-0.279949058460535,0.404262580468665,0.0151424413945846,0.741794253764442,0.0774260679875857,-0.374394318778974,0.490011288131499,0.0601685473789478,1.62662223016871,0.596463717372009,0.988054788236387,0.470944393469519,-3.30891201940578,-2.19744819898392,-1.1720201021629,-0.710983425933536,-2.34337404028904,0.617117182031725,-0.70636855922379,-1.26914749602017,-2.01289999093559,-1.86586139463375]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.43640069","-0.40175395","-0.11614372","1.05004060","-0.36078821","-0.14431057","0.69235409","0.93283144","-0.52977698","-0.55689220","0.70806305","0.95448165","-0.12286640","-0.85303284","1.31445525","1.13887233","-0.45956037","-0.46891641","-1.52273778","0.10060163","1.03303903","-1.39864863","-1.18843981","-1.04348089","-0.92550783","-1.96758543","-0.38968037","-1.44549205","-0.27994906","0.40426258","0.01514244","0.74179425","0.07742607","-0.37439432","0.49001129","0.06016855","1.62662223","0.59646372","0.98805479","0.47094439","-3.30891202","-2.19744820","-1.17202010","-0.71098343","-2.34337404","0.61711718","-0.70636856","-1.26914750","-2.01289999","-1.86586139"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"allyryhvel","dataKey":"93e5cc47d66ea4734f1c1a463b89aef2"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -1033,23 +1034,23 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="qrbkddgxis" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#qrbkddgxis table {
+<div id="ibiiwikvyj" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ibiiwikvyj table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#qrbkddgxis thead, #qrbkddgxis tbody, #qrbkddgxis tfoot, #qrbkddgxis tr, #qrbkddgxis td, #qrbkddgxis th {
+#ibiiwikvyj thead, #ibiiwikvyj tbody, #ibiiwikvyj tfoot, #ibiiwikvyj tr, #ibiiwikvyj td, #ibiiwikvyj th {
   border-style: none;
 }
 
-#qrbkddgxis p {
+#ibiiwikvyj p {
   margin: 0;
   padding: 0;
 }
 
-#qrbkddgxis .gt_table {
+#ibiiwikvyj .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1075,12 +1076,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_caption {
+#ibiiwikvyj .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#qrbkddgxis .gt_title {
+#ibiiwikvyj .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1092,7 +1093,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#qrbkddgxis .gt_subtitle {
+#ibiiwikvyj .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1104,7 +1105,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#qrbkddgxis .gt_heading {
+#ibiiwikvyj .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1116,13 +1117,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_bottom_border {
+#ibiiwikvyj .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_col_headings {
+#ibiiwikvyj .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1137,7 +1138,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_col_heading {
+#ibiiwikvyj .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1157,7 +1158,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#qrbkddgxis .gt_column_spanner_outer {
+#ibiiwikvyj .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1169,15 +1170,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#qrbkddgxis .gt_column_spanner_outer:first-child {
+#ibiiwikvyj .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#qrbkddgxis .gt_column_spanner_outer:last-child {
+#ibiiwikvyj .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#qrbkddgxis .gt_column_spanner {
+#ibiiwikvyj .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1189,11 +1190,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#qrbkddgxis .gt_spanner_row {
+#ibiiwikvyj .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#qrbkddgxis .gt_group_heading {
+#ibiiwikvyj .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1219,7 +1220,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#qrbkddgxis .gt_empty_group_heading {
+#ibiiwikvyj .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1234,15 +1235,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#qrbkddgxis .gt_from_md > :first-child {
+#ibiiwikvyj .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#qrbkddgxis .gt_from_md > :last-child {
+#ibiiwikvyj .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#qrbkddgxis .gt_row {
+#ibiiwikvyj .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1261,7 +1262,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#qrbkddgxis .gt_stub {
+#ibiiwikvyj .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1274,7 +1275,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#qrbkddgxis .gt_stub_row_group {
+#ibiiwikvyj .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1288,15 +1289,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#qrbkddgxis .gt_row_group_first td {
+#ibiiwikvyj .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#qrbkddgxis .gt_row_group_first th {
+#ibiiwikvyj .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#qrbkddgxis .gt_summary_row {
+#ibiiwikvyj .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1306,16 +1307,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#qrbkddgxis .gt_first_summary_row {
+#ibiiwikvyj .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_first_summary_row.thick {
+#ibiiwikvyj .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#qrbkddgxis .gt_last_summary_row {
+#ibiiwikvyj .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1325,7 +1326,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_grand_summary_row {
+#ibiiwikvyj .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1335,7 +1336,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#qrbkddgxis .gt_first_grand_summary_row {
+#ibiiwikvyj .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1345,7 +1346,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_last_grand_summary_row_top {
+#ibiiwikvyj .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1355,11 +1356,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_striped {
+#ibiiwikvyj .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#qrbkddgxis .gt_table_body {
+#ibiiwikvyj .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1368,7 +1369,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_footnotes {
+#ibiiwikvyj .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1382,7 +1383,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_footnote {
+#ibiiwikvyj .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1391,7 +1392,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#qrbkddgxis .gt_sourcenotes {
+#ibiiwikvyj .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1405,7 +1406,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#qrbkddgxis .gt_sourcenote {
+#ibiiwikvyj .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1413,68 +1414,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#qrbkddgxis .gt_left {
+#ibiiwikvyj .gt_left {
   text-align: left;
 }
 
-#qrbkddgxis .gt_center {
+#ibiiwikvyj .gt_center {
   text-align: center;
 }
 
-#qrbkddgxis .gt_right {
+#ibiiwikvyj .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#qrbkddgxis .gt_font_normal {
+#ibiiwikvyj .gt_font_normal {
   font-weight: normal;
 }
 
-#qrbkddgxis .gt_font_bold {
+#ibiiwikvyj .gt_font_bold {
   font-weight: bold;
 }
 
-#qrbkddgxis .gt_font_italic {
+#ibiiwikvyj .gt_font_italic {
   font-style: italic;
 }
 
-#qrbkddgxis .gt_super {
+#ibiiwikvyj .gt_super {
   font-size: 65%;
 }
 
-#qrbkddgxis .gt_footnote_marks {
+#ibiiwikvyj .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#qrbkddgxis .gt_asterisk {
+#ibiiwikvyj .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#qrbkddgxis .gt_indent_1 {
+#ibiiwikvyj .gt_indent_1 {
   text-indent: 5px;
 }
 
-#qrbkddgxis .gt_indent_2 {
+#ibiiwikvyj .gt_indent_2 {
   text-indent: 10px;
 }
 
-#qrbkddgxis .gt_indent_3 {
+#ibiiwikvyj .gt_indent_3 {
   text-indent: 15px;
 }
 
-#qrbkddgxis .gt_indent_4 {
+#ibiiwikvyj .gt_indent_4 {
   text-indent: 20px;
 }
 
-#qrbkddgxis .gt_indent_5 {
+#ibiiwikvyj .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="qrbkddgxis" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="qrbkddgxis">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.0689463971460363,-0.670105863351373,-0.183052302013022,0.330986067228553,-0.68430374288241,1.35453248917346,0.432299629869385,0.0153089985407423,0.459466585101133,0.994071284557335,0.808221056949301,0.212634004549346,-1.2059926749568,-0.114047661020352,0.163956781434002,-0.171628843327521,0.194668157162326,-0.412305580304896,2.25610038005334,0.0287347825649252,0.224295767888284,-0.315836069399563,-1.05346621929327,0.169034384893002,0.257823592198335,1.95523285041982,2.36911434871492,2.38873061406698,3.03393112472058,0.762015656896846,-0.755391534627675,0.254442927997106,1.58227789142672,0.427854736395368,0.0344610831309483,-0.304559674039165,-0.789716067878631,-1.08191724688507,-0.457638001623641,0.0768987280649691,-0.362155452496405,0.12954523768725,-1.33649544787323,-1.48541401835805,-0.0524511351287447,-0.0149526483126476,-0.314617198984162,0.0770878350368148,0.252686936653335,0.0956333690519049],"U":[0.472516143389558,0.251395153710313,0.427378490395798,0.629672495140768,0.246891691993159,0.912216722300009,0.667238171926956,0.50610716823605,0.677050428841933,0.839905917927185,0.79051833100451,0.584193776941136,0.113910157412513,0.454600005929861,0.565117416635401,0.43186466510892,0.577173629065825,0.340057729506771,0.987967827327165,0.511461942330733,0.588736415468703,0.376063469465222,0.146063684327106,0.567115202346861,0.601728472031045,0.974722203577951,0.991084630147212,0.991546653042649,0.998793052335477,0.776974670189842,0.225007045527173,0.60042330490593,0.943206927231094,0.66562155846202,0.513745262467231,0.380350768561324,0.214846802714325,0.139644650274408,0.323606268433282,0.530647945295114,0.358617933469376,0.551536884002103,0.090693693698418,0.0687170922304036,0.47908461510928,0.4940349786632,0.376526159480029,0.530723164781598,0.599744928297224,0.538094119009449],"y":[6.87688406983503,5.04760979060869,6.49123435336511,8.4044664517435,5.00985249592815,14.0890596855422,8.84110677645592,7.17497454225969,8.96201357376171,11.7231975043374,10.6738601258354,7.9213747386213,3.76056942785203,6.72203956756133,7.7306385650187,6.52894431752446,7.85045368890821,5.7737547885675,22.6470575854175,7.22356845716379,7.96774253045654,6.06681926487122,4.10005931940179,7.75032553688773,8.10252889784415,19.2805292311615,24.0743034494508,24.331933952613,34.7389513779004,10.4287574531103,4.82407181592036,8.08883784317674,15.8499933530545,8.82148191474221,7.2443880678009,6.10189371969336,4.73627164518669,4.03524197198381,5.64023059269252,7.40044961103569,5.92456081586822,7.59847764308664,3.48497150737769,3.18592617889838,6.93432685203792,7.06656010177771,6.07060205484964,7.40115208222839,8.08173534278733,7.47035035913799]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.06894640","-0.67010586","-0.18305230","0.33098607","-0.68430374","1.35453249","0.43229963","0.01530900","0.45946659","0.99407128","0.80822106","0.21263400","-1.20599267","-0.11404766","0.16395678","-0.17162884","0.19466816","-0.41230558","2.25610038","0.02873478","0.22429577","-0.31583607","-1.05346622","0.16903438","0.25782359","1.95523285","2.36911435","2.38873061","3.03393112","0.76201566","-0.75539153","0.25444293","1.58227789","0.42785474","0.03446108","-0.30455967","-0.78971607","-1.08191725","-0.45763800","0.07689873","-0.36215545","0.12954524","-1.33649545","-1.48541402","-0.05245114","-0.01495265","-0.31461720","0.07708784","0.25268694","0.09563337"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.47251614","0.25139515","0.42737849","0.62967250","0.24689169","0.91221672","0.66723817","0.50610717","0.67705043","0.83990592","0.79051833","0.58419378","0.11391016","0.45460001","0.56511742","0.43186467","0.57717363","0.34005773","0.98796783","0.51146194","0.58873642","0.37606347","0.14606368","0.56711520","0.60172847","0.97472220","0.99108463","0.99154665","0.99879305","0.77697467","0.22500705","0.60042330","0.94320693","0.66562156","0.51374526","0.38035077","0.21484680","0.13964465","0.32360627","0.53064795","0.35861793","0.55153688","0.09069369","0.06871709","0.47908462","0.49403498","0.37652616","0.53072316","0.59974493","0.53809412"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["6.876884","5.047610","6.491234","8.404466","5.009852","14.089060","8.841107","7.174975","8.962014","11.723198","10.673860","7.921375","3.760569","6.722040","7.730639","6.528944","7.850454","5.773755","22.647058","7.223568","7.967743","6.066819","4.100059","7.750326","8.102529","19.280529","24.074303","24.331934","34.738951","10.428757","4.824072","8.088838","15.849993","8.821482","7.244388","6.101894","4.736272","4.035242","5.640231","7.400450","5.924561","7.598478","3.484972","3.185926","6.934327","7.066560","6.070602","7.401152","8.081735","7.470350"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"qrbkddgxis","dataKey":"c695f62e00d1766ef26c8d79faeeb462"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
+<div id="ibiiwikvyj" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="ibiiwikvyj">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.436400693613395,-0.40175394594592,-0.116143721596351,1.05004059845307,-0.360788206156438,-0.14431056795981,0.692354091128984,0.932831442470785,-0.529776983043089,-0.556892197284997,0.708063052719815,0.954481648015603,-0.122866398581155,-0.853032844402126,1.31445524907948,1.13887233483044,-0.459560365435904,-0.46891641177034,-1.52273778348423,0.100601628655834,1.03303903081493,-1.39864863141536,-1.18843981440738,-1.0434808918175,-0.925507829156898,-1.96758543411807,-0.389680366650337,-1.44549204520968,-0.279949058460535,0.404262580468665,0.0151424413945846,0.741794253764442,0.0774260679875857,-0.374394318778974,0.490011288131499,0.0601685473789478,1.62662223016871,0.596463717372009,0.988054788236387,0.470944393469519,-3.30891201940578,-2.19744819898392,-1.1720201021629,-0.710983425933536,-2.34337404028904,0.617117182031725,-0.70636855922379,-1.26914749602017,-2.01289999093559,-1.86586139463375],"U":[0.331273017904217,0.343932559331943,0.453769319217614,0.853150276284483,0.35912888998128,0.442627616817266,0.755642505580172,0.824546497908587,0.298133282743833,0.288800543015228,0.760546948709157,0.830080052755613,0.451106447011626,0.196820545275446,0.905653475825307,0.872621796995532,0.32291590677713,0.31956469244988,0.0639121605429595,0.540066648106347,0.849207183251212,0.0809591876884787,0.117330089153576,0.148362813070752,0.177350906561091,0.0245578785184396,0.348386458126261,0.0741598629020429,0.389758294078632,0.65699018046656,0.506040729249895,0.770893998683139,0.530857698115674,0.354055484540542,0.687937044452128,0.523989302065766,0.948091322501727,0.724567257329202,0.838437091765541,0.681159777571263,0.000468296318753365,0.0139942260925248,0.120594492758036,0.23854725324225,0.00955510690337406,0.731421281828687,0.239979483971628,0.102194231511664,0.0220625757682728,0.0310303800100331],"y":[5.70245865937722,5.80521160639786,6.7149210552835,12.0604259428969,5.92871865464969,6.61992228224846,10.0703404666316,11.365771528482,5.43303281782684,5.35678086577758,10.150023630469,11.4907812604924,6.69213600827318,4.57745492985712,13.8019789993175,12.6173267039677,5.63462584030404,5.60741376720909,3.11340781612174,7.48899221155845,11.9568970649056,3.35823072972186,3.79865730844483,4.12297528940259,4.40050481731709,2.31614354228411,5.84138308427152,3.26454999825161,6.17905464999368,8.71805005790837,7.17437362094691,10.3233596531161,7.40240866546277,5.88745261904053,9.09995213342542,7.33855110379731,16.2202632087269,9.59783586842642,11.6875544779455,9.0135965690878,0.471582488369624,1.94702173110692,3.83451209489253,4.9394946185385,1.7258429156592,9.69762911942427,4.95160967177567,3.62555489427281,2.24125717823303,2.48825938515974]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.43640069","-0.40175395","-0.11614372","1.05004060","-0.36078821","-0.14431057","0.69235409","0.93283144","-0.52977698","-0.55689220","0.70806305","0.95448165","-0.12286640","-0.85303284","1.31445525","1.13887233","-0.45956037","-0.46891641","-1.52273778","0.10060163","1.03303903","-1.39864863","-1.18843981","-1.04348089","-0.92550783","-1.96758543","-0.38968037","-1.44549205","-0.27994906","0.40426258","0.01514244","0.74179425","0.07742607","-0.37439432","0.49001129","0.06016855","1.62662223","0.59646372","0.98805479","0.47094439","-3.30891202","-2.19744820","-1.17202010","-0.71098343","-2.34337404","0.61711718","-0.70636856","-1.26914750","-2.01289999","-1.86586139"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.3312730179","0.3439325593","0.4537693192","0.8531502763","0.3591288900","0.4426276168","0.7556425056","0.8245464979","0.2981332827","0.2888005430","0.7605469487","0.8300800528","0.4511064470","0.1968205453","0.9056534758","0.8726217970","0.3229159068","0.3195646924","0.0639121605","0.5400666481","0.8492071833","0.0809591877","0.1173300892","0.1483628131","0.1773509066","0.0245578785","0.3483864581","0.0741598629","0.3897582941","0.6569901805","0.5060407292","0.7708939987","0.5308576981","0.3540554845","0.6879370445","0.5239893021","0.9480913225","0.7245672573","0.8384370918","0.6811597776","0.0004682963","0.0139942261","0.1205944928","0.2385472532","0.0095551069","0.7314212818","0.2399794840","0.1021942315","0.0220625758","0.0310303800"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["5.7024587","5.8052116","6.7149211","12.0604259","5.9287187","6.6199223","10.0703405","11.3657715","5.4330328","5.3567809","10.1500236","11.4907813","6.6921360","4.5774549","13.8019790","12.6173267","5.6346258","5.6074138","3.1134078","7.4889922","11.9568971","3.3582307","3.7986573","4.1229753","4.4005048","2.3161435","5.8413831","3.2645500","6.1790546","8.7180501","7.1743736","10.3233597","7.4024087","5.8874526","9.0999521","7.3385511","16.2202632","9.5978359","11.6875545","9.0135966","0.4715825","1.9470217","3.8345121","4.9394946","1.7258429","9.6976291","4.9516097","3.6255549","2.2412572","2.4882594"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"ibiiwikvyj","dataKey":"35728e61f7c230d7f361bb3f930b6a6c"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>

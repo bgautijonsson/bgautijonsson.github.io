@@ -94,7 +94,7 @@ where $\phi_d$ is the density of the same multivariate Gaussian, and $\phi$ is t
 
 #### Sampling from the Gaussian copula
 
-Given the correlation matrix, $R$:
+Given the $d\times d$ correlation matrix, $R$:
 
 1. Compute the Cholesky factor $L$ of the correlation matrix, $R$.
 2. Sample $Z_1, \dots, Z_d \overset{iid}{\sim}\mathrm{Normal}(0, 1)$.
@@ -114,8 +114,9 @@ Let's sample from a two-dimensional process with GEV(8, 2, 0.05) margins and a G
 #| column: page
 #| code-fold: true
 R <- matrix(c(1, 0.7, 0.7, 1), nrow = 2)
+set.seed(1)
 X <- mvtnorm::rmvnorm(
-  n = 100,
+  n = 200,
   sigma = R
 )
 
@@ -157,7 +158,7 @@ X |>
   ) |> 
   wrap_plots() +
   plot_annotation(
-    title = "The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian copula"
+    title = "The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian correlation 0.7"
   )
 
 ```
