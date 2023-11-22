@@ -369,6 +369,7 @@ plot_data <- function(data) {
         data |> 
           ggplot(aes(id, replicate, fill = value)) +
           geom_raster() +
+          scale_fill_viridis_c() +
           coord_cartesian(expand = FALSE) +
           theme(legend.position = "none") +
           labs(
