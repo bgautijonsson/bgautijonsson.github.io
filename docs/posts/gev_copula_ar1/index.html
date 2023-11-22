@@ -248,7 +248,11 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
   <ul>
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
-  <li><a href="#copulas" id="toc-copulas" class="nav-link" data-scroll-target="#copulas">Copulas</a></li>
+  <li><a href="#copulas" id="toc-copulas" class="nav-link" data-scroll-target="#copulas">Copulas</a>
+  <ul class="collapse">
+  <li><a href="#gaussian-copula" id="toc-gaussian-copula" class="nav-link" data-scroll-target="#gaussian-copula">Gaussian Copula</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
@@ -316,6 +320,88 @@ H(\mathbf x) = C(F_1(x_1), \dots, F_d(x_d)).
 <p><span class="math display">\[
 C(\mathbf u) = H(F_1^{-1}(u_1), \dots, F_d^{-1}(u_d))
 \]</span></p>
+<section id="gaussian-copula" class="level3">
+<h3 class="anchored" data-anchor-id="gaussian-copula">Gaussian Copula</h3>
+<p>The Gaussian family of copulas can be written</p>
+<p><span class="math display">\[
+C(\mathbf u | R) = \Phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \vert R \right), \quad \mathbf u \in [0, 1]^d,
+\]</span></p>
+<p>where R is a <span class="math inline">\(d\times d\)</span> correlation matrix, <span class="math inline">\(\Phi_d\)</span> is the CDF of a d-dimensional multivariate Gaussian with mean <span class="math inline">\(\mathbf 0\)</span> and covariance matrix <span class="math inline">\(R\)</span>, and <span class="math inline">\(\Phi\)</span> is the CDF of a standard Gaussian.</p>
+<p>Its density is</p>
+<p><span class="math display">\[
+c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \vert R \right)}{ \prod_{j=1}^{d}{\phi\left( \Phi^{-1}(u_j) \right)}}, \quad \mathbf u \in [0, 1]^d,
+\]</span></p>
+<p>where <span class="math inline">\(\phi_d\)</span> is the density of the same multivariate Gaussian, and <span class="math inline">\(\phi\)</span> is the density of a standard gaussian.</p>
+<section id="sampling-from-the-gaussian-copula" class="level4">
+<h4 class="anchored" data-anchor-id="sampling-from-the-gaussian-copula">Sampling from the Gaussian copula</h4>
+<p>Given the correlation matrix, <span class="math inline">\(R\)</span>:</p>
+<ol type="1">
+<li>Compute the Cholesky factor <span class="math inline">\(L\)</span> of the correlation matrix, <span class="math inline">\(R\)</span>.</li>
+<li>Sample <span class="math inline">\(Z_1, \dots, Z_d \overset{iid}{\sim}\mathrm{Normal}(0, 1)\)</span>.</li>
+<li>Compute <span class="math inline">\(X = LZ\)</span>.</li>
+<li>Return <span class="math inline">\(\mathbf u = \left(\Phi(X_1), \dots, \Phi(X_d)\right)\)</span></li>
+</ol>
+<p>We can then make the margins <span class="math inline">\(u_1, \dots, u_d\)</span> follow any distribution <em>(f.ex. the GEV distribution)</em> by applying its quantile function.</p>
+</section>
+</section>
+<section id="example" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<p>Let’s sample from a two-dimensional process with GEV(8, 2, 0.05) margins and a Gaussian copula with correlation <span class="math inline">\(\rho = 0.7\)</span>.</p>
+<div class="cell page-columns page-full">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="dv">100</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> R</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>X <span class="sc">|&gt;</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="fu">row_number</span>()</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>id), <span class="at">names_to =</span> <span class="st">"variable"</span>, <span class="at">values_to =</span> <span class="st">"Z"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">U =</span> <span class="fu">pnorm</span>(Z),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Y =</span> evd<span class="sc">::</span><span class="fu">qgev</span>(U, <span class="at">loc =</span> <span class="dv">8</span>, <span class="at">scale =</span> <span class="dv">2</span>, <span class="at">shape =</span> <span class="fl">0.05</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>id, <span class="sc">-</span>variable)) <span class="sc">|&gt;</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> variable, <span class="at">values_from =</span> value) <span class="sc">|&gt;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"Z"</span>, <span class="st">"U"</span>, <span class="st">"Y"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fct_recode</span>(</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Z (Gaussian)"</span> <span class="ot">=</span> <span class="st">"Z"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"U (Uniform)"</span> <span class="ot">=</span> <span class="st">"U"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Y (GEV)"</span> <span class="ot">=</span> <span class="st">"Y"</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="at">name2 =</span> name) <span class="sc">|&gt;</span> </span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_map</span>(</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(data, ...) {</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      data <span class="sc">|&gt;</span> </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(<span class="fu">aes</span>(V1, V2)) <span class="sc">+</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_density_2d_filled</span>() <span class="sc">+</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>(<span class="at">col =</span> <span class="st">"grey70"</span>) <span class="sc">+</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">coord_cartesian</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">labs</span>(</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> data<span class="sc">$</span>name</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wrap_plots</span>() <span class="sc">+</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian copula"</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display column-page">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" style="width:100.0%"></p>
+</div>
+</div>
+</section>
 </section>
 </section>
 <section id="methods" class="level1 page-columns page-full">
@@ -354,36 +440,36 @@ R = Q^{-1} = \begin{bmatrix}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>make_AR_cor_matrix_1d <span class="ot">&lt;-</span> <span class="cf">function</span>(n_id, <span class="at">rho =</span> <span class="fl">0.5</span>) {</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> n_id,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> n_id</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">diag</span>(P) <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n_id <span class="sc">-</span> <span class="dv">1</span>)) {</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    P[i, i <span class="sc">+</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span>rho</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, n_id)) {</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    P[i, i <span class="sc">-</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span>rho</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, n_id <span class="sc">-</span> <span class="dv">1</span>)) {</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    P[i, i] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> rho<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> P <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> rho<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  P_cor <span class="ot">&lt;-</span> <span class="fu">solve</span>(P)</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  P_cor</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>n_id <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">make_AR_cor_matrix_1d</span>(<span class="at">n_id =</span> n_id, <span class="at">rho =</span> rho)</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>make_AR_cor_matrix_1d <span class="ot">&lt;-</span> <span class="cf">function</span>(n_id, <span class="at">rho =</span> <span class="fl">0.5</span>) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> n_id,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> n_id</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">diag</span>(P) <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, n_id <span class="sc">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    P[i, i <span class="sc">+</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span>rho</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, n_id)) {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    P[i, i <span class="sc">-</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="sc">-</span>rho</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, n_id <span class="sc">-</span> <span class="dv">1</span>)) {</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    P[i, i] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> rho<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  P <span class="ot">&lt;-</span> P <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> rho<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  P_cor <span class="ot">&lt;-</span> <span class="fu">solve</span>(P)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  P_cor</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>n_id <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">make_AR_cor_matrix_1d</span>(<span class="at">n_id =</span> n_id, <span class="at">rho =</span> rho)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>R</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>       [,1]  [,2] [,3]  [,4]   [,5]
@@ -415,69 +501,69 @@ R = Q^{-1} = \begin{bmatrix}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sample_gaussian_variables <span class="ot">&lt;-</span> <span class="cf">function</span>(cor_matrix, n_replicates) {</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> n_replicates,</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma =</span> cor_matrix</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>R <span class="sc">|&gt;</span> </span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sample_gaussian_variables <span class="ot">&lt;-</span> <span class="cf">function</span>(cor_matrix, n_replicates) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> n_replicates,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma =</span> cor_matrix</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>R <span class="sc">|&gt;</span> </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>         [,1]      [,2]     [,3]      [,4]      [,5]
-[1,] 1.304272 0.4298426 1.080875 0.7894652 -1.122778</code></pre>
+<pre><code>          [,1]       [,2]       [,3]     [,4]        [,5]
+[1,] -2.565599 -0.7567668 -0.2584833 1.430638 0.004611752</code></pre>
 </div>
 </div>
 <p>We will want more than one observation from each <em>“site”</em>, so we write a helped function for tidying this output into a tibble.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>tidy_mvgauss <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_matrix) {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(mvnorm_matrix) <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="fu">ncol</span>(mvnorm_matrix))</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  mvnorm_matrix <span class="sc">|&gt;</span> </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">replicate =</span> dplyr<span class="sc">::</span><span class="fu">row_number</span>(),</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">.before =</span> <span class="st">`</span><span class="at">1</span><span class="st">`</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="sc">-</span>replicate),</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">names_to =</span> <span class="st">"id"</span>, <span class="at">names_transform =</span> as.numeric,</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">values_to =</span> <span class="st">"Z"</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>n_replicates <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="ot">&lt;-</span> R <span class="sc">|&gt;</span> </span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> n_replicates) <span class="sc">|&gt;</span> </span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy_mvgauss</span>()</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="sc">|&gt;</span> </span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tidy_mvgauss <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_matrix) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(mvnorm_matrix) <span class="ot">&lt;-</span> <span class="fu">seq_len</span>(<span class="fu">ncol</span>(mvnorm_matrix))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  mvnorm_matrix <span class="sc">|&gt;</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">replicate =</span> dplyr<span class="sc">::</span><span class="fu">row_number</span>(),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">.before =</span> <span class="st">`</span><span class="at">1</span><span class="st">`</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    tidyr<span class="sc">::</span><span class="fu">pivot_longer</span>(</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="sc">-</span>replicate),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">names_to =</span> <span class="st">"id"</span>, <span class="at">names_transform =</span> as.numeric,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">values_to =</span> <span class="st">"Z"</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>n_replicates <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="ot">&lt;-</span> R <span class="sc">|&gt;</span> </span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> n_replicates) <span class="sc">|&gt;</span> </span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy_mvgauss</span>()</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="sc">|&gt;</span> </span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="vbfxsxapnl" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#vbfxsxapnl table {
+<div id="mqasmdehcw" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mqasmdehcw table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#vbfxsxapnl thead, #vbfxsxapnl tbody, #vbfxsxapnl tfoot, #vbfxsxapnl tr, #vbfxsxapnl td, #vbfxsxapnl th {
+#mqasmdehcw thead, #mqasmdehcw tbody, #mqasmdehcw tfoot, #mqasmdehcw tr, #mqasmdehcw td, #mqasmdehcw th {
   border-style: none;
 }
 
-#vbfxsxapnl p {
+#mqasmdehcw p {
   margin: 0;
   padding: 0;
 }
 
-#vbfxsxapnl .gt_table {
+#mqasmdehcw .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -503,12 +589,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_caption {
+#mqasmdehcw .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#vbfxsxapnl .gt_title {
+#mqasmdehcw .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -520,7 +606,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#vbfxsxapnl .gt_subtitle {
+#mqasmdehcw .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -532,7 +618,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#vbfxsxapnl .gt_heading {
+#mqasmdehcw .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -544,13 +630,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_bottom_border {
+#mqasmdehcw .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_col_headings {
+#mqasmdehcw .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -565,7 +651,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_col_heading {
+#mqasmdehcw .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -585,7 +671,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#vbfxsxapnl .gt_column_spanner_outer {
+#mqasmdehcw .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -597,15 +683,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#vbfxsxapnl .gt_column_spanner_outer:first-child {
+#mqasmdehcw .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#vbfxsxapnl .gt_column_spanner_outer:last-child {
+#mqasmdehcw .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#vbfxsxapnl .gt_column_spanner {
+#mqasmdehcw .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -617,11 +703,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#vbfxsxapnl .gt_spanner_row {
+#mqasmdehcw .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#vbfxsxapnl .gt_group_heading {
+#mqasmdehcw .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -647,7 +733,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#vbfxsxapnl .gt_empty_group_heading {
+#mqasmdehcw .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -662,15 +748,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#vbfxsxapnl .gt_from_md > :first-child {
+#mqasmdehcw .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#vbfxsxapnl .gt_from_md > :last-child {
+#mqasmdehcw .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#vbfxsxapnl .gt_row {
+#mqasmdehcw .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -689,7 +775,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#vbfxsxapnl .gt_stub {
+#mqasmdehcw .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -702,7 +788,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#vbfxsxapnl .gt_stub_row_group {
+#mqasmdehcw .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -716,15 +802,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#vbfxsxapnl .gt_row_group_first td {
+#mqasmdehcw .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#vbfxsxapnl .gt_row_group_first th {
+#mqasmdehcw .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#vbfxsxapnl .gt_summary_row {
+#mqasmdehcw .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -734,16 +820,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#vbfxsxapnl .gt_first_summary_row {
+#mqasmdehcw .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_first_summary_row.thick {
+#mqasmdehcw .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#vbfxsxapnl .gt_last_summary_row {
+#mqasmdehcw .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -753,7 +839,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_grand_summary_row {
+#mqasmdehcw .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -763,7 +849,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#vbfxsxapnl .gt_first_grand_summary_row {
+#mqasmdehcw .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -773,7 +859,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_last_grand_summary_row_top {
+#mqasmdehcw .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -783,11 +869,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_striped {
+#mqasmdehcw .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#vbfxsxapnl .gt_table_body {
+#mqasmdehcw .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -796,7 +882,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_footnotes {
+#mqasmdehcw .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -810,7 +896,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_footnote {
+#mqasmdehcw .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -819,7 +905,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#vbfxsxapnl .gt_sourcenotes {
+#mqasmdehcw .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -833,7 +919,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#vbfxsxapnl .gt_sourcenote {
+#mqasmdehcw .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -841,68 +927,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#vbfxsxapnl .gt_left {
+#mqasmdehcw .gt_left {
   text-align: left;
 }
 
-#vbfxsxapnl .gt_center {
+#mqasmdehcw .gt_center {
   text-align: center;
 }
 
-#vbfxsxapnl .gt_right {
+#mqasmdehcw .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#vbfxsxapnl .gt_font_normal {
+#mqasmdehcw .gt_font_normal {
   font-weight: normal;
 }
 
-#vbfxsxapnl .gt_font_bold {
+#mqasmdehcw .gt_font_bold {
   font-weight: bold;
 }
 
-#vbfxsxapnl .gt_font_italic {
+#mqasmdehcw .gt_font_italic {
   font-style: italic;
 }
 
-#vbfxsxapnl .gt_super {
+#mqasmdehcw .gt_super {
   font-size: 65%;
 }
 
-#vbfxsxapnl .gt_footnote_marks {
+#mqasmdehcw .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#vbfxsxapnl .gt_asterisk {
+#mqasmdehcw .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#vbfxsxapnl .gt_indent_1 {
+#mqasmdehcw .gt_indent_1 {
   text-indent: 5px;
 }
 
-#vbfxsxapnl .gt_indent_2 {
+#mqasmdehcw .gt_indent_2 {
   text-indent: 10px;
 }
 
-#vbfxsxapnl .gt_indent_3 {
+#mqasmdehcw .gt_indent_3 {
   text-indent: 15px;
 }
 
-#vbfxsxapnl .gt_indent_4 {
+#mqasmdehcw .gt_indent_4 {
   text-indent: 20px;
 }
 
-#vbfxsxapnl .gt_indent_5 {
+#mqasmdehcw .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="vbfxsxapnl" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="vbfxsxapnl">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.838842054133869,0.735920544274324,0.0257686834715345,-0.0155799106379054,0.237591341644598,-0.779602109716935,-1.74937774762662,-1.69896541747752,-0.693498111753161,-1.69121848490616,-0.662883123115692,-0.161964412472335,-0.685085709031592,-0.157860986879714,0.267569682315178,-0.396551752757115,-0.917550877860917,-1.82408114795539,-0.582749746467878,-0.496202317095872,0.873027049743963,-1.02157995850379,-0.967764390657677,-0.764371735772087,1.52020202479684,1.89090853670885,1.58725534048482,0.574391209613349,-0.45289200712016,0.0199308499513609,-0.553019511044624,0.301408138112527,0.565867015662667,0.0935196089064788,1.70241349727378,0.449603346572939,1.44472936846097,0.371681948306045,0.125517002817499,-1.16312290934035,-1.11787545023083,-0.107504539676316,0.00518327202733099,-0.0968483951362571,-0.839977204360986,0.132748781027452,-0.444638310201653,0.257456213586652,-0.540523600957891,0.511760244094851]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.838842054","0.735920544","0.025768683","-0.015579911","0.237591342","-0.779602110","-1.749377748","-1.698965417","-0.693498112","-1.691218485","-0.662883123","-0.161964412","-0.685085709","-0.157860987","0.267569682","-0.396551753","-0.917550878","-1.824081148","-0.582749746","-0.496202317","0.873027050","-1.021579959","-0.967764391","-0.764371736","1.520202025","1.890908537","1.587255340","0.574391210","-0.452892007","0.019930850","-0.553019511","0.301408138","0.565867016","0.093519609","1.702413497","0.449603347","1.444729368","0.371681948","0.125517003","-1.163122909","-1.117875450","-0.107504540","0.005183272","-0.096848395","-0.839977204","0.132748781","-0.444638310","0.257456214","-0.540523601","0.511760244"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"vbfxsxapnl","dataKey":"23cbc57c80e9db727b4d199aaf25a303"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+<div id="mqasmdehcw" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="mqasmdehcw">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[0.403539546968351,-1.08135955962246,-0.745394516864418,-0.16235989607067,-0.80485773949381,-0.439984282237938,0.229021083306807,-0.180020470066276,-1.7557996304722,-1.38859916022831,0.125032315344734,-0.689956336897874,0.584096510995895,0.451655620321786,-0.945607352160775,1.06396871165744,-0.164732651579674,-0.584421991997708,0.913655047733595,0.972396970898358,1.25960373666065,0.600482388522512,0.744063902427303,0.547360162459707,-0.132018556488247,-0.214131314719595,-0.890305430895083,0.27327054212247,0.518996223878257,0.907387352660364,-0.755827573855755,-1.49846080781037,0.500904729727637,-0.405345784000656,-0.767057106561286,0.0462112696062323,0.428242524893364,1.73787997117032,1.46142995544163,-0.083484460501424,-0.977685420120512,0.518456480420229,1.77885043148906,0.461217300664786,0.00179192839122908,-0.225228959753106,-0.616217815397284,-0.697510536269603,-0.102935554016703,0.934888463383259]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.403539547","-1.081359560","-0.745394517","-0.162359896","-0.804857739","-0.439984282","0.229021083","-0.180020470","-1.755799630","-1.388599160","0.125032315","-0.689956337","0.584096511","0.451655620","-0.945607352","1.063968712","-0.164732652","-0.584421992","0.913655048","0.972396971","1.259603737","0.600482389","0.744063902","0.547360162","-0.132018556","-0.214131315","-0.890305431","0.273270542","0.518996224","0.907387353","-0.755827574","-1.498460808","0.500904730","-0.405345784","-0.767057107","0.046211270","0.428242525","1.737879971","1.461429955","-0.083484461","-0.977685420","0.518456480","1.778850431","0.461217301","0.001791928","-0.225228960","-0.616217815","-0.697510536","-0.102935554","0.934888463"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"mqasmdehcw","dataKey":"e4e2242c5705b0735956014a48c45352"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -913,57 +999,57 @@ R = Q^{-1} = \begin{bmatrix}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mvnorm_to_gev <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_data, gev_params) {</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  mvnorm_data <span class="sc">|&gt;</span> </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">U =</span> <span class="fu">pnorm</span>(Z)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      gev_params,</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> purrr<span class="sc">:::</span><span class="fu">pmap_dbl</span>(</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(U, mu, sigma, xi), </span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        \(U, mu, sigma, xi) evd<span class="sc">::</span><span class="fu">qgev</span>(<span class="at">p =</span> U, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>gev_params <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="dv">6</span>,</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="dv">3</span>,</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">xi =</span> <span class="fl">0.1</span>,</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">seq_len</span>(n_id)</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>gev_data <span class="ot">&lt;-</span> mvnorm_data <span class="sc">|&gt;</span> </span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mvnorm_to_gev</span>(<span class="at">gev_params =</span> gev_params)</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>mu, <span class="sc">-</span>sigma, <span class="sc">-</span>xi) <span class="sc">|&gt;</span> </span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mvnorm_to_gev <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_data, gev_params) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  mvnorm_data <span class="sc">|&gt;</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">U =</span> <span class="fu">pnorm</span>(Z)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      gev_params,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> purrr<span class="sc">:::</span><span class="fu">pmap_dbl</span>(</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(U, mu, sigma, xi), </span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        \(U, mu, sigma, xi) evd<span class="sc">::</span><span class="fu">qgev</span>(<span class="at">p =</span> U, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>gev_params <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="dv">6</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="dv">3</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">xi =</span> <span class="fl">0.1</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">seq_len</span>(n_id)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>gev_data <span class="ot">&lt;-</span> mvnorm_data <span class="sc">|&gt;</span> </span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mvnorm_to_gev</span>(<span class="at">gev_params =</span> gev_params)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>mu, <span class="sc">-</span>sigma, <span class="sc">-</span>xi) <span class="sc">|&gt;</span> </span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="dpebnsrahf" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#dpebnsrahf table {
+<div id="zzmkebwgrd" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#zzmkebwgrd table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#dpebnsrahf thead, #dpebnsrahf tbody, #dpebnsrahf tfoot, #dpebnsrahf tr, #dpebnsrahf td, #dpebnsrahf th {
+#zzmkebwgrd thead, #zzmkebwgrd tbody, #zzmkebwgrd tfoot, #zzmkebwgrd tr, #zzmkebwgrd td, #zzmkebwgrd th {
   border-style: none;
 }
 
-#dpebnsrahf p {
+#zzmkebwgrd p {
   margin: 0;
   padding: 0;
 }
 
-#dpebnsrahf .gt_table {
+#zzmkebwgrd .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -989,12 +1075,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_caption {
+#zzmkebwgrd .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#dpebnsrahf .gt_title {
+#zzmkebwgrd .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1006,7 +1092,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#dpebnsrahf .gt_subtitle {
+#zzmkebwgrd .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1018,7 +1104,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#dpebnsrahf .gt_heading {
+#zzmkebwgrd .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1030,13 +1116,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_bottom_border {
+#zzmkebwgrd .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_col_headings {
+#zzmkebwgrd .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1051,7 +1137,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_col_heading {
+#zzmkebwgrd .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1071,7 +1157,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#dpebnsrahf .gt_column_spanner_outer {
+#zzmkebwgrd .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1083,15 +1169,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#dpebnsrahf .gt_column_spanner_outer:first-child {
+#zzmkebwgrd .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#dpebnsrahf .gt_column_spanner_outer:last-child {
+#zzmkebwgrd .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#dpebnsrahf .gt_column_spanner {
+#zzmkebwgrd .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1103,11 +1189,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#dpebnsrahf .gt_spanner_row {
+#zzmkebwgrd .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#dpebnsrahf .gt_group_heading {
+#zzmkebwgrd .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1133,7 +1219,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#dpebnsrahf .gt_empty_group_heading {
+#zzmkebwgrd .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1148,15 +1234,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#dpebnsrahf .gt_from_md > :first-child {
+#zzmkebwgrd .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#dpebnsrahf .gt_from_md > :last-child {
+#zzmkebwgrd .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#dpebnsrahf .gt_row {
+#zzmkebwgrd .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1175,7 +1261,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#dpebnsrahf .gt_stub {
+#zzmkebwgrd .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1188,7 +1274,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#dpebnsrahf .gt_stub_row_group {
+#zzmkebwgrd .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1202,15 +1288,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#dpebnsrahf .gt_row_group_first td {
+#zzmkebwgrd .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#dpebnsrahf .gt_row_group_first th {
+#zzmkebwgrd .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#dpebnsrahf .gt_summary_row {
+#zzmkebwgrd .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1220,16 +1306,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#dpebnsrahf .gt_first_summary_row {
+#zzmkebwgrd .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_first_summary_row.thick {
+#zzmkebwgrd .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#dpebnsrahf .gt_last_summary_row {
+#zzmkebwgrd .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1239,7 +1325,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_grand_summary_row {
+#zzmkebwgrd .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1249,7 +1335,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#dpebnsrahf .gt_first_grand_summary_row {
+#zzmkebwgrd .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1259,7 +1345,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_last_grand_summary_row_top {
+#zzmkebwgrd .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1269,11 +1355,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_striped {
+#zzmkebwgrd .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#dpebnsrahf .gt_table_body {
+#zzmkebwgrd .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1282,7 +1368,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_footnotes {
+#zzmkebwgrd .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1296,7 +1382,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_footnote {
+#zzmkebwgrd .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1305,7 +1391,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#dpebnsrahf .gt_sourcenotes {
+#zzmkebwgrd .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1319,7 +1405,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#dpebnsrahf .gt_sourcenote {
+#zzmkebwgrd .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1327,68 +1413,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#dpebnsrahf .gt_left {
+#zzmkebwgrd .gt_left {
   text-align: left;
 }
 
-#dpebnsrahf .gt_center {
+#zzmkebwgrd .gt_center {
   text-align: center;
 }
 
-#dpebnsrahf .gt_right {
+#zzmkebwgrd .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#dpebnsrahf .gt_font_normal {
+#zzmkebwgrd .gt_font_normal {
   font-weight: normal;
 }
 
-#dpebnsrahf .gt_font_bold {
+#zzmkebwgrd .gt_font_bold {
   font-weight: bold;
 }
 
-#dpebnsrahf .gt_font_italic {
+#zzmkebwgrd .gt_font_italic {
   font-style: italic;
 }
 
-#dpebnsrahf .gt_super {
+#zzmkebwgrd .gt_super {
   font-size: 65%;
 }
 
-#dpebnsrahf .gt_footnote_marks {
+#zzmkebwgrd .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#dpebnsrahf .gt_asterisk {
+#zzmkebwgrd .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#dpebnsrahf .gt_indent_1 {
+#zzmkebwgrd .gt_indent_1 {
   text-indent: 5px;
 }
 
-#dpebnsrahf .gt_indent_2 {
+#zzmkebwgrd .gt_indent_2 {
   text-indent: 10px;
 }
 
-#dpebnsrahf .gt_indent_3 {
+#zzmkebwgrd .gt_indent_3 {
   text-indent: 15px;
 }
 
-#dpebnsrahf .gt_indent_4 {
+#zzmkebwgrd .gt_indent_4 {
   text-indent: 20px;
 }
 
-#dpebnsrahf .gt_indent_5 {
+#zzmkebwgrd .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="dpebnsrahf" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="dpebnsrahf">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.838842054133869,0.735920544274324,0.0257686834715345,-0.0155799106379054,0.237591341644598,-0.779602109716935,-1.74937774762662,-1.69896541747752,-0.693498111753161,-1.69121848490616,-0.662883123115692,-0.161964412472335,-0.685085709031592,-0.157860986879714,0.267569682315178,-0.396551752757115,-0.917550877860917,-1.82408114795539,-0.582749746467878,-0.496202317095872,0.873027049743963,-1.02157995850379,-0.967764390657677,-0.764371735772087,1.52020202479684,1.89090853670885,1.58725534048482,0.574391209613349,-0.45289200712016,0.0199308499513609,-0.553019511044624,0.301408138112527,0.565867015662667,0.0935196089064788,1.70241349727378,0.449603346572939,1.44472936846097,0.371681948306045,0.125517002817499,-1.16312290934035,-1.11787545023083,-0.107504539676316,0.00518327202733099,-0.0968483951362571,-0.839977204360986,0.132748781027452,-0.444638310201653,0.257456213586652,-0.540523600957891,0.511760244094851],"U":[0.20077897407215,0.769110473116809,0.510279079740086,0.493784766363703,0.593900966693018,0.217812556867556,0.0401128723679771,0.0446628498895528,0.243998505204445,0.0453975409144492,0.253702705702293,0.435666939263814,0.246644918848604,0.437283170243163,0.605484714864777,0.345849018545748,0.179427022514119,0.0340699025703967,0.280030889654523,0.309875838190323,0.808675832945678,0.153489873614208,0.166581025832996,0.222322873586756,0.93576989565606,0.97068172265958,0.943772587244681,0.717148449991673,0.325313253355008,0.507950732336581,0.290125024988631,0.61844835531071,0.714257907238826,0.537254613846867,0.9556610591918,0.673501762697159,0.925733041347448,0.644935166585019,0.549942867407798,0.12238981920154,0.131810095705926,0.457194362027699,0.502067817103418,0.461423395390294,0.200460583937946,0.552803968725663,0.32829057859639,0.601586693633563,0.294417994710031,0.695590591309735],"y":[4.61270088473726,10.292954693913,7.21280639872279,7.06432909081315,8.02092869250737,4.7620162047883,2.69247641239193,2.78333082690064,4.98551871383578,2.79742906791106,5.06690262400358,6.56100057633001,5.0077793683975,6.57465400580371,8.14212586784137,5.82077367072186,4.41968596097224,2.56061056295164,5.28487327855353,5.52867275984235,11.0279375948844,4.17354518322048,4.29963457696841,4.80098317118733,15.3471988379662,18.634664984808,15.8910871759442,9.49235553003182,5.65408764002376,7.19166848152655,5.36761802938953,8.28108746738126,9.45193980456587,7.46243249987788,16.8753646121944,8.91792530442612,14.7593740415799,8.57720711506798,7.58314904659169,3.85403228064959,3.95431700158665,6.74430501077826,7.13852719108893,6.78071013490713,4.60987415171019,7.61068918688009,5.6782537619253,8.10103998582916,5.40270713304784,9.1994819808429]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.838842054","0.735920544","0.025768683","-0.015579911","0.237591342","-0.779602110","-1.749377748","-1.698965417","-0.693498112","-1.691218485","-0.662883123","-0.161964412","-0.685085709","-0.157860987","0.267569682","-0.396551753","-0.917550878","-1.824081148","-0.582749746","-0.496202317","0.873027050","-1.021579959","-0.967764391","-0.764371736","1.520202025","1.890908537","1.587255340","0.574391210","-0.452892007","0.019930850","-0.553019511","0.301408138","0.565867016","0.093519609","1.702413497","0.449603347","1.444729368","0.371681948","0.125517003","-1.163122909","-1.117875450","-0.107504540","0.005183272","-0.096848395","-0.839977204","0.132748781","-0.444638310","0.257456214","-0.540523601","0.511760244"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.20077897","0.76911047","0.51027908","0.49378477","0.59390097","0.21781256","0.04011287","0.04466285","0.24399851","0.04539754","0.25370271","0.43566694","0.24664492","0.43728317","0.60548471","0.34584902","0.17942702","0.03406990","0.28003089","0.30987584","0.80867583","0.15348987","0.16658103","0.22232287","0.93576990","0.97068172","0.94377259","0.71714845","0.32531325","0.50795073","0.29012502","0.61844836","0.71425791","0.53725461","0.95566106","0.67350176","0.92573304","0.64493517","0.54994287","0.12238982","0.13181010","0.45719436","0.50206782","0.46142340","0.20046058","0.55280397","0.32829058","0.60158669","0.29441799","0.69559059"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["4.612701","10.292955","7.212806","7.064329","8.020929","4.762016","2.692476","2.783331","4.985519","2.797429","5.066903","6.561001","5.007779","6.574654","8.142126","5.820774","4.419686","2.560611","5.284873","5.528673","11.027938","4.173545","4.299635","4.800983","15.347199","18.634665","15.891087","9.492356","5.654088","7.191668","5.367618","8.281087","9.451940","7.462432","16.875365","8.917925","14.759374","8.577207","7.583149","3.854032","3.954317","6.744305","7.138527","6.780710","4.609874","7.610689","5.678254","8.101040","5.402707","9.199482"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"dpebnsrahf","dataKey":"75d43d40a736fc1f6512ba320113afef"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
+<div id="zzmkebwgrd" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="zzmkebwgrd">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[0.403539546968351,-1.08135955962246,-0.745394516864418,-0.16235989607067,-0.80485773949381,-0.439984282237938,0.229021083306807,-0.180020470066276,-1.7557996304722,-1.38859916022831,0.125032315344734,-0.689956336897874,0.584096510995895,0.451655620321786,-0.945607352160775,1.06396871165744,-0.164732651579674,-0.584421991997708,0.913655047733595,0.972396970898358,1.25960373666065,0.600482388522512,0.744063902427303,0.547360162459707,-0.132018556488247,-0.214131314719595,-0.890305430895083,0.27327054212247,0.518996223878257,0.907387352660364,-0.755827573855755,-1.49846080781037,0.500904729727637,-0.405345784000656,-0.767057106561286,0.0462112696062323,0.428242524893364,1.73787997117032,1.46142995544163,-0.083484460501424,-0.977685420120512,0.518456480420229,1.77885043148906,0.461217300664786,0.00179192839122908,-0.225228959753106,-0.616217815397284,-0.697510536269603,-0.102935554016703,0.934888463383259],"U":[0.656724326018795,0.139768601605243,0.228016628812361,0.43551122502983,0.210450888880274,0.329974245630192,0.590573735264988,0.428568248968428,0.0395613137607606,0.0824773364383974,0.549751016435588,0.245110822942671,0.720422308969196,0.674241452907984,0.172174446441995,0.856328563131924,0.434577207910195,0.279468217135566,0.819550934292137,0.834573450847426,0.896093826554828,0.725907602707513,0.771581091843419,0.707934340664386,0.447484807130185,0.41522232824379,0.186650952889646,0.607677371096278,0.69811831273936,0.817899002420852,0.22487629112433,0.0670067839702118,0.691780913164105,0.342611678468984,0.221523781534029,0.518429069887524,0.665762720541394,0.958884017234447,0.928051257518566,0.466733166489656,0.164114967479337,0.697930091722737,0.962367856730879,0.677678644737928,0.500714875616134,0.410900580770385,0.26887538591961,0.242741673964621,0.459007059770782,0.825077108442584],"y":[8.71489946793197,4.03650576729152,4.8498738380583,6.55968601971496,4.69792469033086,5.69191829764836,7.98660569635812,6.50122370080338,2.68101206062457,3.37853250988576,7.58130666312823,4.99488148066993,9.53858757112097,8.92708078901809,4.3523179500181,12.1459593156581,6.55180412632675,5.28024974994101,11.2562587031681,11.5953379414632,13.4193786812384,9.61716988051371,10.3351335888582,9.36480011711469,6.66122929793066,6.38962030210518,4.48582047144659,8.1653755185154,9.23284125137817,11.2207095985896,4.82294879085583,3.16046932539105,9.14966612681499,5.79448734056992,4.79409520829399,7.28728562265466,8.82319231039965,17.1918863833899,14.8872847852914,6.82661911989531,4.27619184112288,9.23034867703143,17.5656979486439,8.96986219932198,7.12635875555807,6.35367972553918,5.19295158980949,4.97492820339579,6.75989242928078,11.377586171606]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.403539547","-1.081359560","-0.745394517","-0.162359896","-0.804857739","-0.439984282","0.229021083","-0.180020470","-1.755799630","-1.388599160","0.125032315","-0.689956337","0.584096511","0.451655620","-0.945607352","1.063968712","-0.164732652","-0.584421992","0.913655048","0.972396971","1.259603737","0.600482389","0.744063902","0.547360162","-0.132018556","-0.214131315","-0.890305431","0.273270542","0.518996224","0.907387353","-0.755827574","-1.498460808","0.500904730","-0.405345784","-0.767057107","0.046211270","0.428242525","1.737879971","1.461429955","-0.083484461","-0.977685420","0.518456480","1.778850431","0.461217301","0.001791928","-0.225228960","-0.616217815","-0.697510536","-0.102935554","0.934888463"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.65672433","0.13976860","0.22801663","0.43551123","0.21045089","0.32997425","0.59057374","0.42856825","0.03956131","0.08247734","0.54975102","0.24511082","0.72042231","0.67424145","0.17217445","0.85632856","0.43457721","0.27946822","0.81955093","0.83457345","0.89609383","0.72590760","0.77158109","0.70793434","0.44748481","0.41522233","0.18665095","0.60767737","0.69811831","0.81789900","0.22487629","0.06700678","0.69178091","0.34261168","0.22152378","0.51842907","0.66576272","0.95888402","0.92805126","0.46673317","0.16411497","0.69793009","0.96236786","0.67767864","0.50071488","0.41090058","0.26887539","0.24274167","0.45900706","0.82507711"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["8.714899","4.036506","4.849874","6.559686","4.697925","5.691918","7.986606","6.501224","2.681012","3.378533","7.581307","4.994881","9.538588","8.927081","4.352318","12.145959","6.551804","5.280250","11.256259","11.595338","13.419379","9.617170","10.335134","9.364800","6.661229","6.389620","4.485820","8.165376","9.232841","11.220710","4.822949","3.160469","9.149666","5.794487","4.794095","7.287286","8.823192","17.191886","14.887285","6.826619","4.276192","9.230349","17.565698","8.969862","7.126359","6.353680","5.192952","4.974928","6.759892","11.377586"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"zzmkebwgrd","dataKey":"8ab26e3bdcba1d829590c49e5726f6f4"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -1406,96 +1492,96 @@ R = Q^{-1} = \begin{bmatrix}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span> </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(replicate, id, Z, U, y) <span class="sc">|&gt;</span> </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>replicate, <span class="sc">-</span>id)) <span class="sc">|&gt;</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"Z"</span>, <span class="st">"U"</span>, <span class="st">"y"</span>),</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">name2 =</span> name</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(name) <span class="sc">|&gt;</span> </span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_map</span>(</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>(data, ...) {</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        data <span class="sc">|&gt;</span> </span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>          <span class="fu">ggplot</span>(<span class="fu">aes</span>(id, replicate, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_raster</span>() <span class="sc">+</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_cartesian</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle =</span> data<span class="sc">$</span>name2</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>          )</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">wrap_plots</span>() <span class="sc">+</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_annotation</span>(</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Heatmaps of the three data representations"</span>,</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Z: Normal | U: Uniform | y: GEV"</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot_data <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(replicate, id, Z, U, y) <span class="sc">|&gt;</span> </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="fu">c</span>(<span class="sc">-</span>replicate, <span class="sc">-</span>id)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"Z"</span>, <span class="st">"U"</span>, <span class="st">"y"</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">name2 =</span> name</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(name) <span class="sc">|&gt;</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_map</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">function</span>(data, ...) {</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        data <span class="sc">|&gt;</span> </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>          <span class="fu">ggplot</span>(<span class="fu">aes</span>(id, replicate, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">geom_raster</span>() <span class="sc">+</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>          <span class="fu">coord_cartesian</span>(<span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>          <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>          <span class="fu">labs</span>(</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle =</span> data<span class="sc">$</span>name2</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>          )</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">wrap_plots</span>() <span class="sc">+</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot_annotation</span>(</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">title =</span> <span class="st">"Heatmaps of the three data representations"</span>,</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">subtitle =</span> <span class="st">"Z: Normal | U: Uniform | y: GEV"</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell page-columns page-full">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display column-page">
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" style="width:100.0%"></p>
 </div>
 </div>
 <p>It’s nice to wrap this process in a single function</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>make_data <span class="ot">&lt;-</span> <span class="cf">function</span>(gev_params, n_replicate, rho) {</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">make_AR_cor_matrix_1d</span>(<span class="at">n_id =</span> <span class="fu">nrow</span>(gev_params), <span class="at">rho =</span> rho) <span class="sc">|&gt;</span> </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> n_replicate) <span class="sc">|&gt;</span> </span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tidy_mvgauss</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">U =</span> <span class="fu">pnorm</span>(Z)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      gev_params,</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> purrr<span class="sc">::</span><span class="fu">pmap_dbl</span>(</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(U, mu, sigma, xi), </span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        \(U, mu, sigma, xi) evd<span class="sc">::</span><span class="fu">qgev</span>(<span class="at">p =</span> U, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>      )</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>make_data <span class="ot">&lt;-</span> <span class="cf">function</span>(gev_params, n_replicate, rho) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">make_AR_cor_matrix_1d</span>(<span class="at">n_id =</span> <span class="fu">nrow</span>(gev_params), <span class="at">rho =</span> rho) <span class="sc">|&gt;</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> n_replicate) <span class="sc">|&gt;</span> </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tidy_mvgauss</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">U =</span> <span class="fu">pnorm</span>(Z)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">inner_join</span>(</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>      gev_params,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> dplyr<span class="sc">::</span><span class="fu">join_by</span>(id)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> purrr<span class="sc">::</span><span class="fu">pmap_dbl</span>(</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">list</span>(U, mu, sigma, xi), </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        \(U, mu, sigma, xi) evd<span class="sc">::</span><span class="fu">qgev</span>(<span class="at">p =</span> U, <span class="at">loc =</span> mu, <span class="at">scale =</span> sigma, <span class="at">shape =</span> xi)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Let’s see how the data look if we make it larger and increase the correlation</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n_id <span class="ot">&lt;-</span> <span class="dv">40</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>n_replicates <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>gev_params <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="dv">6</span>,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="dv">3</span>,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xi =</span> <span class="fl">0.1</span>,</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">seq_len</span>(n_id)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">make_data</span>(gev_params, n_replicates, <span class="at">rho =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>n_id <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>n_replicates <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>gev_params <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">mu =</span> <span class="dv">6</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma =</span> <span class="dv">3</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xi =</span> <span class="fl">0.1</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="fu">seq_len</span>(n_id)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">make_data</span>(gev_params, n_replicates, <span class="at">rho =</span> <span class="fl">0.95</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We see that with higher neighbor correlations we get obvious horizontal stripes corresponding to a large amount of dependence within each replicate.</p>
 <div class="cell page-columns page-full">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display column-page">
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" style="width:100.0%"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" style="width:100.0%"></p>
 </div>
 </div>
 </section>
@@ -1514,100 +1600,100 @@ R = Q^{-1} = \begin{bmatrix}
 <div class="cell column-page-inset" data-output.var="model1">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_copula_prec_lpdf(<span class="dt">vector</span> U, <span class="dt">matrix</span> L) {</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(U);</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] mu = rep_vector(<span class="dv">0</span>, N);</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[N, N] I = diag_matrix(rep_vector(<span class="dv">1</span>, N));</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Defining the precision matrix Q</span></span>
-<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>      Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i &lt; n_id) {</span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>      Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[n_id] U;</span>
-<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>      U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> normal_copula_prec_lpdf(U | Omega);</span>
-<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
-<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Creating Q inside brackets, since I don't want to include it in the model output</span></span>
-<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
-<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
-<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
-<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
-<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>    Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
-<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
-<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>        Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
-<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &lt; n_id) {</span>
-<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>        Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
-<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[n_id] U;</span>
-<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a>      log_lik += normal_copula_prec_lpdf(U | Omega);</span>
-<span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb13-93"><a href="#cb13-93" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb13-94"><a href="#cb13-94" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> normal_copula_prec_lpdf(<span class="dt">vector</span> U, <span class="dt">matrix</span> L) {</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> N = rows(U);</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[N] mu = rep_vector(<span class="dv">0</span>, N);</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="dt">matrix</span>[N, N] I = diag_matrix(rep_vector(<span class="dv">1</span>, N));</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Defining the precision matrix Q</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &lt; n_id) {</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[n_id] U;</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> normal_copula_prec_lpdf(U | Omega);</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating Q inside brackets, since I don't want to include it in the model output</span></span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &lt; n_id) {</span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[n_id] U;</span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>log_lik += normal_copula_prec_lpdf(U | Omega);</span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1615,57 +1701,57 @@ R = Q^{-1} = \begin{bmatrix}
 <div class="cell column-page-inset" data-output.var="model2">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>

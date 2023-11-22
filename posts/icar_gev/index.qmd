@@ -359,7 +359,7 @@ stan_data <- list(
 
 # Model
 
-The model is written below in math and Stan code.
+The model is written below in mathematical notation and Stan code.
 
 ::: {.panel-tabset}
 

@@ -74,6 +74,95 @@ $$
 C(\mathbf u) = H(F_1^{-1}(u_1), \dots, F_d^{-1}(u_d))
 $$
 
+### Gaussian Copula
+
+The Gaussian family of copulas can be written
+
+$$
+C(\mathbf u | R) = \Phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \vert R \right), \quad \mathbf u \in [0, 1]^d,
+$$
+
+where R is a $d\times d$ correlation matrix, $\Phi_d$ is the CDF of a d-dimensional multivariate Gaussian with mean $\mathbf 0$ and covariance matrix $R$, and $\Phi$ is the CDF of a standard Gaussian.
+
+Its density is
+
+$$
+c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \vert R \right)}{ \prod_{j=1}^{d}{\phi\left( \Phi^{-1}(u_j) \right)}}, \quad \mathbf u \in [0, 1]^d,
+$$
+
+where $\phi_d$ is the density of the same multivariate Gaussian, and $\phi$ is the density of a standard gaussian.
+
+#### Sampling from the Gaussian copula
+
+Given the correlation matrix, $R$:
+
+1. Compute the Cholesky factor $L$ of the correlation matrix, $R$.
+2. Sample $Z_1, \dots, Z_d \overset{iid}{\sim}\mathrm{Normal}(0, 1)$.
+3. Compute $X = LZ$.
+4. Return $\mathbf u = \left(\Phi(X_1), \dots, \Phi(X_d)\right)$
+
+We can then make the margins $u_1, \dots, u_d$ follow any distribution *(f.ex. the GEV distribution)* by applying its quantile function.
+
+### Example
+
+Let's sample from a two-dimensional process with GEV(8, 2, 0.05) margins and a Gaussian copula with correlation $\rho = 0.7$.
+
+```{r}
+#| fig-asp: 0.3
+#| fig-width: 12
+#| out-width: 100%
+#| column: page
+#| code-fold: true
+R <- matrix(c(1, 0.7, 0.7, 1), nrow = 2)
+X <- mvtnorm::rmvnorm(
+  n = 100,
+  sigma = R
+)
+
+X |> 
+  as_tibble() |> 
+  mutate(
+    id = row_number()
+  ) |> 
+  pivot_longer(c(-id), names_to = "variable", values_to = "Z") |> 
+  mutate(
+    U = pnorm(Z),
+    Y = evd::qgev(U, loc = 8, scale = 2, shape = 0.05)
+  ) |> 
+  pivot_longer(c(-id, -variable)) |> 
+  pivot_wider(names_from = variable, values_from = value) |>
+  mutate(
+    name = fct_relevel(name, "Z", "U", "Y") |> 
+      fct_recode(
+        "Z (Gaussian)" = "Z",
+        "U (Uniform)" = "U",
+        "Y (GEV)" = "Y"
+      )
+  ) |> 
+  group_by(name2 = name) |> 
+  group_map(
+    function(data, ...) {
+      data |> 
+        ggplot(aes(V1, V2)) +
+        geom_density_2d_filled() +
+        geom_point(col = "grey70") +
+        coord_cartesian(expand = FALSE) +
+        theme(legend.position = "none") +
+        labs(
+          x = NULL,
+          y = NULL,
+          subtitle = data$name
+        )
+    }
+  ) |> 
+  wrap_plots() +
+  plot_annotation(
+    title = "The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian copula"
+  )
+
+```
+
+
 # Methods
 
 ## Data
@@ -377,98 +466,98 @@ I wrote two different models in stan.
 #| eval: false
 #| column: page-inset
 functions {
-  real gev_lpdf(real y, real mu, real sigma, real xi) {
-    if (abs(xi) < 1e-10) {
-      real z = (y - mu) / sigma;
-      return -log(sigma) - z - exp(-z);
-    } else {
-      real z = 1 + xi * (y - mu) / sigma;
-      if (z > 0) {
-        return -log(sigma) - (1 + 1/xi) * log(z) - pow(z, -1/xi);
-      } else {
-        reject("Found incompatible GEV parameter values");
-      }
-    }
-  }
+real gev_lpdf(real y, real mu, real sigma, real xi) {
+if (abs(xi) < 1e-10) {
+real z = (y - mu) / sigma;
+return -log(sigma) - z - exp(-z);
+} else {
+real z = 1 + xi * (y - mu) / sigma;
+if (z > 0) {
+return -log(sigma) - (1 + 1/xi) * log(z) - pow(z, -1/xi);
+} else {
+reject("Found incompatible GEV parameter values");
+}
+}
+}
 
-  real normal_copula_prec_lpdf(vector U, matrix L) {
-    int N = rows(U);
-    vector[N] Z = inv_Phi(U);
-    vector[N] mu = rep_vector(0, N);
-    matrix[N, N] I = diag_matrix(rep_vector(1, N));
-    
-    return multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);
-  }
+real normal_copula_prec_lpdf(vector U, matrix L) {
+int N = rows(U);
+vector[N] Z = inv_Phi(U);
+vector[N] mu = rep_vector(0, N);
+matrix[N, N] I = diag_matrix(rep_vector(1, N));
+
+return multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);
+}
 }
 
 data {
-  int<lower = 0> n_replicate;
-  int<lower = 0> n_id;
-  array[n_replicate, n_id] real y;
-  array[n_replicate, n_id] real y_test;
+int<lower = 0> n_replicate;
+int<lower = 0> n_id;
+array[n_replicate, n_id] real y;
+array[n_replicate, n_id] real y_test;
 }
 
 parameters {
-  real<lower = 0> mu;
-  real<lower = 0> sigma;
-  real<lower = 0, upper = 0.5> xi;
-  real<lower = -1, upper = 1> rho;
+real<lower = 0> mu;
+real<lower = 0> sigma;
+real<lower = 0, upper = 0.5> xi;
+real<lower = -1, upper = 1> rho;
 }
 
 model {
-  # Defining the precision matrix Q
-  real rho_scaler = pow(1 - rho^2, -1);
-  real diag_inside = rho^2 * rho_scaler;
-  real off_diag = -rho * rho_scaler;
-  matrix[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));
-  Omega[2:(n_id - 1), 2:(n_id - 1)] = add_diag(Omega[2:(n_id - 1), 2:(n_id - 1)], diag_inside);
-  for (i in 1:n_id) {
-    if (i > 1) {
-      Omega[i, i - 1] = off_diag;
-    }
-    if (i < n_id) {
-      Omega[i, i + 1] = off_diag;
-    }
-  }
-  
-  
-  for (i in 1:n_replicate) {
-    vector[n_id] U;
-    for (j in 1:n_id) {
-      U[j] = gev_cdf(y[i, j] | mu, sigma, xi);
-      target += gev_lpdf(y[i, j] | mu, sigma, xi);
-    }
-    target += normal_copula_prec_lpdf(U | Omega);
-  }
+# Defining the precision matrix Q
+real rho_scaler = pow(1 - rho^2, -1);
+real diag_inside = rho^2 * rho_scaler;
+real off_diag = -rho * rho_scaler;
+matrix[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));
+Omega[2:(n_id - 1), 2:(n_id - 1)] = add_diag(Omega[2:(n_id - 1), 2:(n_id - 1)], diag_inside);
+for (i in 1:n_id) {
+if (i > 1) {
+Omega[i, i - 1] = off_diag;
+}
+if (i < n_id) {
+Omega[i, i + 1] = off_diag;
+}
+}
+
+
+for (i in 1:n_replicate) {
+vector[n_id] U;
+for (j in 1:n_id) {
+U[j] = gev_cdf(y[i, j] | mu, sigma, xi);
+target += gev_lpdf(y[i, j] | mu, sigma, xi);
+}
+target += normal_copula_prec_lpdf(U | Omega);
+}
 }
 
 generated quantities {
-  real log_lik = 0;
-  {
-    # Creating Q inside brackets, since I don't want to include it in the model output
-    real rho_scaler = pow(1 - rho^2, -1);
-    real diag_inside = rho^2 * rho_scaler;
-    real off_diag = -rho * rho_scaler;
-    matrix[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));
-    Omega[2:(n_id - 1), 2:(n_id - 1)] = add_diag(Omega[2:(n_id - 1), 2:(n_id - 1)], diag_inside);
-    for (i in 1:n_id) {
-      if (i > 1) {
-        Omega[i, i - 1] = off_diag;
-      }
-      if (i < n_id) {
-        Omega[i, i + 1] = off_diag;
-      }
-    }
-    
-    for (i in 1:n_replicate) {
-      vector[n_id] U;
-      for (j in 1:n_id) {
-        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);
-        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);
-      }
-      log_lik += normal_copula_prec_lpdf(U | Omega);
-    }
-  }
+real log_lik = 0;
+{
+# Creating Q inside brackets, since I don't want to include it in the model output
+real rho_scaler = pow(1 - rho^2, -1);
+real diag_inside = rho^2 * rho_scaler;
+real off_diag = -rho * rho_scaler;
+matrix[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));
+Omega[2:(n_id - 1), 2:(n_id - 1)] = add_diag(Omega[2:(n_id - 1), 2:(n_id - 1)], diag_inside);
+for (i in 1:n_id) {
+if (i > 1) {
+Omega[i, i - 1] = off_diag;
+}
+if (i < n_id) {
+Omega[i, i + 1] = off_diag;
+}
+}
+
+for (i in 1:n_replicate) {
+vector[n_id] U;
+for (j in 1:n_id) {
+U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);
+log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);
+}
+log_lik += normal_copula_prec_lpdf(U | Omega);
+}
+}
 }
 ```
 
@@ -479,55 +568,55 @@ generated quantities {
 #| column: page-inset
 
 functions {
-  real gev_lpdf(real y, real mu, real sigma, real xi) {
-    if (abs(xi) < 1e-10) {
-      real z = (y - mu) / sigma;
-      return -log(sigma) - z - exp(-z);
-    } else {
-      real z = 1 + xi * (y - mu) / sigma;
-      if (z > 0) {
-        return -log(sigma) - (1 + 1/xi) * log(z) - pow(z, -1/xi);
-      } else {
-        reject("Found incompatible GEV parameter values");
-      }
-    }
-  }
+real gev_lpdf(real y, real mu, real sigma, real xi) {
+if (abs(xi) < 1e-10) {
+real z = (y - mu) / sigma;
+return -log(sigma) - z - exp(-z);
+} else {
+real z = 1 + xi * (y - mu) / sigma;
+if (z > 0) {
+return -log(sigma) - (1 + 1/xi) * log(z) - pow(z, -1/xi);
+} else {
+reject("Found incompatible GEV parameter values");
+}
+}
+}
 }
 
 data {
-  int<lower = 0> n_replicate;
-  int<lower = 0> n_id;
-  array[n_replicate, n_id] real y;
-  array[n_replicate, n_id] real y_test;
+int<lower = 0> n_replicate;
+int<lower = 0> n_id;
+array[n_replicate, n_id] real y;
+array[n_replicate, n_id] real y_test;
 }
 
 parameters {
-  real<lower = 0> mu;
-  real<lower = 0> sigma;
-  real<lower = 0, upper = 0.5> xi;
+real<lower = 0> mu;
+real<lower = 0> sigma;
+real<lower = 0, upper = 0.5> xi;
 }
 
 transformed parameters {
-  
+
 }
 
 model {
-  for (i in 1:n_replicate) {
-    for (j in 1:n_id) {
-      target += gev_lpdf(y[i, j] | mu, sigma, xi);
-    }
-  }
+for (i in 1:n_replicate) {
+for (j in 1:n_id) {
+target += gev_lpdf(y[i, j] | mu, sigma, xi);
+}
+}
 }
 
 generated quantities {
-  real log_lik = 0;
-  {
-    for (i in 1:n_replicate) {
-      for (j in 1:n_id) {
-        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);
-      }
-    }
-  }
+real log_lik = 0;
+{
+for (i in 1:n_replicate) {
+for (j in 1:n_id) {
+log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);
+}
+}
+}
 }
 
 ```

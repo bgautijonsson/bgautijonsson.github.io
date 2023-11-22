@@ -652,7 +652,7 @@ font-style: inherit;">node2 =</span> node2</span>
 </section>
 <section id="model" class="level1">
 <h1>Model</h1>
-<p>The model is written below in math and Stan code.</p>
+<p>The model is written below in mathematical notation and Stan code.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" aria-controls="tabset-1-1" aria-selected="true">Math</a></li><li class="nav-item"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" aria-controls="tabset-1-2" aria-selected="false">Stan</a></li></ul>
 <div class="tab-content">

@@ -8,7 +8,7 @@
 
 <meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
 <meta name="dcterms.date" content="2023-11-21">
-<meta name="description" content="For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.">
+<meta name="description" content="For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors.">
 
 <title>bggj - Spatially Dependent Generalized Extreme Value Parameters</title>
 <style>
@@ -191,7 +191,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
             <p class="subtitle lead">Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters</p>
                   <div>
         <div class="description">
-          <p>For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up an do my best to explain a Stan program that puts spatial dependence on these parameters using an instrinsic conditional autoregression prior based on each locations neighbors.</p>
+          <p>For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors.</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -592,7 +592,7 @@ Simpson, Daniel P., Håvard Rue, Thiago G. Martins, Andrea Riebler, and Sigrunn 
 </section>
 <section id="model" class="level1">
 <h1>Model</h1>
-<p>The model is written below in math and Stan code.</p>
+<p>The model is written below in mathematical notation and Stan code.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Math</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Stan</a></li></ul>
 <div class="tab-content">
