@@ -512,8 +512,8 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>          [,1]       [,2]       [,3]     [,4]        [,5]
-[1,] -2.565599 -0.7567668 -0.2584833 1.430638 0.004611752</code></pre>
+<pre><code>         [,1]     [,2]     [,3]      [,4]      [,5]
+[1,] 1.675126 1.376576 1.398109 0.7627564 0.2468338</code></pre>
 </div>
 </div>
 <p>We will want more than one observation from each <em>“site”</em>, so we write a helped function for tidying this output into a tibble.</p>
@@ -547,23 +547,23 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="mqasmdehcw" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mqasmdehcw table {
+<div id="bzgnnzjhlo" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#bzgnnzjhlo table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#mqasmdehcw thead, #mqasmdehcw tbody, #mqasmdehcw tfoot, #mqasmdehcw tr, #mqasmdehcw td, #mqasmdehcw th {
+#bzgnnzjhlo thead, #bzgnnzjhlo tbody, #bzgnnzjhlo tfoot, #bzgnnzjhlo tr, #bzgnnzjhlo td, #bzgnnzjhlo th {
   border-style: none;
 }
 
-#mqasmdehcw p {
+#bzgnnzjhlo p {
   margin: 0;
   padding: 0;
 }
 
-#mqasmdehcw .gt_table {
+#bzgnnzjhlo .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -589,12 +589,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_caption {
+#bzgnnzjhlo .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#mqasmdehcw .gt_title {
+#bzgnnzjhlo .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -606,7 +606,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#mqasmdehcw .gt_subtitle {
+#bzgnnzjhlo .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -618,7 +618,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#mqasmdehcw .gt_heading {
+#bzgnnzjhlo .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -630,13 +630,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_bottom_border {
+#bzgnnzjhlo .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_col_headings {
+#bzgnnzjhlo .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -651,7 +651,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_col_heading {
+#bzgnnzjhlo .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -671,7 +671,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#mqasmdehcw .gt_column_spanner_outer {
+#bzgnnzjhlo .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -683,15 +683,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#mqasmdehcw .gt_column_spanner_outer:first-child {
+#bzgnnzjhlo .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mqasmdehcw .gt_column_spanner_outer:last-child {
+#bzgnnzjhlo .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mqasmdehcw .gt_column_spanner {
+#bzgnnzjhlo .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -703,11 +703,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#mqasmdehcw .gt_spanner_row {
+#bzgnnzjhlo .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#mqasmdehcw .gt_group_heading {
+#bzgnnzjhlo .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -733,7 +733,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#mqasmdehcw .gt_empty_group_heading {
+#bzgnnzjhlo .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -748,15 +748,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#mqasmdehcw .gt_from_md > :first-child {
+#bzgnnzjhlo .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#mqasmdehcw .gt_from_md > :last-child {
+#bzgnnzjhlo .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#mqasmdehcw .gt_row {
+#bzgnnzjhlo .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -775,7 +775,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#mqasmdehcw .gt_stub {
+#bzgnnzjhlo .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -788,7 +788,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mqasmdehcw .gt_stub_row_group {
+#bzgnnzjhlo .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -802,15 +802,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#mqasmdehcw .gt_row_group_first td {
+#bzgnnzjhlo .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#mqasmdehcw .gt_row_group_first th {
+#bzgnnzjhlo .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#mqasmdehcw .gt_summary_row {
+#bzgnnzjhlo .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -820,16 +820,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mqasmdehcw .gt_first_summary_row {
+#bzgnnzjhlo .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_first_summary_row.thick {
+#bzgnnzjhlo .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#mqasmdehcw .gt_last_summary_row {
+#bzgnnzjhlo .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -839,7 +839,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_grand_summary_row {
+#bzgnnzjhlo .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -849,7 +849,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mqasmdehcw .gt_first_grand_summary_row {
+#bzgnnzjhlo .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -859,7 +859,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_last_grand_summary_row_top {
+#bzgnnzjhlo .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -869,11 +869,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_striped {
+#bzgnnzjhlo .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mqasmdehcw .gt_table_body {
+#bzgnnzjhlo .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -882,7 +882,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_footnotes {
+#bzgnnzjhlo .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -896,7 +896,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_footnote {
+#bzgnnzjhlo .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -905,7 +905,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mqasmdehcw .gt_sourcenotes {
+#bzgnnzjhlo .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -919,7 +919,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mqasmdehcw .gt_sourcenote {
+#bzgnnzjhlo .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -927,68 +927,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mqasmdehcw .gt_left {
+#bzgnnzjhlo .gt_left {
   text-align: left;
 }
 
-#mqasmdehcw .gt_center {
+#bzgnnzjhlo .gt_center {
   text-align: center;
 }
 
-#mqasmdehcw .gt_right {
+#bzgnnzjhlo .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mqasmdehcw .gt_font_normal {
+#bzgnnzjhlo .gt_font_normal {
   font-weight: normal;
 }
 
-#mqasmdehcw .gt_font_bold {
+#bzgnnzjhlo .gt_font_bold {
   font-weight: bold;
 }
 
-#mqasmdehcw .gt_font_italic {
+#bzgnnzjhlo .gt_font_italic {
   font-style: italic;
 }
 
-#mqasmdehcw .gt_super {
+#bzgnnzjhlo .gt_super {
   font-size: 65%;
 }
 
-#mqasmdehcw .gt_footnote_marks {
+#bzgnnzjhlo .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#mqasmdehcw .gt_asterisk {
+#bzgnnzjhlo .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#mqasmdehcw .gt_indent_1 {
+#bzgnnzjhlo .gt_indent_1 {
   text-indent: 5px;
 }
 
-#mqasmdehcw .gt_indent_2 {
+#bzgnnzjhlo .gt_indent_2 {
   text-indent: 10px;
 }
 
-#mqasmdehcw .gt_indent_3 {
+#bzgnnzjhlo .gt_indent_3 {
   text-indent: 15px;
 }
 
-#mqasmdehcw .gt_indent_4 {
+#bzgnnzjhlo .gt_indent_4 {
   text-indent: 20px;
 }
 
-#mqasmdehcw .gt_indent_5 {
+#bzgnnzjhlo .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="mqasmdehcw" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="mqasmdehcw">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[0.403539546968351,-1.08135955962246,-0.745394516864418,-0.16235989607067,-0.80485773949381,-0.439984282237938,0.229021083306807,-0.180020470066276,-1.7557996304722,-1.38859916022831,0.125032315344734,-0.689956336897874,0.584096510995895,0.451655620321786,-0.945607352160775,1.06396871165744,-0.164732651579674,-0.584421991997708,0.913655047733595,0.972396970898358,1.25960373666065,0.600482388522512,0.744063902427303,0.547360162459707,-0.132018556488247,-0.214131314719595,-0.890305430895083,0.27327054212247,0.518996223878257,0.907387352660364,-0.755827573855755,-1.49846080781037,0.500904729727637,-0.405345784000656,-0.767057106561286,0.0462112696062323,0.428242524893364,1.73787997117032,1.46142995544163,-0.083484460501424,-0.977685420120512,0.518456480420229,1.77885043148906,0.461217300664786,0.00179192839122908,-0.225228959753106,-0.616217815397284,-0.697510536269603,-0.102935554016703,0.934888463383259]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.403539547","-1.081359560","-0.745394517","-0.162359896","-0.804857739","-0.439984282","0.229021083","-0.180020470","-1.755799630","-1.388599160","0.125032315","-0.689956337","0.584096511","0.451655620","-0.945607352","1.063968712","-0.164732652","-0.584421992","0.913655048","0.972396971","1.259603737","0.600482389","0.744063902","0.547360162","-0.132018556","-0.214131315","-0.890305431","0.273270542","0.518996224","0.907387353","-0.755827574","-1.498460808","0.500904730","-0.405345784","-0.767057107","0.046211270","0.428242525","1.737879971","1.461429955","-0.083484461","-0.977685420","0.518456480","1.778850431","0.461217301","0.001791928","-0.225228960","-0.616217815","-0.697510536","-0.102935554","0.934888463"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"mqasmdehcw","dataKey":"e4e2242c5705b0735956014a48c45352"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+<div id="bzgnnzjhlo" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="bzgnnzjhlo">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[1.22505665457402,1.27448601208445,2.10712940876571,1.18384754133247,-1.32271973117886,-1.43263665819171,-0.0938065575988356,-0.520319614874725,-1.34595947933128,1.07048170890064,1.58226814682803,1.88425827768995,0.643245110527554,0.294391471832164,1.15880911335168,0.236231512675783,1.01457304169725,1.16329101918799,1.4806752547426,0.0579720968361406,-1.83222310296355,-0.33273263879716,-1.04620875088013,-1.55833869522345,0.721220711302771,-0.0985507144714543,-0.291187106655954,0.735980828142414,1.44561573354731,0.928825687045977,-1.05258516241866,-0.785679316778183,-1.26958893705356,0.205205807531141,-0.052880153649068,-0.0371298350078277,1.14668224639133,-0.18012649698354,1.17453412825358,0.673524016526332,-1.53670899710289,-1.12650886526353,-1.10454855425745,-2.08325016539635,-0.633575494357546,-0.245582099665996,1.7337192889147,0.779671069252002,-0.0849667362660042,0.895138556472369]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1.22505665","1.27448601","2.10712941","1.18384754","-1.32271973","-1.43263666","-0.09380656","-0.52031961","-1.34595948","1.07048171","1.58226815","1.88425828","0.64324511","0.29439147","1.15880911","0.23623151","1.01457304","1.16329102","1.48067525","0.05797210","-1.83222310","-0.33273264","-1.04620875","-1.55833870","0.72122071","-0.09855071","-0.29118711","0.73598083","1.44561573","0.92882569","-1.05258516","-0.78567932","-1.26958894","0.20520581","-0.05288015","-0.03712984","1.14668225","-0.18012650","1.17453413","0.67352402","-1.53670900","-1.12650887","-1.10454855","-2.08325017","-0.63357549","-0.24558210","1.73371929","0.77967107","-0.08496674","0.89513856"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"bzgnnzjhlo","dataKey":"642e614412694592a6d0fd5e14c4731b"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -1033,23 +1033,23 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="zzmkebwgrd" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#zzmkebwgrd table {
+<div id="mkfqbkhbew" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mkfqbkhbew table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#zzmkebwgrd thead, #zzmkebwgrd tbody, #zzmkebwgrd tfoot, #zzmkebwgrd tr, #zzmkebwgrd td, #zzmkebwgrd th {
+#mkfqbkhbew thead, #mkfqbkhbew tbody, #mkfqbkhbew tfoot, #mkfqbkhbew tr, #mkfqbkhbew td, #mkfqbkhbew th {
   border-style: none;
 }
 
-#zzmkebwgrd p {
+#mkfqbkhbew p {
   margin: 0;
   padding: 0;
 }
 
-#zzmkebwgrd .gt_table {
+#mkfqbkhbew .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1075,12 +1075,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_caption {
+#mkfqbkhbew .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#zzmkebwgrd .gt_title {
+#mkfqbkhbew .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1092,7 +1092,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#zzmkebwgrd .gt_subtitle {
+#mkfqbkhbew .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1104,7 +1104,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#zzmkebwgrd .gt_heading {
+#mkfqbkhbew .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1116,13 +1116,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_bottom_border {
+#mkfqbkhbew .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_col_headings {
+#mkfqbkhbew .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1137,7 +1137,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_col_heading {
+#mkfqbkhbew .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1157,7 +1157,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#zzmkebwgrd .gt_column_spanner_outer {
+#mkfqbkhbew .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1169,15 +1169,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#zzmkebwgrd .gt_column_spanner_outer:first-child {
+#mkfqbkhbew .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#zzmkebwgrd .gt_column_spanner_outer:last-child {
+#mkfqbkhbew .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#zzmkebwgrd .gt_column_spanner {
+#mkfqbkhbew .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1189,11 +1189,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#zzmkebwgrd .gt_spanner_row {
+#mkfqbkhbew .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#zzmkebwgrd .gt_group_heading {
+#mkfqbkhbew .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1219,7 +1219,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#zzmkebwgrd .gt_empty_group_heading {
+#mkfqbkhbew .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1234,15 +1234,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#zzmkebwgrd .gt_from_md > :first-child {
+#mkfqbkhbew .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#zzmkebwgrd .gt_from_md > :last-child {
+#mkfqbkhbew .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#zzmkebwgrd .gt_row {
+#mkfqbkhbew .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1261,7 +1261,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#zzmkebwgrd .gt_stub {
+#mkfqbkhbew .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1274,7 +1274,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#zzmkebwgrd .gt_stub_row_group {
+#mkfqbkhbew .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1288,15 +1288,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#zzmkebwgrd .gt_row_group_first td {
+#mkfqbkhbew .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#zzmkebwgrd .gt_row_group_first th {
+#mkfqbkhbew .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#zzmkebwgrd .gt_summary_row {
+#mkfqbkhbew .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1306,16 +1306,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#zzmkebwgrd .gt_first_summary_row {
+#mkfqbkhbew .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_first_summary_row.thick {
+#mkfqbkhbew .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#zzmkebwgrd .gt_last_summary_row {
+#mkfqbkhbew .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1325,7 +1325,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_grand_summary_row {
+#mkfqbkhbew .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1335,7 +1335,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#zzmkebwgrd .gt_first_grand_summary_row {
+#mkfqbkhbew .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1345,7 +1345,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_last_grand_summary_row_top {
+#mkfqbkhbew .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1355,11 +1355,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_striped {
+#mkfqbkhbew .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#zzmkebwgrd .gt_table_body {
+#mkfqbkhbew .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1368,7 +1368,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_footnotes {
+#mkfqbkhbew .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1382,7 +1382,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_footnote {
+#mkfqbkhbew .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1391,7 +1391,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#zzmkebwgrd .gt_sourcenotes {
+#mkfqbkhbew .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1405,7 +1405,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#zzmkebwgrd .gt_sourcenote {
+#mkfqbkhbew .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1413,68 +1413,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#zzmkebwgrd .gt_left {
+#mkfqbkhbew .gt_left {
   text-align: left;
 }
 
-#zzmkebwgrd .gt_center {
+#mkfqbkhbew .gt_center {
   text-align: center;
 }
 
-#zzmkebwgrd .gt_right {
+#mkfqbkhbew .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#zzmkebwgrd .gt_font_normal {
+#mkfqbkhbew .gt_font_normal {
   font-weight: normal;
 }
 
-#zzmkebwgrd .gt_font_bold {
+#mkfqbkhbew .gt_font_bold {
   font-weight: bold;
 }
 
-#zzmkebwgrd .gt_font_italic {
+#mkfqbkhbew .gt_font_italic {
   font-style: italic;
 }
 
-#zzmkebwgrd .gt_super {
+#mkfqbkhbew .gt_super {
   font-size: 65%;
 }
 
-#zzmkebwgrd .gt_footnote_marks {
+#mkfqbkhbew .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#zzmkebwgrd .gt_asterisk {
+#mkfqbkhbew .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#zzmkebwgrd .gt_indent_1 {
+#mkfqbkhbew .gt_indent_1 {
   text-indent: 5px;
 }
 
-#zzmkebwgrd .gt_indent_2 {
+#mkfqbkhbew .gt_indent_2 {
   text-indent: 10px;
 }
 
-#zzmkebwgrd .gt_indent_3 {
+#mkfqbkhbew .gt_indent_3 {
   text-indent: 15px;
 }
 
-#zzmkebwgrd .gt_indent_4 {
+#mkfqbkhbew .gt_indent_4 {
   text-indent: 20px;
 }
 
-#zzmkebwgrd .gt_indent_5 {
+#mkfqbkhbew .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="zzmkebwgrd" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="zzmkebwgrd">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[0.403539546968351,-1.08135955962246,-0.745394516864418,-0.16235989607067,-0.80485773949381,-0.439984282237938,0.229021083306807,-0.180020470066276,-1.7557996304722,-1.38859916022831,0.125032315344734,-0.689956336897874,0.584096510995895,0.451655620321786,-0.945607352160775,1.06396871165744,-0.164732651579674,-0.584421991997708,0.913655047733595,0.972396970898358,1.25960373666065,0.600482388522512,0.744063902427303,0.547360162459707,-0.132018556488247,-0.214131314719595,-0.890305430895083,0.27327054212247,0.518996223878257,0.907387352660364,-0.755827573855755,-1.49846080781037,0.500904729727637,-0.405345784000656,-0.767057106561286,0.0462112696062323,0.428242524893364,1.73787997117032,1.46142995544163,-0.083484460501424,-0.977685420120512,0.518456480420229,1.77885043148906,0.461217300664786,0.00179192839122908,-0.225228959753106,-0.616217815397284,-0.697510536269603,-0.102935554016703,0.934888463383259],"U":[0.656724326018795,0.139768601605243,0.228016628812361,0.43551122502983,0.210450888880274,0.329974245630192,0.590573735264988,0.428568248968428,0.0395613137607606,0.0824773364383974,0.549751016435588,0.245110822942671,0.720422308969196,0.674241452907984,0.172174446441995,0.856328563131924,0.434577207910195,0.279468217135566,0.819550934292137,0.834573450847426,0.896093826554828,0.725907602707513,0.771581091843419,0.707934340664386,0.447484807130185,0.41522232824379,0.186650952889646,0.607677371096278,0.69811831273936,0.817899002420852,0.22487629112433,0.0670067839702118,0.691780913164105,0.342611678468984,0.221523781534029,0.518429069887524,0.665762720541394,0.958884017234447,0.928051257518566,0.466733166489656,0.164114967479337,0.697930091722737,0.962367856730879,0.677678644737928,0.500714875616134,0.410900580770385,0.26887538591961,0.242741673964621,0.459007059770782,0.825077108442584],"y":[8.71489946793197,4.03650576729152,4.8498738380583,6.55968601971496,4.69792469033086,5.69191829764836,7.98660569635812,6.50122370080338,2.68101206062457,3.37853250988576,7.58130666312823,4.99488148066993,9.53858757112097,8.92708078901809,4.3523179500181,12.1459593156581,6.55180412632675,5.28024974994101,11.2562587031681,11.5953379414632,13.4193786812384,9.61716988051371,10.3351335888582,9.36480011711469,6.66122929793066,6.38962030210518,4.48582047144659,8.1653755185154,9.23284125137817,11.2207095985896,4.82294879085583,3.16046932539105,9.14966612681499,5.79448734056992,4.79409520829399,7.28728562265466,8.82319231039965,17.1918863833899,14.8872847852914,6.82661911989531,4.27619184112288,9.23034867703143,17.5656979486439,8.96986219932198,7.12635875555807,6.35367972553918,5.19295158980949,4.97492820339579,6.75989242928078,11.377586171606]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.403539547","-1.081359560","-0.745394517","-0.162359896","-0.804857739","-0.439984282","0.229021083","-0.180020470","-1.755799630","-1.388599160","0.125032315","-0.689956337","0.584096511","0.451655620","-0.945607352","1.063968712","-0.164732652","-0.584421992","0.913655048","0.972396971","1.259603737","0.600482389","0.744063902","0.547360162","-0.132018556","-0.214131315","-0.890305431","0.273270542","0.518996224","0.907387353","-0.755827574","-1.498460808","0.500904730","-0.405345784","-0.767057107","0.046211270","0.428242525","1.737879971","1.461429955","-0.083484461","-0.977685420","0.518456480","1.778850431","0.461217301","0.001791928","-0.225228960","-0.616217815","-0.697510536","-0.102935554","0.934888463"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.65672433","0.13976860","0.22801663","0.43551123","0.21045089","0.32997425","0.59057374","0.42856825","0.03956131","0.08247734","0.54975102","0.24511082","0.72042231","0.67424145","0.17217445","0.85632856","0.43457721","0.27946822","0.81955093","0.83457345","0.89609383","0.72590760","0.77158109","0.70793434","0.44748481","0.41522233","0.18665095","0.60767737","0.69811831","0.81789900","0.22487629","0.06700678","0.69178091","0.34261168","0.22152378","0.51842907","0.66576272","0.95888402","0.92805126","0.46673317","0.16411497","0.69793009","0.96236786","0.67767864","0.50071488","0.41090058","0.26887539","0.24274167","0.45900706","0.82507711"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["8.714899","4.036506","4.849874","6.559686","4.697925","5.691918","7.986606","6.501224","2.681012","3.378533","7.581307","4.994881","9.538588","8.927081","4.352318","12.145959","6.551804","5.280250","11.256259","11.595338","13.419379","9.617170","10.335134","9.364800","6.661229","6.389620","4.485820","8.165376","9.232841","11.220710","4.822949","3.160469","9.149666","5.794487","4.794095","7.287286","8.823192","17.191886","14.887285","6.826619","4.276192","9.230349","17.565698","8.969862","7.126359","6.353680","5.192952","4.974928","6.759892","11.377586"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"zzmkebwgrd","dataKey":"8ab26e3bdcba1d829590c49e5726f6f4"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
+<div id="mkfqbkhbew" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="mkfqbkhbew">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[1.22505665457402,1.27448601208445,2.10712940876571,1.18384754133247,-1.32271973117886,-1.43263665819171,-0.0938065575988356,-0.520319614874725,-1.34595947933128,1.07048170890064,1.58226814682803,1.88425827768995,0.643245110527554,0.294391471832164,1.15880911335168,0.236231512675783,1.01457304169725,1.16329101918799,1.4806752547426,0.0579720968361406,-1.83222310296355,-0.33273263879716,-1.04620875088013,-1.55833869522345,0.721220711302771,-0.0985507144714543,-0.291187106655954,0.735980828142414,1.44561573354731,0.928825687045977,-1.05258516241866,-0.785679316778183,-1.26958893705356,0.205205807531141,-0.052880153649068,-0.0371298350078277,1.14668224639133,-0.18012649698354,1.17453412825358,0.673524016526332,-1.53670899710289,-1.12650886526353,-1.10454855425745,-2.08325016539635,-0.633575494357546,-0.245582099665996,1.7337192889147,0.779671069252002,-0.0849667362660042,0.895138556472369],"U":[0.889723062424867,0.898754386570204,0.982446818116525,0.881763290468224,0.092964299683076,0.0759808499412801,0.462631411224001,0.301420413413487,0.0891577924453222,0.857798731079,0.943205815430715,0.970234975983753,0.739967466784821,0.615770608584826,0.876732999030424,0.593373486089279,0.844845302343069,0.877644275904874,0.930653434473299,0.523114572682896,0.0334590940991625,0.369668054908007,0.147732331768682,0.0595764903657734,0.764613134542581,0.460747501794669,0.385454111467909,0.76912881733245,0.925857494402682,0.82351028498007,0.146265580202921,0.216027691740998,0.102115546075075,0.581294333878015,0.478913698681088,0.485190741763941,0.874243514728214,0.428526630615966,0.87990942482989,0.74969301254051,0.0621822934464475,0.129975095128984,0.134677626744326,0.0186142133146528,0.263178948869464,0.403002873671301,0.958516048827237,0.782207744022803,0.466143917831447,0.814643487365097],"y":[13.1843530718372,13.5220278555503,20.9057226222937,12.9098491301811,3.51344831732456,3.2901043560528,6.79113489838206,5.45983489648936,3.46548962705163,12.1861803245954,15.8499130164419,18.5692628264736,9.82541268456005,8.25208222519009,12.7460998969034,8.0154731372388,11.8455335271121,12.7752447078194,15.0361972943569,7.33046102552299,2.54643348150647,6.01458947244574,4.11670625951086,3.04510880630131,10.2172722702125,6.77488243623006,6.14371577467174,10.293266273043,14.7661323617782,11.3428017820579,4.10207779655605,4.7465344044588,3.62462214882786,7.89197657603716,6.93282727739344,6.98807663272107,12.6676026647264,6.50087412935479,12.8486749012667,9.97568443814901,3.08650402244104,3.93505037255801,3.98418122931354,2.12709815025528,5.14578092002082,6.28822823296289,17.1544176902147,10.521705604685,6.82151311976498,11.1515818068816]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1.22505665","1.27448601","2.10712941","1.18384754","-1.32271973","-1.43263666","-0.09380656","-0.52031961","-1.34595948","1.07048171","1.58226815","1.88425828","0.64324511","0.29439147","1.15880911","0.23623151","1.01457304","1.16329102","1.48067525","0.05797210","-1.83222310","-0.33273264","-1.04620875","-1.55833870","0.72122071","-0.09855071","-0.29118711","0.73598083","1.44561573","0.92882569","-1.05258516","-0.78567932","-1.26958894","0.20520581","-0.05288015","-0.03712984","1.14668225","-0.18012650","1.17453413","0.67352402","-1.53670900","-1.12650887","-1.10454855","-2.08325017","-0.63357549","-0.24558210","1.73371929","0.77967107","-0.08496674","0.89513856"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.88972306","0.89875439","0.98244682","0.88176329","0.09296430","0.07598085","0.46263141","0.30142041","0.08915779","0.85779873","0.94320582","0.97023498","0.73996747","0.61577061","0.87673300","0.59337349","0.84484530","0.87764428","0.93065343","0.52311457","0.03345909","0.36966805","0.14773233","0.05957649","0.76461313","0.46074750","0.38545411","0.76912882","0.92585749","0.82351028","0.14626558","0.21602769","0.10211555","0.58129433","0.47891370","0.48519074","0.87424351","0.42852663","0.87990942","0.74969301","0.06218229","0.12997510","0.13467763","0.01861421","0.26317895","0.40300287","0.95851605","0.78220774","0.46614392","0.81464349"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["13.184353","13.522028","20.905723","12.909849","3.513448","3.290104","6.791135","5.459835","3.465490","12.186180","15.849913","18.569263","9.825413","8.252082","12.746100","8.015473","11.845534","12.775245","15.036197","7.330461","2.546433","6.014589","4.116706","3.045109","10.217272","6.774882","6.143716","10.293266","14.766132","11.342802","4.102078","4.746534","3.624622","7.891977","6.932827","6.988077","12.667603","6.500874","12.848675","9.975684","3.086504","3.935050","3.984181","2.127098","5.145781","6.288228","17.154418","10.521706","6.821513","11.151582"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"mkfqbkhbew","dataKey":"b1a75b63323a19a24a0a2d42a30e4d33"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -1594,165 +1594,194 @@ R = Q^{-1} = \begin{bmatrix}
 <li>A model that assumes i.i.d. GEV margins</li>
 </ol>
 <div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">AR(1) Copula</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">i.i.d.</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">AR(1) Copula</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">i.i.d.</a></li></ul>
 <div class="tab-content page-columns page-full">
-<div id="tabset-1-1" class="tab-pane active page-columns page-full" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div class="cell column-page-inset" data-output.var="model1">
+<div id="tabset-3-1" class="tab-pane active page-columns page-full" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Math</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Stan</a></li></ul>
+<div class="tab-content page-columns page-full">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<p>Our data</p>
+<p><span class="math display">\[
+\begin{gathered}
+H(\mathbf y \vert \mu, \sigma, \xi, R) = \Phi_d\left(\mathrm{GEV}(y_1 \vert \mu, \sigma, \xi), \dots, \mathrm{GEV}(y_d \vert \mu, \sigma, \xi) \vert R\right) \\
+R \sim \mathrm{AR}(1)
+\end{gathered}
+\]</span></p>
+</div>
+<div id="tabset-1-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell column-page-right" data-output.var="model1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = (y - mu) / sigma;</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> normal_copula_prec_lpdf(<span class="dt">vector</span> U, <span class="dt">matrix</span> L) {</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> N = rows(U);</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[N] mu = rep_vector(<span class="dv">0</span>, N);</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="dt">matrix</span>[N, N] I = diag_matrix(rep_vector(<span class="dv">1</span>, N));</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Defining the precision matrix Q</span></span>
-<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
-<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a><span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
-<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &lt; n_id) {</span>
-<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
-<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">  Log pdf of GEV distribution</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">  Log pdf of a normal copula with precision matrix parametrization</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_copula_prec_lpdf(<span class="dt">vector</span> U, <span class="dt">matrix</span> L) {</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(U);</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] mu = rep_vector(<span class="dv">0</span>, N);</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[N, N] I = diag_matrix(rep_vector(<span class="dv">1</span>, N));</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co">  Function for creating AR(1) precision matrix</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> AR1_precision_matrix(<span class="dt">int</span> n_id, <span class="dt">real</span> rho) {</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &lt; n_id) {</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>        Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Omega;</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
 <span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[n_id] U;</span>
-<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> normal_copula_prec_lpdf(U | Omega);</span>
-<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
-<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating Q inside brackets, since I don't want to include it in the model output</span></span>
-<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
-<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
-<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
-<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a><span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
-<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
-<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
-<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
-<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (i &lt; n_id) {</span>
-<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
-<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a><span class="dt">vector</span>[n_id] U;</span>
-<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>log_lik += normal_copula_prec_lpdf(U | Omega);</span>
-<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[n_id, n_id] Omega = AR1_precision_matrix(n_id, rho);</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>      U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> normal_copula_prec_lpdf(U | Omega);</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[n_id, n_id] Omega = AR1_precision_matrix(n_id, rho);</span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>      log_lik += normal_copula_prec_lpdf(U | Omega);</span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
-<div id="tabset-1-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="cell column-page-inset" data-output.var="model2">
+</div>
+</div>
+</div>
+<div id="tabset-3-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Math</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Stan</a></li></ul>
+<div class="tab-content page-columns page-full">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<p><span class="math display">\[
+\begin{gathered}
+y_1, \dots, y_d \overset{iid}{\sim} \mathrm{GEV}(\mu, \sigma, \xi)
+\end{gathered}
+\]</span></p>
+</div>
+<div id="tabset-2-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell column-page-right" data-output.var="model2">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = (y - mu) / sigma;</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
-<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">  Log pdf of GEV distribution</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>

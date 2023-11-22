@@ -238,6 +238,13 @@
     "text": "Prepare the data for Stan\n\n\nCode\nprecip_matrix &lt;- model_precip |&gt;\n  pivot_wider(names_from = station, values_from = precip) |&gt;\n  column_to_rownames(\"year\") |&gt;\n  as.matrix()\n\nN_stations &lt;- ncol(precip_matrix)\nN_years &lt;- nrow(precip_matrix)\n\n\n\n\nCode\nupdate_names &lt;- function(table, variable) {\n  table |&gt; \n    inner_join(\n      new_names,\n      by = join_by({{ variable }} == station)\n    ) |&gt; \n    mutate(\n      \"{{variable}}\" := new_name\n    ) |&gt; \n    select(-new_name)\n}\n\n\n\n\nCode\nedges &lt;- twelve_neighbors |&gt;\n  filter(\n    type %in% c(\"e\", \"n\", \"w\", \"s\")\n  ) |&gt;\n  inner_join(\n    model_stations,\n    by = join_by(station)\n  ) |&gt;\n  semi_join(\n    model_stations,\n    by = join_by(neighbor == station)\n  ) |&gt;\n  select(station, neighbor) |&gt; \n  update_names(station) |&gt; \n  update_names(neighbor)\n\nN_neighbors = nrow(edges)\nnode1 &lt;- edges$station\nnode2 &lt;- edges$neighbor\n\n\n\n\nCode\nstan_data &lt;- list(\n  N_stations = N_stations,\n  N_years = N_years,\n  precip = precip_matrix,\n  N_neighbors = N_neighbors,\n  node1 = node1,\n  node2 = node2\n)"
   },
   {
+    "objectID": "posts/icar_gev/index.html#bym2-parameters",
+    "href": "posts/icar_gev/index.html#bym2-parameters",
+    "title": "Spatially Dependent Generalized Extreme Value Parameters",
+    "section": "BYM2 Parameters",
+    "text": "BYM2 Parameters\n\n\nCode\nbym2 &lt;- draws |&gt; \n  subset_draws(variable = c(\"^rho_\", \"sigma_\", \"mu_\"), regex = TRUE) |&gt; \n  summarise_draws()\n\nbym2 |&gt; \n  mutate(\n    variable = str_c(\"&lt;b&gt;&\", variable, \";&lt;/sub&gt;&lt;/b&gt;\") |&gt; \n      str_replace(\"_\", \";&lt;sub&gt;&\")\n  ) |&gt; \n  gt() |&gt; \n  tab_header(\n    title = \"Our BYM2 hyperparameters point to a large degree of spatial variation\"\n  ) |&gt; \n  fmt_markdown(\n    columns = variable\n  ) |&gt; \n  fmt_number(\n    columns = mean:rhat,\n    decimals = 3\n  ) |&gt; \n  fmt_number(\n    columns = ess_bulk:ess_tail,\n    decimals = 0\n  ) |&gt; \n  tab_options(table.width = pct(100)) |&gt; \n  opt_interactive( \n    use_sorting = FALSE, \n    use_compact_mode = TRUE,\n    use_highlight = TRUE,\n    page_size_default = 12\n  )\n\n\n\n\n\nOur BYM2 hyperparameters point to a large degree of spatial variation"
+  },
+  {
     "objectID": "posts/icar_gev/index.html#pairs-plot-for-station-5",
     "href": "posts/icar_gev/index.html#pairs-plot-for-station-5",
     "title": "Spatially Dependent Generalized Extreme Value Parameters",
