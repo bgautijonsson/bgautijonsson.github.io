@@ -512,8 +512,8 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample_gaussian_variables</span>(<span class="at">n_replicates =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>         [,1]     [,2]     [,3]      [,4]      [,5]
-[1,] 1.675126 1.376576 1.398109 0.7627564 0.2468338</code></pre>
+<pre><code>           [,1]     [,2]       [,3]       [,4]       [,5]
+[1,] -0.6014966 -1.62685 -0.6193135 -0.7935626 -0.9967508</code></pre>
 </div>
 </div>
 <p>We will want more than one observation from each <em>“site”</em>, so we write a helped function for tidying this output into a tibble.</p>
@@ -547,23 +547,23 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="bzgnnzjhlo" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#bzgnnzjhlo table {
+<div id="hqrkpgksss" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#hqrkpgksss table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#bzgnnzjhlo thead, #bzgnnzjhlo tbody, #bzgnnzjhlo tfoot, #bzgnnzjhlo tr, #bzgnnzjhlo td, #bzgnnzjhlo th {
+#hqrkpgksss thead, #hqrkpgksss tbody, #hqrkpgksss tfoot, #hqrkpgksss tr, #hqrkpgksss td, #hqrkpgksss th {
   border-style: none;
 }
 
-#bzgnnzjhlo p {
+#hqrkpgksss p {
   margin: 0;
   padding: 0;
 }
 
-#bzgnnzjhlo .gt_table {
+#hqrkpgksss .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -589,12 +589,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_caption {
+#hqrkpgksss .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#bzgnnzjhlo .gt_title {
+#hqrkpgksss .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -606,7 +606,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#bzgnnzjhlo .gt_subtitle {
+#hqrkpgksss .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -618,7 +618,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#bzgnnzjhlo .gt_heading {
+#hqrkpgksss .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -630,13 +630,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_bottom_border {
+#hqrkpgksss .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_col_headings {
+#hqrkpgksss .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -651,7 +651,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_col_heading {
+#hqrkpgksss .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -671,7 +671,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#bzgnnzjhlo .gt_column_spanner_outer {
+#hqrkpgksss .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -683,15 +683,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#bzgnnzjhlo .gt_column_spanner_outer:first-child {
+#hqrkpgksss .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#bzgnnzjhlo .gt_column_spanner_outer:last-child {
+#hqrkpgksss .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#bzgnnzjhlo .gt_column_spanner {
+#hqrkpgksss .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -703,11 +703,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#bzgnnzjhlo .gt_spanner_row {
+#hqrkpgksss .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#bzgnnzjhlo .gt_group_heading {
+#hqrkpgksss .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -733,7 +733,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#bzgnnzjhlo .gt_empty_group_heading {
+#hqrkpgksss .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -748,15 +748,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#bzgnnzjhlo .gt_from_md > :first-child {
+#hqrkpgksss .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#bzgnnzjhlo .gt_from_md > :last-child {
+#hqrkpgksss .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#bzgnnzjhlo .gt_row {
+#hqrkpgksss .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -775,7 +775,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#bzgnnzjhlo .gt_stub {
+#hqrkpgksss .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -788,7 +788,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#bzgnnzjhlo .gt_stub_row_group {
+#hqrkpgksss .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -802,15 +802,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#bzgnnzjhlo .gt_row_group_first td {
+#hqrkpgksss .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#bzgnnzjhlo .gt_row_group_first th {
+#hqrkpgksss .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#bzgnnzjhlo .gt_summary_row {
+#hqrkpgksss .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -820,16 +820,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#bzgnnzjhlo .gt_first_summary_row {
+#hqrkpgksss .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_first_summary_row.thick {
+#hqrkpgksss .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#bzgnnzjhlo .gt_last_summary_row {
+#hqrkpgksss .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -839,7 +839,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_grand_summary_row {
+#hqrkpgksss .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -849,7 +849,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#bzgnnzjhlo .gt_first_grand_summary_row {
+#hqrkpgksss .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -859,7 +859,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_last_grand_summary_row_top {
+#hqrkpgksss .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -869,11 +869,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_striped {
+#hqrkpgksss .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#bzgnnzjhlo .gt_table_body {
+#hqrkpgksss .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -882,7 +882,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_footnotes {
+#hqrkpgksss .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -896,7 +896,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_footnote {
+#hqrkpgksss .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -905,7 +905,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#bzgnnzjhlo .gt_sourcenotes {
+#hqrkpgksss .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -919,7 +919,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#bzgnnzjhlo .gt_sourcenote {
+#hqrkpgksss .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -927,68 +927,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#bzgnnzjhlo .gt_left {
+#hqrkpgksss .gt_left {
   text-align: left;
 }
 
-#bzgnnzjhlo .gt_center {
+#hqrkpgksss .gt_center {
   text-align: center;
 }
 
-#bzgnnzjhlo .gt_right {
+#hqrkpgksss .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#bzgnnzjhlo .gt_font_normal {
+#hqrkpgksss .gt_font_normal {
   font-weight: normal;
 }
 
-#bzgnnzjhlo .gt_font_bold {
+#hqrkpgksss .gt_font_bold {
   font-weight: bold;
 }
 
-#bzgnnzjhlo .gt_font_italic {
+#hqrkpgksss .gt_font_italic {
   font-style: italic;
 }
 
-#bzgnnzjhlo .gt_super {
+#hqrkpgksss .gt_super {
   font-size: 65%;
 }
 
-#bzgnnzjhlo .gt_footnote_marks {
+#hqrkpgksss .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#bzgnnzjhlo .gt_asterisk {
+#hqrkpgksss .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#bzgnnzjhlo .gt_indent_1 {
+#hqrkpgksss .gt_indent_1 {
   text-indent: 5px;
 }
 
-#bzgnnzjhlo .gt_indent_2 {
+#hqrkpgksss .gt_indent_2 {
   text-indent: 10px;
 }
 
-#bzgnnzjhlo .gt_indent_3 {
+#hqrkpgksss .gt_indent_3 {
   text-indent: 15px;
 }
 
-#bzgnnzjhlo .gt_indent_4 {
+#hqrkpgksss .gt_indent_4 {
   text-indent: 20px;
 }
 
-#bzgnnzjhlo .gt_indent_5 {
+#hqrkpgksss .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="bzgnnzjhlo" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="bzgnnzjhlo">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[1.22505665457402,1.27448601208445,2.10712940876571,1.18384754133247,-1.32271973117886,-1.43263665819171,-0.0938065575988356,-0.520319614874725,-1.34595947933128,1.07048170890064,1.58226814682803,1.88425827768995,0.643245110527554,0.294391471832164,1.15880911335168,0.236231512675783,1.01457304169725,1.16329101918799,1.4806752547426,0.0579720968361406,-1.83222310296355,-0.33273263879716,-1.04620875088013,-1.55833869522345,0.721220711302771,-0.0985507144714543,-0.291187106655954,0.735980828142414,1.44561573354731,0.928825687045977,-1.05258516241866,-0.785679316778183,-1.26958893705356,0.205205807531141,-0.052880153649068,-0.0371298350078277,1.14668224639133,-0.18012649698354,1.17453412825358,0.673524016526332,-1.53670899710289,-1.12650886526353,-1.10454855425745,-2.08325016539635,-0.633575494357546,-0.245582099665996,1.7337192889147,0.779671069252002,-0.0849667362660042,0.895138556472369]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1.22505665","1.27448601","2.10712941","1.18384754","-1.32271973","-1.43263666","-0.09380656","-0.52031961","-1.34595948","1.07048171","1.58226815","1.88425828","0.64324511","0.29439147","1.15880911","0.23623151","1.01457304","1.16329102","1.48067525","0.05797210","-1.83222310","-0.33273264","-1.04620875","-1.55833870","0.72122071","-0.09855071","-0.29118711","0.73598083","1.44561573","0.92882569","-1.05258516","-0.78567932","-1.26958894","0.20520581","-0.05288015","-0.03712984","1.14668225","-0.18012650","1.17453413","0.67352402","-1.53670900","-1.12650887","-1.10454855","-2.08325017","-0.63357549","-0.24558210","1.73371929","0.77967107","-0.08496674","0.89513856"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"bzgnnzjhlo","dataKey":"642e614412694592a6d0fd5e14c4731b"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+<div id="hqrkpgksss" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="hqrkpgksss">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.0689463971460363,-0.670105863351373,-0.183052302013022,0.330986067228553,-0.68430374288241,1.35453248917346,0.432299629869385,0.0153089985407423,0.459466585101133,0.994071284557335,0.808221056949301,0.212634004549346,-1.2059926749568,-0.114047661020352,0.163956781434002,-0.171628843327521,0.194668157162326,-0.412305580304896,2.25610038005334,0.0287347825649252,0.224295767888284,-0.315836069399563,-1.05346621929327,0.169034384893002,0.257823592198335,1.95523285041982,2.36911434871492,2.38873061406698,3.03393112472058,0.762015656896846,-0.755391534627675,0.254442927997106,1.58227789142672,0.427854736395368,0.0344610831309483,-0.304559674039165,-0.789716067878631,-1.08191724688507,-0.457638001623641,0.0768987280649691,-0.362155452496405,0.12954523768725,-1.33649544787323,-1.48541401835805,-0.0524511351287447,-0.0149526483126476,-0.314617198984162,0.0770878350368148,0.252686936653335,0.0956333690519049]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.06894640","-0.67010586","-0.18305230","0.33098607","-0.68430374","1.35453249","0.43229963","0.01530900","0.45946659","0.99407128","0.80822106","0.21263400","-1.20599267","-0.11404766","0.16395678","-0.17162884","0.19466816","-0.41230558","2.25610038","0.02873478","0.22429577","-0.31583607","-1.05346622","0.16903438","0.25782359","1.95523285","2.36911435","2.38873061","3.03393112","0.76201566","-0.75539153","0.25444293","1.58227789","0.42785474","0.03446108","-0.30455967","-0.78971607","-1.08191725","-0.45763800","0.07689873","-0.36215545","0.12954524","-1.33649545","-1.48541402","-0.05245114","-0.01495265","-0.31461720","0.07708784","0.25268694","0.09563337"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"hqrkpgksss","dataKey":"55c05ca1d7ade8772874963f324b77a9"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -1033,23 +1033,23 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="mkfqbkhbew" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mkfqbkhbew table {
+<div id="qrbkddgxis" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#qrbkddgxis table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#mkfqbkhbew thead, #mkfqbkhbew tbody, #mkfqbkhbew tfoot, #mkfqbkhbew tr, #mkfqbkhbew td, #mkfqbkhbew th {
+#qrbkddgxis thead, #qrbkddgxis tbody, #qrbkddgxis tfoot, #qrbkddgxis tr, #qrbkddgxis td, #qrbkddgxis th {
   border-style: none;
 }
 
-#mkfqbkhbew p {
+#qrbkddgxis p {
   margin: 0;
   padding: 0;
 }
 
-#mkfqbkhbew .gt_table {
+#qrbkddgxis .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1075,12 +1075,12 @@ R = Q^{-1} = \begin{bmatrix}
   border-left-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_caption {
+#qrbkddgxis .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#mkfqbkhbew .gt_title {
+#qrbkddgxis .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1092,7 +1092,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-width: 0;
 }
 
-#mkfqbkhbew .gt_subtitle {
+#qrbkddgxis .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1104,7 +1104,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-width: 0;
 }
 
-#mkfqbkhbew .gt_heading {
+#qrbkddgxis .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1116,13 +1116,13 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_bottom_border {
+#qrbkddgxis .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_col_headings {
+#qrbkddgxis .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1137,7 +1137,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_col_heading {
+#qrbkddgxis .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1157,7 +1157,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#mkfqbkhbew .gt_column_spanner_outer {
+#qrbkddgxis .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1169,15 +1169,15 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 4px;
 }
 
-#mkfqbkhbew .gt_column_spanner_outer:first-child {
+#qrbkddgxis .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mkfqbkhbew .gt_column_spanner_outer:last-child {
+#qrbkddgxis .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mkfqbkhbew .gt_column_spanner {
+#qrbkddgxis .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1189,11 +1189,11 @@ R = Q^{-1} = \begin{bmatrix}
   width: 100%;
 }
 
-#mkfqbkhbew .gt_spanner_row {
+#qrbkddgxis .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#mkfqbkhbew .gt_group_heading {
+#qrbkddgxis .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1219,7 +1219,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-align: left;
 }
 
-#mkfqbkhbew .gt_empty_group_heading {
+#qrbkddgxis .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1234,15 +1234,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: middle;
 }
 
-#mkfqbkhbew .gt_from_md > :first-child {
+#qrbkddgxis .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#mkfqbkhbew .gt_from_md > :last-child {
+#qrbkddgxis .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#mkfqbkhbew .gt_row {
+#qrbkddgxis .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1261,7 +1261,7 @@ R = Q^{-1} = \begin{bmatrix}
   overflow-x: hidden;
 }
 
-#mkfqbkhbew .gt_stub {
+#qrbkddgxis .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1274,7 +1274,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mkfqbkhbew .gt_stub_row_group {
+#qrbkddgxis .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1288,15 +1288,15 @@ R = Q^{-1} = \begin{bmatrix}
   vertical-align: top;
 }
 
-#mkfqbkhbew .gt_row_group_first td {
+#qrbkddgxis .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#mkfqbkhbew .gt_row_group_first th {
+#qrbkddgxis .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#mkfqbkhbew .gt_summary_row {
+#qrbkddgxis .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1306,16 +1306,16 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mkfqbkhbew .gt_first_summary_row {
+#qrbkddgxis .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_first_summary_row.thick {
+#qrbkddgxis .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#mkfqbkhbew .gt_last_summary_row {
+#qrbkddgxis .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1325,7 +1325,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_grand_summary_row {
+#qrbkddgxis .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1335,7 +1335,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mkfqbkhbew .gt_first_grand_summary_row {
+#qrbkddgxis .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1345,7 +1345,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-top-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_last_grand_summary_row_top {
+#qrbkddgxis .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1355,11 +1355,11 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_striped {
+#qrbkddgxis .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mkfqbkhbew .gt_table_body {
+#qrbkddgxis .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1368,7 +1368,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-bottom-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_footnotes {
+#qrbkddgxis .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1382,7 +1382,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_footnote {
+#qrbkddgxis .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1391,7 +1391,7 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mkfqbkhbew .gt_sourcenotes {
+#qrbkddgxis .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1405,7 +1405,7 @@ R = Q^{-1} = \begin{bmatrix}
   border-right-color: #D3D3D3;
 }
 
-#mkfqbkhbew .gt_sourcenote {
+#qrbkddgxis .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1413,68 +1413,68 @@ R = Q^{-1} = \begin{bmatrix}
   padding-right: 5px;
 }
 
-#mkfqbkhbew .gt_left {
+#qrbkddgxis .gt_left {
   text-align: left;
 }
 
-#mkfqbkhbew .gt_center {
+#qrbkddgxis .gt_center {
   text-align: center;
 }
 
-#mkfqbkhbew .gt_right {
+#qrbkddgxis .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mkfqbkhbew .gt_font_normal {
+#qrbkddgxis .gt_font_normal {
   font-weight: normal;
 }
 
-#mkfqbkhbew .gt_font_bold {
+#qrbkddgxis .gt_font_bold {
   font-weight: bold;
 }
 
-#mkfqbkhbew .gt_font_italic {
+#qrbkddgxis .gt_font_italic {
   font-style: italic;
 }
 
-#mkfqbkhbew .gt_super {
+#qrbkddgxis .gt_super {
   font-size: 65%;
 }
 
-#mkfqbkhbew .gt_footnote_marks {
+#qrbkddgxis .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#mkfqbkhbew .gt_asterisk {
+#qrbkddgxis .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#mkfqbkhbew .gt_indent_1 {
+#qrbkddgxis .gt_indent_1 {
   text-indent: 5px;
 }
 
-#mkfqbkhbew .gt_indent_2 {
+#qrbkddgxis .gt_indent_2 {
   text-indent: 10px;
 }
 
-#mkfqbkhbew .gt_indent_3 {
+#qrbkddgxis .gt_indent_3 {
   text-indent: 15px;
 }
 
-#mkfqbkhbew .gt_indent_4 {
+#qrbkddgxis .gt_indent_4 {
   text-indent: 20px;
 }
 
-#mkfqbkhbew .gt_indent_5 {
+#qrbkddgxis .gt_indent_5 {
   text-indent: 25px;
 }
 </style>
-<div id="mkfqbkhbew" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="mkfqbkhbew">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[1.22505665457402,1.27448601208445,2.10712940876571,1.18384754133247,-1.32271973117886,-1.43263665819171,-0.0938065575988356,-0.520319614874725,-1.34595947933128,1.07048170890064,1.58226814682803,1.88425827768995,0.643245110527554,0.294391471832164,1.15880911335168,0.236231512675783,1.01457304169725,1.16329101918799,1.4806752547426,0.0579720968361406,-1.83222310296355,-0.33273263879716,-1.04620875088013,-1.55833869522345,0.721220711302771,-0.0985507144714543,-0.291187106655954,0.735980828142414,1.44561573354731,0.928825687045977,-1.05258516241866,-0.785679316778183,-1.26958893705356,0.205205807531141,-0.052880153649068,-0.0371298350078277,1.14668224639133,-0.18012649698354,1.17453412825358,0.673524016526332,-1.53670899710289,-1.12650886526353,-1.10454855425745,-2.08325016539635,-0.633575494357546,-0.245582099665996,1.7337192889147,0.779671069252002,-0.0849667362660042,0.895138556472369],"U":[0.889723062424867,0.898754386570204,0.982446818116525,0.881763290468224,0.092964299683076,0.0759808499412801,0.462631411224001,0.301420413413487,0.0891577924453222,0.857798731079,0.943205815430715,0.970234975983753,0.739967466784821,0.615770608584826,0.876732999030424,0.593373486089279,0.844845302343069,0.877644275904874,0.930653434473299,0.523114572682896,0.0334590940991625,0.369668054908007,0.147732331768682,0.0595764903657734,0.764613134542581,0.460747501794669,0.385454111467909,0.76912881733245,0.925857494402682,0.82351028498007,0.146265580202921,0.216027691740998,0.102115546075075,0.581294333878015,0.478913698681088,0.485190741763941,0.874243514728214,0.428526630615966,0.87990942482989,0.74969301254051,0.0621822934464475,0.129975095128984,0.134677626744326,0.0186142133146528,0.263178948869464,0.403002873671301,0.958516048827237,0.782207744022803,0.466143917831447,0.814643487365097],"y":[13.1843530718372,13.5220278555503,20.9057226222937,12.9098491301811,3.51344831732456,3.2901043560528,6.79113489838206,5.45983489648936,3.46548962705163,12.1861803245954,15.8499130164419,18.5692628264736,9.82541268456005,8.25208222519009,12.7460998969034,8.0154731372388,11.8455335271121,12.7752447078194,15.0361972943569,7.33046102552299,2.54643348150647,6.01458947244574,4.11670625951086,3.04510880630131,10.2172722702125,6.77488243623006,6.14371577467174,10.293266273043,14.7661323617782,11.3428017820579,4.10207779655605,4.7465344044588,3.62462214882786,7.89197657603716,6.93282727739344,6.98807663272107,12.6676026647264,6.50087412935479,12.8486749012667,9.97568443814901,3.08650402244104,3.93505037255801,3.98418122931354,2.12709815025528,5.14578092002082,6.28822823296289,17.1544176902147,10.521705604685,6.82151311976498,11.1515818068816]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1.22505665","1.27448601","2.10712941","1.18384754","-1.32271973","-1.43263666","-0.09380656","-0.52031961","-1.34595948","1.07048171","1.58226815","1.88425828","0.64324511","0.29439147","1.15880911","0.23623151","1.01457304","1.16329102","1.48067525","0.05797210","-1.83222310","-0.33273264","-1.04620875","-1.55833870","0.72122071","-0.09855071","-0.29118711","0.73598083","1.44561573","0.92882569","-1.05258516","-0.78567932","-1.26958894","0.20520581","-0.05288015","-0.03712984","1.14668225","-0.18012650","1.17453413","0.67352402","-1.53670900","-1.12650887","-1.10454855","-2.08325017","-0.63357549","-0.24558210","1.73371929","0.77967107","-0.08496674","0.89513856"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.88972306","0.89875439","0.98244682","0.88176329","0.09296430","0.07598085","0.46263141","0.30142041","0.08915779","0.85779873","0.94320582","0.97023498","0.73996747","0.61577061","0.87673300","0.59337349","0.84484530","0.87764428","0.93065343","0.52311457","0.03345909","0.36966805","0.14773233","0.05957649","0.76461313","0.46074750","0.38545411","0.76912882","0.92585749","0.82351028","0.14626558","0.21602769","0.10211555","0.58129433","0.47891370","0.48519074","0.87424351","0.42852663","0.87990942","0.74969301","0.06218229","0.12997510","0.13467763","0.01861421","0.26317895","0.40300287","0.95851605","0.78220774","0.46614392","0.81464349"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["13.184353","13.522028","20.905723","12.909849","3.513448","3.290104","6.791135","5.459835","3.465490","12.186180","15.849913","18.569263","9.825413","8.252082","12.746100","8.015473","11.845534","12.775245","15.036197","7.330461","2.546433","6.014589","4.116706","3.045109","10.217272","6.774882","6.143716","10.293266","14.766132","11.342802","4.102078","4.746534","3.624622","7.891977","6.932827","6.988077","12.667603","6.500874","12.848675","9.975684","3.086504","3.935050","3.984181","2.127098","5.145781","6.288228","17.154418","10.521706","6.821513","11.151582"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"mkfqbkhbew","dataKey":"b1a75b63323a19a24a0a2d42a30e4d33"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
+<div id="qrbkddgxis" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="qrbkddgxis">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.0689463971460363,-0.670105863351373,-0.183052302013022,0.330986067228553,-0.68430374288241,1.35453248917346,0.432299629869385,0.0153089985407423,0.459466585101133,0.994071284557335,0.808221056949301,0.212634004549346,-1.2059926749568,-0.114047661020352,0.163956781434002,-0.171628843327521,0.194668157162326,-0.412305580304896,2.25610038005334,0.0287347825649252,0.224295767888284,-0.315836069399563,-1.05346621929327,0.169034384893002,0.257823592198335,1.95523285041982,2.36911434871492,2.38873061406698,3.03393112472058,0.762015656896846,-0.755391534627675,0.254442927997106,1.58227789142672,0.427854736395368,0.0344610831309483,-0.304559674039165,-0.789716067878631,-1.08191724688507,-0.457638001623641,0.0768987280649691,-0.362155452496405,0.12954523768725,-1.33649544787323,-1.48541401835805,-0.0524511351287447,-0.0149526483126476,-0.314617198984162,0.0770878350368148,0.252686936653335,0.0956333690519049],"U":[0.472516143389558,0.251395153710313,0.427378490395798,0.629672495140768,0.246891691993159,0.912216722300009,0.667238171926956,0.50610716823605,0.677050428841933,0.839905917927185,0.79051833100451,0.584193776941136,0.113910157412513,0.454600005929861,0.565117416635401,0.43186466510892,0.577173629065825,0.340057729506771,0.987967827327165,0.511461942330733,0.588736415468703,0.376063469465222,0.146063684327106,0.567115202346861,0.601728472031045,0.974722203577951,0.991084630147212,0.991546653042649,0.998793052335477,0.776974670189842,0.225007045527173,0.60042330490593,0.943206927231094,0.66562155846202,0.513745262467231,0.380350768561324,0.214846802714325,0.139644650274408,0.323606268433282,0.530647945295114,0.358617933469376,0.551536884002103,0.090693693698418,0.0687170922304036,0.47908461510928,0.4940349786632,0.376526159480029,0.530723164781598,0.599744928297224,0.538094119009449],"y":[6.87688406983503,5.04760979060869,6.49123435336511,8.4044664517435,5.00985249592815,14.0890596855422,8.84110677645592,7.17497454225969,8.96201357376171,11.7231975043374,10.6738601258354,7.9213747386213,3.76056942785203,6.72203956756133,7.7306385650187,6.52894431752446,7.85045368890821,5.7737547885675,22.6470575854175,7.22356845716379,7.96774253045654,6.06681926487122,4.10005931940179,7.75032553688773,8.10252889784415,19.2805292311615,24.0743034494508,24.331933952613,34.7389513779004,10.4287574531103,4.82407181592036,8.08883784317674,15.8499933530545,8.82148191474221,7.2443880678009,6.10189371969336,4.73627164518669,4.03524197198381,5.64023059269252,7.40044961103569,5.92456081586822,7.59847764308664,3.48497150737769,3.18592617889838,6.93432685203792,7.06656010177771,6.07060205484964,7.40115208222839,8.08173534278733,7.47035035913799]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.06894640","-0.67010586","-0.18305230","0.33098607","-0.68430374","1.35453249","0.43229963","0.01530900","0.45946659","0.99407128","0.80822106","0.21263400","-1.20599267","-0.11404766","0.16395678","-0.17162884","0.19466816","-0.41230558","2.25610038","0.02873478","0.22429577","-0.31583607","-1.05346622","0.16903438","0.25782359","1.95523285","2.36911435","2.38873061","3.03393112","0.76201566","-0.75539153","0.25444293","1.58227789","0.42785474","0.03446108","-0.30455967","-0.78971607","-1.08191725","-0.45763800","0.07689873","-0.36215545","0.12954524","-1.33649545","-1.48541402","-0.05245114","-0.01495265","-0.31461720","0.07708784","0.25268694","0.09563337"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.47251614","0.25139515","0.42737849","0.62967250","0.24689169","0.91221672","0.66723817","0.50610717","0.67705043","0.83990592","0.79051833","0.58419378","0.11391016","0.45460001","0.56511742","0.43186467","0.57717363","0.34005773","0.98796783","0.51146194","0.58873642","0.37606347","0.14606368","0.56711520","0.60172847","0.97472220","0.99108463","0.99154665","0.99879305","0.77697467","0.22500705","0.60042330","0.94320693","0.66562156","0.51374526","0.38035077","0.21484680","0.13964465","0.32360627","0.53064795","0.35861793","0.55153688","0.09069369","0.06871709","0.47908462","0.49403498","0.37652616","0.53072316","0.59974493","0.53809412"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["6.876884","5.047610","6.491234","8.404466","5.009852","14.089060","8.841107","7.174975","8.962014","11.723198","10.673860","7.921375","3.760569","6.722040","7.730639","6.528944","7.850454","5.773755","22.647058","7.223568","7.967743","6.066819","4.100059","7.750326","8.102529","19.280529","24.074303","24.331934","34.738951","10.428757","4.824072","8.088838","15.849993","8.821482","7.244388","6.101894","4.736272","4.035242","5.640231","7.400450","5.924561","7.598478","3.484972","3.185926","6.934327","7.066560","6.070602","7.401152","8.081735","7.470350"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"qrbkddgxis","dataKey":"c695f62e00d1766ef26c8d79faeeb462"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
 </div>
 </div>
 </div>
@@ -1790,7 +1790,8 @@ y_1, \dots, y_d \overset{iid}{\sim} \mathrm{GEV}(\mu, \sigma, \xi)
 </section>
 <section id="results" class="level1 page-columns page-full">
 <h1>Results</h1>
-<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_means.png" class="column-page img-fluid"></p>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors.png" class="column-page img-fluid"></p>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors_abs.png" class="column-page img-fluid"></p>
 <p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png" class="column-page img-fluid"></p>
 <p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/diff_elppd.png" class="column-page img-fluid"></p>
 

@@ -344,7 +344,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <p><span class="math display">\[
 \mu_t = \mu_0 \cdot (1 + \Delta(t - t_0)) = \mu_0 + \Delta(t - t_0) \cdot \mu_0.
 \]</span></p>
-<p>This gives us to paramters to estimate, <span class="math inline">\(\mu_0\)</span> and <span class="math inline">\(\Delta\)</span>.</p>
+<p>We thus estimate two parameters that are related to the location of the GEV distribution, <span class="math inline">\(\mu_0\)</span> and <span class="math inline">\(\Delta\)</span>.</p>
 </section>
 <section id="spatial-statistics" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="spatial-statistics">Spatial Statistics</h2>
@@ -363,8 +363,10 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <p><span class="math display">\[
 x_i \perp x_j \vert \mathbf x_{-ij} \iff Q_{ij} = 0.
 \]</span></p>
-<p>This means that any two elements in <span class="math inline">\(\mathbf x\)</span> are conditionally independent conditional on the other elements of <span class="math inline">\(\mathbf x\)</span> if and only if the corresponding value in the precision matrix <span class="math inline">\(\mathbf Q\)</span> is zero.</p>
-<p>We can easily use this to our advantage so that our precision matrix becomes very sparse. For example we might set <span class="math inline">\(Q_{ij} \neq 0\)</span> only if <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are neighbors on our map.</p>
+<p>This means that any two elements in <span class="math inline">\(\mathbf x\)</span> are conditionally independent conditional on the other elements of <span class="math inline">\(\mathbf x\)</span> if and only if the corresponding value in the precision matrix <span class="math inline">\(\mathbf Q\)</span> is zero. For further reading see <span class="citation" data-cites="rueGaussianMarkovRandom2005">Rue and Held (<a href="#ref-rueGaussianMarkovRandom2005" role="doc-biblioref">2005</a>)</span>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-rueGaussianMarkovRandom2005" class="csl-entry" role="listitem">
+Rue, Havard, and Leonhard Held. 2005. <em>Gaussian <span>Markov Random Fields</span>: <span>Theory</span> and <span>Applications</span></em>. <span>CRC Press</span>.
+</div></div><p>We can easily use this to our advantage so that our precision matrix becomes very sparse. For example we might set <span class="math inline">\(Q_{ij} \neq 0\)</span> only if <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are neighbors on our map.</p>
 <p>The rest of this chapter on spatial statistics is based heavily on the paper by <span class="citation" data-cites="morrisBayesianHierarchicalSpatial2019">Morris et al. (<a href="#ref-morrisBayesianHierarchicalSpatial2019" role="doc-biblioref">2019</a>)</span>.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-morrisBayesianHierarchicalSpatial2019" class="csl-entry" role="listitem">
 Morris, Mitzi, Katherine Wheeler-Martin, Dan Simpson, Stephen J. Mooney, Andrew Gelman, and Charles DiMaggio. 2019. <span>“Bayesian Hierarchical Spatial Models: <span>Implementing</span> the <span>Besag York Mollié</span> Model in Stan.”</span> <em>Spatial and Spatio-Temporal Epidemiology</em> 31 (November): 100301. <a href="https://doi.org/10.1016/j.sste.2019.100301">https://doi.org/10.1016/j.sste.2019.100301</a>.

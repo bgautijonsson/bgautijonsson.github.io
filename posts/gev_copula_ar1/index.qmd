@@ -655,7 +655,9 @@ generated quantities {
 
 # Results
 
-![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_means.png){.column-page}
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors.png){.column-page}
+
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors_abs.png){.column-page}
 
 ![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png){.column-page}
 
