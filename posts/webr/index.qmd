@@ -1,0 +1,32 @@
+---
+title: "Using webR in teaching"
+author: 
+    -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
+        url: "bggj.is"
+        affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
+        affiliation-url: "https://www.hi.is/tolfraedi_0"
+date: "2023/02/03"
+format: 
+    html:
+        code-fold: true
+        toc: true
+        toc-location: left
+execute: 
+  echo: true
+  warning: false
+editor: source
+draft: true
+categories:
+    - english
+    - R
+    - webr
+    - teaching
+filters: 
+  - webr
+---
+
+```{webr-r}
+m <- lm(mpg ~ wt + cyl, data = mtcars)
+summary(m)
+```
+

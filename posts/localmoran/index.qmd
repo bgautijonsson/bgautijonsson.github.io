@@ -1,0 +1,191 @@
+---
+title: "Spatially Dependent Generalized Extreme Value Parameters"
+subtitle: "Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters"
+description: |
+  For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors.
+author: 
+    -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
+        url: "bggj.is"
+        affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
+        affiliation-url: "https://www.hi.is/tolfraedi_0"
+date: "2023/12/07"
+format: 
+    html:
+        toc: true
+        toc-location: left
+        code-overflow: scroll
+execute: 
+  echo: true
+  warning: false
+code-fold: show
+editor: source
+draft: true
+image: Figures/spatial_gamma.png
+categories:
+    - english
+    - R
+    - phd
+    - stan
+    - bayesian
+    - spatial statistics
+    - hierarchical modeling
+---
+
+**Note:** I'm still working on this post, but I thought I might put it out there while I work on it.
+
+```{r setup}
+#| eval: true
+library(bggjphd)
+library(tidyverse)
+library(progressr)
+library(glue)
+library(here)
+library(gt)
+library(future)
+library(progressr)
+library(sf)
+library(mapview)
+library(spdep)
+library(tmap)
+theme_set(theme_bggj())
+```
+
+
+```{r}
+#| eval: false
+with_progress({
+  station_estimates <-  ms_max(data = precip)
+})
+
+station_estimates |> 
+  qs::qsave("data/station_estimates.qs")
+```
+
+```{r}
+station_estimates <- qs::qread("data/station_estimates.qs") |> 
+  select(-hess) |> 
+  unnest(par) |> 
+  pivot_wider()
+```
+
+```{r}
+n_x <- length(unique(stations$proj_x))
+n_y <- length(unique(stations$proj_y))
+d <- stations |> 
+  stations_to_sf() |> 
+  points_to_grid(n_x = n_x, n_y = n_y) |> 
+  inner_join(station_estimates, by = join_by(station))
+```
+
+
+```{r}
+nb <- poly2nb(d, queen = FALSE)
+nbw <- nb2listw(nb, style = "W")
+```
+
+
+```{r}
+make_local_moran_plot <- function(variable) {
+  lmoran <- localmoran(
+    d[[variable]], nbw, alternative = "greater"
+  )
+  
+  uk_dat <- get_uk_spatial() |> 
+    mutate(
+      fill = 1
+    )
+  
+  uk_map <- tm_shape(uk_dat) +
+    tm_borders(lwd = 5)
+  
+  
+  d$lmI <- lmoran[, "Ii"] # local Moran's I
+  d$lmZ <- lmoran[, "Z.Ii"] # z-scores
+  # p-values corresponding to alternative greater
+  d$lmp <- lmoran[, "Pr(z > E(Ii))"]
+  
+  p1 <- tm_shape(d) +
+    tm_polygons(
+      fill = variable, 
+      fill.legend = tm_legend(
+        title = variable, 
+        style = "quantile"
+      ),
+      lwd = 0
+    ) +
+    uk_map
+  
+  p2 <- tm_shape(d) +
+    tm_polygons(
+      fill = "lmI",
+      style = "quantile",
+      fill.legend = tm_legend(
+        title = "Local Moran's I"
+      ),
+      lwd = 0
+    ) +
+    tm_layout(legend.outside = TRUE) +
+    uk_map
+  
+  p3 <- tm_shape(d) +
+    tm_polygons(
+      fill = "lmZ", 
+      breaks = c(-Inf, 1.65, Inf),
+      fill.legend = tm_legend(
+        title = "Z-score"
+      ),
+      lwd = 0
+    ) +
+    tm_layout(legend.outside = TRUE) +
+    uk_map
+  
+  p4 <- tm_shape(d) +
+    tm_polygons(
+      fill = "lmp", 
+      breaks = c(-Inf, 0.05, Inf),
+      fill.legend = tm_legend(
+        title = "p-value"
+      ),
+      lwd = 0
+    ) +
+    tm_layout(legend.outside = TRUE) +
+    uk_map
+  
+  tmap_arrange(p1, p2, p3, p4)
+}
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+#| column: page
+#| out-width: 100%
+p_psi <- make_local_moran_plot("psi")
+p_psi
+```
+
+```{r}
+#| column: page
+#| out-width: 100%
+p_tau <- make_local_moran_plot("tau")
+p_tau
+```
+
+```{r}
+#| column: page
+#| out-width: 100%
+p_phi <- make_local_moran_plot("phi")
+p_phi
+```
+
+```{r}
+#| column: page
+#| out-width: 100%
+p_gamma <- make_local_moran_plot("gamma")
+p_gamma
+```
+

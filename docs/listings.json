@@ -11,6 +11,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/icar_gev/index.html",
+      "/posts/gev_copula_ar1/index.html",
       "/posts/plotly-animations/index.html",
       "/posts/ceda-archive/index.html",
       "/posts/forest-plot-table/index.html"

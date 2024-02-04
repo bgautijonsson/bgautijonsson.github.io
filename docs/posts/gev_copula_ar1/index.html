@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.449">
+<meta name="generator" content="quarto-1.4.548">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
-<meta name="dcterms.date" content="2023-08-28">
+<meta name="dcterms.date" content="2023-12-11">
 <meta name="description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
 
 <title>bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins</title>
@@ -102,6 +102,7 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -120,20 +121,47 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <script src="../../site_libs/react-18.2.0/react.min.js"></script>
 <script src="../../site_libs/react-18.2.0/react-dom.min.js"></script>
 <script src="../../site_libs/reactwidget-1.0.0/react-tools.js"></script>
-<script src="../../site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<script src="../../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
 <link href="../../site_libs/reactable-0.4.4/reactable.css" rel="stylesheet">
 <script src="../../site_libs/reactable-binding-0.4.4/reactable.js"></script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 <meta property="og:title" content="bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins">
 <meta property="og:description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
-<meta property="og:image" content="https://www.bggj.is/posts/gev_copula_ar1/Figures/spatial_gamma.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png">
 <meta property="og:site_name" content="bggj">
 <meta name="twitter:title" content="bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins">
 <meta name="twitter:description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
-<meta name="twitter:image" content="https://www.bggj.is/posts/gev_copula_ar1/Figures/spatial_gamma.png">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png">
 <meta name="twitter:creator" content="@bggjonsson">
 <meta name="twitter:site" content="@bggjonsson">
 <meta name="twitter:card" content="summary_large_image">
@@ -142,7 +170,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <body class="floating nav-fixed slimcontent">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -216,14 +244,14 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
       <div class="quarto-title-meta-contents">
       <p class="author"><a href="bggj.is">Brynjólfur Gauti Guðrúnar Jónsson</a> </p>
     </div>
-      <div class="quarto-title-meta-contents">
+    <div class="quarto-title-meta-contents">
           <p class="affiliation">
               <a href="https://www.hi.is/tolfraedi_0">
               Tölfræði, Raunvísindadeild Háskóla Íslands
               </a>
             </p>
         </div>
-      </div>
+    </div>
 
   <div class="quarto-title-meta">
 
@@ -231,7 +259,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">August 28, 2023</p>
+        <p class="date">December 11, 2023</p>
       </div>
     </div>
     
@@ -241,7 +269,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
   
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
@@ -263,13 +291,26 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
   <li><a href="#transforming-to-multivariate-gev" id="toc-transforming-to-multivariate-gev" class="nav-link" data-scroll-target="#transforming-to-multivariate-gev">3. Transforming to Multivariate GEV</a></li>
   </ul></li>
   <li><a href="#checking-the-data" id="toc-checking-the-data" class="nav-link" data-scroll-target="#checking-the-data">Checking the data</a></li>
-  <li><a href="#modeling" id="toc-modeling" class="nav-link" data-scroll-target="#modeling">Modeling</a></li>
+  <li><a href="#modeling" id="toc-modeling" class="nav-link" data-scroll-target="#modeling">Modeling</a>
+  <ul class="collapse">
+  <li><a href="#ar1-model" id="toc-ar1-model" class="nav-link" data-scroll-target="#ar1-model">AR(1) Model</a></li>
+  <li><a href="#i.i.d.-model" id="toc-i.i.d.-model" class="nav-link" data-scroll-target="#i.i.d.-model">i.i.d. Model</a></li>
+  <li><a href="#two-step-estimation" id="toc-two-step-estimation" class="nav-link" data-scroll-target="#two-step-estimation">Two-Step Estimation</a></li>
   </ul></li>
-  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  </ul></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#estimates-of-gev-parameters" id="toc-estimates-of-gev-parameters" class="nav-link" data-scroll-target="#estimates-of-gev-parameters">Estimates of GEV Parameters</a></li>
+  <li><a href="#expected-log-predicted-probability-density" id="toc-expected-log-predicted-probability-density" class="nav-link" data-scroll-target="#expected-log-predicted-probability-density">Expected log predicted probability density</a>
+  <ul class="collapse">
+  <li><a href="#comparing-to-the-simple-i.i.d.-model" id="toc-comparing-to-the-simple-i.i.d.-model" class="nav-link" data-scroll-target="#comparing-to-the-simple-i.i.d.-model">Comparing to the simple i.i.d. model</a></li>
+  </ul></li>
+  <li><a href="#differences-between-ar1-and-two-step-model" id="toc-differences-between-ar1-and-two-step-model" class="nav-link" data-scroll-target="#differences-between-ar1-and-two-step-model">Differences between AR(1) and Two-Step Model</a></li>
+  </ul></li>
   </ul>
 </nav>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
     </div>
@@ -347,7 +388,7 @@ c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \
 <section id="example" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="example">Example</h3>
 <p>Let’s sample from a two-dimensional process with GEV(8, 2, 0.05) margins and a Gaussian copula with correlation <span class="math inline">\(\rho = 0.7\)</span>.</p>
-<div class="cell page-columns page-full">
+<div class="cell page-columns page-full" data-fig.asp="0.3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
@@ -398,8 +439,12 @@ c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \
 <span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"The stages in generating 2d GEV(8, 2, 0.05) data with a Gaussian correlation 0.7"</span></span>
 <span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display column-page">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" style="width:100.0%"></p>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -407,7 +452,7 @@ c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \
 </section>
 <section id="methods" class="level1 page-columns page-full">
 <h1>Methods</h1>
-<section id="data" class="level2">
+<section id="data" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p><a href="https://github.com/bgautijonsson/stan_experiments/blob/master/R/data.R">R scripts used for simulating the data</a></p>
 <p>The simulated data have GEV margins and an AR(1) Gaussian copula. The steps in simulating the data are as follows.</p>
@@ -482,7 +527,7 @@ R = Q^{-1} = \begin{bmatrix}
 </div>
 </div>
 </section>
-<section id="generating-multivariate-normal-data" class="level3">
+<section id="generating-multivariate-normal-data" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="generating-multivariate-normal-data">2. Generating Multivariate Normal Data</h3>
 <p>We then use the well-known fact that if</p>
 <p><span class="math display">\[
@@ -492,7 +537,7 @@ R = Q^{-1} = \begin{bmatrix}
 <p><span class="math display">\[
 \boldsymbol X = \boldsymbol \mu +  L \boldsymbol Z,
 \]</span></p>
-<p>where <span class="math inline">\(\boldsymbol Z \sim \mathrm{Normal}(\boldsymbol 0, I)\)</span> and <span class="math inline">\(L\)</span> is the Cholesky decomposition of <span class="math inline">\(R\)</span>, or <span class="math inline">\(LL^T = \Sigma\)</span>.</p>
+<p>where <span class="math inline">\(\boldsymbol Z \sim \mathrm{Normal}(\boldsymbol 0,  I)\)</span> and <span class="math inline">\(L\)</span> is the Cholesky decomposition of <span class="math inline">\(R\)</span>, or <span class="math inline">\(LL^T = \Sigma\)</span>.</p>
 <p>In our case, we want <span class="math inline">\(\mathbf X\)</span> to have mean 0 and covariance matrix <span class="math inline">\(R\)</span>, so we write</p>
 <p><span class="math display">\[
 \mathbf X = L\mathbf Z
@@ -518,7 +563,7 @@ R = Q^{-1} = \begin{bmatrix}
 </div>
 </div>
 <p>We will want more than one observation from each <em>“site”</em>, so we write a helped function for tidying this output into a tibble.</p>
-<div class="cell">
+<div class="cell page-columns page-full">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tidy_mvgauss <span class="ot">&lt;-</span> <span class="cf">function</span>(mvnorm_matrix) {</span>
@@ -544,11 +589,16 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy_mvgauss</span>()</span>
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>mvnorm_data <span class="sc">|&gt;</span> </span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_interactive</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(replicate <span class="sc">&lt;=</span> <span class="dv">5</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> replicate, <span class="at">values_from =</span> Z) <span class="sc">|&gt;</span> </span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_spanner</span>(</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="sc">-</span>id,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">"Replicate"</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display">
-<div id="allyryhvel" class=".gt_table" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div class="cell-output-display column-page">
+<div id="allyryhvel" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#allyryhvel table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
@@ -988,8 +1038,65 @@ R = Q^{-1} = \begin{bmatrix}
   text-indent: 25px;
 }
 </style>
-<div id="allyryhvel" class="reactable html-widget " style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="allyryhvel">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.436400693613395,-0.40175394594592,-0.116143721596351,1.05004059845307,-0.360788206156438,-0.14431056795981,0.692354091128984,0.932831442470785,-0.529776983043089,-0.556892197284997,0.708063052719815,0.954481648015603,-0.122866398581155,-0.853032844402126,1.31445524907948,1.13887233483044,-0.459560365435904,-0.46891641177034,-1.52273778348423,0.100601628655834,1.03303903081493,-1.39864863141536,-1.18843981440738,-1.0434808918175,-0.925507829156898,-1.96758543411807,-0.389680366650337,-1.44549204520968,-0.279949058460535,0.404262580468665,0.0151424413945846,0.741794253764442,0.0774260679875857,-0.374394318778974,0.490011288131499,0.0601685473789478,1.62662223016871,0.596463717372009,0.988054788236387,0.470944393469519,-3.30891201940578,-2.19744819898392,-1.1720201021629,-0.710983425933536,-2.34337404028904,0.617117182031725,-0.70636855922379,-1.26914749602017,-2.01289999093559,-1.86586139463375]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.43640069","-0.40175395","-0.11614372","1.05004060","-0.36078821","-0.14431057","0.69235409","0.93283144","-0.52977698","-0.55689220","0.70806305","0.95448165","-0.12286640","-0.85303284","1.31445525","1.13887233","-0.45956037","-0.46891641","-1.52273778","0.10060163","1.03303903","-1.39864863","-1.18843981","-1.04348089","-0.92550783","-1.96758543","-0.38968037","-1.44549205","-0.27994906","0.40426258","0.01514244","0.74179425","0.07742607","-0.37439432","0.49001129","0.06016855","1.62662223","0.59646372","0.98805479","0.47094439","-3.30891202","-2.19744820","-1.17202010","-0.71098343","-2.34337404","0.61711718","-0.70636856","-1.26914750","-2.01289999","-1.86586139"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"allyryhvel","dataKey":"93e5cc47d66ea4734f1c1a463b89aef2"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style"],"jsHooks":[]}</script>
+
+<table class="gt_table table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_col_headings gt_spanner_row">
+<th rowspan="2" id="id" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">id</th>
+<th colspan="5" id="Replicate" class="gt_center gt_columns_top_border gt_column_spanner_outer" data-quarto-table-cell-role="th" scope="colgroup"><span class="gt_column_spanner">Replicate</span></th>
+</tr>
+<tr class="odd gt_col_headings">
+<th id="1" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">1</th>
+<th id="2" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">2</th>
+<th id="3" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">3</th>
+<th id="4" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">4</th>
+<th id="5" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">5</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_right" headers="id">1</td>
+<td class="gt_row gt_right" headers="1">-0.4364007</td>
+<td class="gt_row gt_right" headers="2">-0.1443106</td>
+<td class="gt_row gt_right" headers="3">0.7080631</td>
+<td class="gt_row gt_right" headers="4">1.1388723</td>
+<td class="gt_row gt_right" headers="5">1.0330390</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="id">2</td>
+<td class="gt_row gt_right" headers="1">-0.4017539</td>
+<td class="gt_row gt_right" headers="2">0.6923541</td>
+<td class="gt_row gt_right" headers="3">0.9544816</td>
+<td class="gt_row gt_right" headers="4">-0.4595604</td>
+<td class="gt_row gt_right" headers="5">-1.3986486</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="id">3</td>
+<td class="gt_row gt_right" headers="1">-0.1161437</td>
+<td class="gt_row gt_right" headers="2">0.9328314</td>
+<td class="gt_row gt_right" headers="3">-0.1228664</td>
+<td class="gt_row gt_right" headers="4">-0.4689164</td>
+<td class="gt_row gt_right" headers="5">-1.1884398</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_right" headers="id">4</td>
+<td class="gt_row gt_right" headers="1">1.0500406</td>
+<td class="gt_row gt_right" headers="2">-0.5297770</td>
+<td class="gt_row gt_right" headers="3">-0.8530328</td>
+<td class="gt_row gt_right" headers="4">-1.5227378</td>
+<td class="gt_row gt_right" headers="5">-1.0434809</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_right" headers="id">5</td>
+<td class="gt_row gt_right" headers="1">-0.3607882</td>
+<td class="gt_row gt_right" headers="2">-0.5568922</td>
+<td class="gt_row gt_right" headers="3">1.3144552</td>
+<td class="gt_row gt_right" headers="4">0.1006016</td>
+<td class="gt_row gt_right" headers="5">-0.9255078</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
 </div>
@@ -1474,7 +1581,7 @@ R = Q^{-1} = \begin{bmatrix}
   text-indent: 25px;
 }
 </style>
-<div id="ibiiwikvyj" class="reactable html-widget " style="width:auto;height:auto;"></div>
+<div id="ibiiwikvyj" class="reactable html-widget" style="width:auto;height:auto;"></div>
 <script type="application/json" data-for="ibiiwikvyj">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"replicate":[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,10,10,10,10,10],"id":[1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5],"Z":[-0.436400693613395,-0.40175394594592,-0.116143721596351,1.05004059845307,-0.360788206156438,-0.14431056795981,0.692354091128984,0.932831442470785,-0.529776983043089,-0.556892197284997,0.708063052719815,0.954481648015603,-0.122866398581155,-0.853032844402126,1.31445524907948,1.13887233483044,-0.459560365435904,-0.46891641177034,-1.52273778348423,0.100601628655834,1.03303903081493,-1.39864863141536,-1.18843981440738,-1.0434808918175,-0.925507829156898,-1.96758543411807,-0.389680366650337,-1.44549204520968,-0.279949058460535,0.404262580468665,0.0151424413945846,0.741794253764442,0.0774260679875857,-0.374394318778974,0.490011288131499,0.0601685473789478,1.62662223016871,0.596463717372009,0.988054788236387,0.470944393469519,-3.30891201940578,-2.19744819898392,-1.1720201021629,-0.710983425933536,-2.34337404028904,0.617117182031725,-0.70636855922379,-1.26914749602017,-2.01289999093559,-1.86586139463375],"U":[0.331273017904217,0.343932559331943,0.453769319217614,0.853150276284483,0.35912888998128,0.442627616817266,0.755642505580172,0.824546497908587,0.298133282743833,0.288800543015228,0.760546948709157,0.830080052755613,0.451106447011626,0.196820545275446,0.905653475825307,0.872621796995532,0.32291590677713,0.31956469244988,0.0639121605429595,0.540066648106347,0.849207183251212,0.0809591876884787,0.117330089153576,0.148362813070752,0.177350906561091,0.0245578785184396,0.348386458126261,0.0741598629020429,0.389758294078632,0.65699018046656,0.506040729249895,0.770893998683139,0.530857698115674,0.354055484540542,0.687937044452128,0.523989302065766,0.948091322501727,0.724567257329202,0.838437091765541,0.681159777571263,0.000468296318753365,0.0139942260925248,0.120594492758036,0.23854725324225,0.00955510690337406,0.731421281828687,0.239979483971628,0.102194231511664,0.0220625757682728,0.0310303800100331],"y":[5.70245865937722,5.80521160639786,6.7149210552835,12.0604259428969,5.92871865464969,6.61992228224846,10.0703404666316,11.365771528482,5.43303281782684,5.35678086577758,10.150023630469,11.4907812604924,6.69213600827318,4.57745492985712,13.8019789993175,12.6173267039677,5.63462584030404,5.60741376720909,3.11340781612174,7.48899221155845,11.9568970649056,3.35823072972186,3.79865730844483,4.12297528940259,4.40050481731709,2.31614354228411,5.84138308427152,3.26454999825161,6.17905464999368,8.71805005790837,7.17437362094691,10.3233596531161,7.40240866546277,5.88745261904053,9.09995213342542,7.33855110379731,16.2202632087269,9.59783586842642,11.6875544779455,9.0135965690878,0.471582488369624,1.94702173110692,3.83451209489253,4.9394946185385,1.7258429156592,9.69762911942427,4.95160967177567,3.62555489427281,2.24125717823303,2.48825938515974]},"columns":[{"id":"replicate","name":"replicate","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","1","1","1","1","2","2","2","2","2","3","3","3","3","3","4","4","4","4","4","5","5","5","5","5","6","6","6","6","6","7","7","7","7","7","8","8","8","8","8","9","9","9","9","9","10","10","10","10","10"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"id","name":"id","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5","1","2","3","4","5"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"Z","name":"Z","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["-0.43640069","-0.40175395","-0.11614372","1.05004060","-0.36078821","-0.14431057","0.69235409","0.93283144","-0.52977698","-0.55689220","0.70806305","0.95448165","-0.12286640","-0.85303284","1.31445525","1.13887233","-0.45956037","-0.46891641","-1.52273778","0.10060163","1.03303903","-1.39864863","-1.18843981","-1.04348089","-0.92550783","-1.96758543","-0.38968037","-1.44549205","-0.27994906","0.40426258","0.01514244","0.74179425","0.07742607","-0.37439432","0.49001129","0.06016855","1.62662223","0.59646372","0.98805479","0.47094439","-3.30891202","-2.19744820","-1.17202010","-0.71098343","-2.34337404","0.61711718","-0.70636856","-1.26914750","-2.01289999","-1.86586139"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"U","name":"U","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["0.3312730179","0.3439325593","0.4537693192","0.8531502763","0.3591288900","0.4426276168","0.7556425056","0.8245464979","0.2981332827","0.2888005430","0.7605469487","0.8300800528","0.4511064470","0.1968205453","0.9056534758","0.8726217970","0.3229159068","0.3195646924","0.0639121605","0.5400666481","0.8492071833","0.0809591877","0.1173300892","0.1483628131","0.1773509066","0.0245578785","0.3483864581","0.0741598629","0.3897582941","0.6569901805","0.5060407292","0.7708939987","0.5308576981","0.3540554845","0.6879370445","0.5239893021","0.9480913225","0.7245672573","0.8384370918","0.6811597776","0.0004682963","0.0139942261","0.1205944928","0.2385472532","0.0095551069","0.7314212818","0.2399794840","0.1021942315","0.0220625758","0.0310303800"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}},{"id":"y","name":"y","type":"numeric","style":"function(rowInfo, colInfo) {\nconst rowIndex = rowInfo.index + 1\n}","cell":["5.7024587","5.8052116","6.7149211","12.0604259","5.9287187","6.6199223","10.0703405","11.3657715","5.4330328","5.3567809","10.1500236","11.4907813","6.6921360","4.5774549","13.8019790","12.6173267","5.6346258","5.6074138","3.1134078","7.4889922","11.9568971","3.3582307","3.7986573","4.1229753","4.4005048","2.3161435","5.8413831","3.2645500","6.1790546","8.7180501","7.1743736","10.3233597","7.4024087","5.8874526","9.0999521","7.3385511","16.2202632","9.5978359","11.6875545","9.0135966","0.4715825","1.9470217","3.8345121","4.9394946","1.7258429","9.6976291","4.9516097","3.6255549","2.2412572","2.4882594"],"html":true,"align":"right","headerStyle":{"font-weight":"normal"}}],"defaultPageSize":10,"showPageSizeOptions":false,"pageSizeOptions":[10,25,50,100],"paginationType":"numbers","showPagination":true,"showPageInfo":true,"minRows":1,"showSortable":true,"height":"auto","theme":{"color":"#333333","backgroundColor":"#FFFFFF","stripedColor":"rgba(128,128,128,0.05)","style":{"fontFamily":"system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"},"headerStyle":{"borderTopStyle":"solid","borderTopWidth":"2px","borderTopColor":"#D3D3D3","borderBottomStyle":"solid","borderBottomWidth":"2px","borderBottomColor":"#D3D3D3"}},"elementId":"ibiiwikvyj","dataKey":"35728e61f7c230d7f361bb3f930b6a6c"},"children":[]},"class":"reactR_markup"},"evals":["tag.attribs.columns.0.style","tag.attribs.columns.1.style","tag.attribs.columns.2.style","tag.attribs.columns.3.style","tag.attribs.columns.4.style"],"jsHooks":[]}</script>
 </div>
 </div>
@@ -1524,18 +1631,22 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell page-columns page-full">
+<div class="cell page-columns page-full" data-fig.asp="0.3">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display column-page">
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" style="width:100.0%"></p>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>It’s nice to wrap this process in a single function</p>
-<div class="cell">
+<div class="cell" data-fig.asp="1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>make_data <span class="ot">&lt;-</span> <span class="cf">function</span>(gev_params, n_replicate, rho) {</span>
@@ -1577,228 +1688,321 @@ R = Q^{-1} = \begin{bmatrix}
 </details>
 </div>
 <p>We see that with higher neighbor correlations we get obvious horizontal stripes corresponding to a large amount of dependence within each replicate.</p>
-<div class="cell page-columns page-full">
+<div class="cell page-columns page-full" data-fig.asp="0.3">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display column-page">
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" style="width:100.0%"></p>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
 <section id="modeling" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="modeling">Modeling</h2>
 <p><a href="https://github.com/bgautijonsson/stan_experiments/blob/master/R/modeling.R">R scripts used for modeling</a></p>
-<p>I wrote two different models in stan.</p>
-<ol type="1">
-<li>A model that wraps the GEV margins into an AR(1) Gaussian copula</li>
-<li>A model that assumes i.i.d. GEV margins</li>
-</ol>
-<div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true">AR(1) Copula</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false">i.i.d.</a></li></ul>
-<div class="tab-content page-columns page-full">
-<div id="tabset-3-1" class="tab-pane active page-columns page-full" role="tabpanel" aria-labelledby="tabset-3-1-tab">
-<div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Math</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Stan</a></li></ul>
-<div class="tab-content page-columns page-full">
-<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<p>Our data</p>
-<p><span class="math display">\[
-\begin{gathered}
-H(\mathbf y \vert \mu, \sigma, \xi, R) = \Phi_d\left(\mathrm{GEV}(y_1 \vert \mu, \sigma, \xi), \dots, \mathrm{GEV}(y_d \vert \mu, \sigma, \xi) \vert R\right) \\
-R \sim \mathrm{AR}(1)
-\end{gathered}
-\]</span></p>
-</div>
-<div id="tabset-1-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="cell column-page-right" data-output.var="model1">
+<section id="ar1-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="ar1-model">AR(1) Model</h3>
+<p>We can fit the <code>AR(1)</code> model directly using Stan.</p>
+<div class="cell column-screen-right" data-output.var="model_ar1">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co">  Log pdf of GEV distribution</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">  Log pdf of a normal copula with precision matrix parametrization</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_copula_prec_lpdf(<span class="dt">vector</span> U, <span class="dt">matrix</span> L) {</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(U);</span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] mu = rep_vector(<span class="dv">0</span>, N);</span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[N, N] I = diag_matrix(rep_vector(<span class="dv">1</span>, N));</span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);</span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
-<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="co">  Function for creating AR(1) precision matrix</span></span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span> AR1_precision_matrix(<span class="dt">int</span> n_id, <span class="dt">real</span> rho) {</span>
-<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> rho_scaler = pow(<span class="dv">1</span> - rho^<span class="dv">2</span>, -<span class="dv">1</span>);</span>
-<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> diag_inside = rho^<span class="dv">2</span> * rho_scaler;</span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> off_diag = -rho * rho_scaler;</span>
-<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));</span>
-<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)] = add_diag(Omega[<span class="dv">2</span>:(n_id - <span class="dv">1</span>), <span class="dv">2</span>:(n_id - <span class="dv">1</span>)], diag_inside);</span>
-<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &gt; <span class="dv">1</span>) {</span>
-<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>        Omega[i, i - <span class="dv">1</span>] = off_diag;</span>
-<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (i &lt; n_id) {</span>
-<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>        Omega[i, i + <span class="dv">1</span>] = off_diag;</span>
-<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> Omega;</span>
-<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
-<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
-<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
-<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
-<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
-<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
-<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
-<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
-<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[n_id, n_id] Omega = AR1_precision_matrix(n_id, rho);</span>
-<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[n_id] U;</span>
-<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>      U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> normal_copula_prec_lpdf(U | Omega);</span>
-<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
-<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[n_id, n_id] Omega = AR1_precision_matrix(n_id, rho);</span>
-<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[n_id] U;</span>
-<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>      log_lik += normal_copula_prec_lpdf(U | Omega);</span>
-<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_ar1_lpdf(<span class="dt">vector</span> x, <span class="dt">real</span> rho) {</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = num_elements(x);</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> out;</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> log_det = - (N - <span class="dv">1</span>) * (log(<span class="dv">1</span> + rho) + log(<span class="dv">1</span> - rho)) / <span class="dv">2</span>;</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] q;</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> scl = sqrt(<span class="dv">1</span> / (<span class="dv">1</span> - rho^<span class="dv">2</span>));</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    q[<span class="dv">1</span>:(N - <span class="dv">1</span>)] = scl * (x[<span class="dv">1</span>:(N - <span class="dv">1</span>)] - rho * x[<span class="dv">2</span>:N]);</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    q[N] = x[N];</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    out = log_det - dot_self(q) / <span class="dv">2</span>;</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out;</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_copula_ar1_lpdf(<span class="dt">vector</span> U, <span class="dt">real</span> rho) {</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(U);</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> normal_ar1_lpdf(Z | rho) + dot_self(Z) / <span class="dv">2</span>;</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_cdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> exp(-exp(z));</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> exp(-pow(z, -<span class="dv">1</span>/xi));</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="fl">0.5</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; xi;</span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="dv">1</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; rho;</span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {    </span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>      U[j] = gev_cdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>    } </span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> normal_copula_ar1_lpdf(U | rho);</span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>      log_lik += normal_copula_ar1_lpdf(U | rho);</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div id="tabset-3-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-3-2-tab">
-<div class="tabset-margin-container"></div><div class="panel-tabset page-columns page-full">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Math</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Stan</a></li></ul>
-<div class="tab-content page-columns page-full">
-<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<p><span class="math display">\[
-\begin{gathered}
-y_1, \dots, y_d \overset{iid}{\sim} \mathrm{GEV}(\mu, \sigma, \xi)
-\end{gathered}
-\]</span></p>
-</div>
-<div id="tabset-2-2" class="tab-pane page-columns page-full" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="cell column-page-right" data-output.var="model2">
+</section>
+<section id="i.i.d.-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="i.i.d.-model">i.i.d. Model</h3>
+<div class="cell column-screen-right" data-output.var="model_iid">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">/*</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">  Log pdf of GEV distribution</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">  */</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>, <span class="kw">upper</span> = <span class="fl">0.5</span>&gt; xi;</span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
-<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
-<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
-<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
-<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="fl">0.5</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; xi;</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+<section id="two-step-estimation" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="two-step-estimation">Two-Step Estimation</h3>
+<p>We can’t fit this model directly using one stan file. What we do is:</p>
+<ol type="1">
+<li>Estimate the marginal distributions</li>
+<li>Use the empirical CDFs to transform the data into uniformly distributed variables</li>
+<li>Transform these uniformly distributed variables into standard normal variables</li>
+<li>Estimate the precision matrix using these variables</li>
+<li>Make sure the precision matrix is semi-positive definite and normalize it so that its inverse is a correlation matrix</li>
+<li>Re-estimate the marginal distributions with a gaussian copula assuming this precision matrix is known</li>
+</ol>
+<div class="cell column-screen-right" data-output.var="model_twostep">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">functions</span> {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_cdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> exp(-exp(z));</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> exp(-pow(z, -<span class="dv">1</span>/xi));</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> gev_lpdf(<span class="dt">real</span> y, <span class="dt">real</span> mu, <span class="dt">real</span> sigma, <span class="dt">real</span> xi) {</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (abs(xi) &lt; <span class="fl">1e-10</span>) {</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = (y - mu) / sigma;</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> -log(sigma) - z - exp(-z);</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>      <span class="dt">real</span> z = <span class="dv">1</span> + xi * (y - mu) / sigma;</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (z &gt; <span class="dv">0</span>) {</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> -log(sigma) - (<span class="dv">1</span> + <span class="dv">1</span>/xi) * log(z) - pow(z, -<span class="dv">1</span>/xi);</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">reject</span>(<span class="st">"Found incompatible GEV parameter values"</span>);</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_prec_chol_lpdf(<span class="dt">vector</span> x, <span class="dt">array</span>[] <span class="dt">int</span> n_values, <span class="dt">array</span>[] <span class="dt">int</span> index, <span class="dt">vector</span> values, <span class="dt">real</span> log_det) {</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = num_elements(x);</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> counter = <span class="dv">1</span>;</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] q = rep_vector(<span class="dv">0</span>, N);</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_values[i]) {</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        q[i] += values[counter] * x[index[counter]];</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>        counter += <span class="dv">1</span>;</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> log_det - dot_self(q) / <span class="dv">2</span>;</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> normal_copula_prec_chol_lpdf(<span class="dt">vector</span> U, <span class="dt">array</span>[] <span class="dt">int</span> n_values, <span class="dt">array</span>[] <span class="dt">int</span> index, <span class="dt">vector</span> value, <span class="dt">real</span> log_det) {</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> N = rows(U);</span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>    <span class="dt">vector</span>[N] Z = inv_Phi(U);</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> normal_prec_chol_lpdf(Z | n_values, index, value, log_det) + dot_self(Z) / <span class="dv">2</span>;</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_replicate;</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_id;</span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y;</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_replicate, n_id] <span class="dt">real</span> y_test;</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n_nonzero_chol_Q;</span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_det_Q;</span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_id] <span class="dt">int</span> n_values;</span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_nonzero_chol_Q] <span class="dt">int</span> index;</span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_nonzero_chol_Q] value;</span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; mu;</span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; sigma;</span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span> = -<span class="fl">0.5</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt; xi;</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> gev_lpdf(y[i, j] | mu, sigma, xi);</span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> log_lik = <span class="dv">0</span>;</span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n_replicate) {</span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a>      <span class="dt">vector</span>[n_id] U;</span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:n_id) {</span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a>        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a>        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);</span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a>      log_lik += normal_copula_prec_chol_lpdf(U | n_values, index, value, log_det_Q);</span>
+<span id="cb16-93"><a href="#cb16-93" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-94"><a href="#cb16-94" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-</div>
-</div>
-</div>
-</div>
-</div>
+</section>
 </section>
 </section>
 <section id="results" class="level1 page-columns page-full">
 <h1>Results</h1>
-<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors.png" class="column-page img-fluid"></p>
-<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors_abs.png" class="column-page img-fluid"></p>
-<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png" class="column-page img-fluid"></p>
-<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/diff_elppd.png" class="column-page img-fluid"></p>
+<section id="estimates-of-gev-parameters" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="estimates-of-gev-parameters">Estimates of GEV Parameters</h2>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/param_errors.png" class="column-page img-fluid"></p>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/param_errors_abs.png" class="column-page img-fluid"></p>
+</section>
+<section id="expected-log-predicted-probability-density" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="expected-log-predicted-probability-density">Expected log predicted probability density</h2>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/elppd.png" class="column-page img-fluid"></p>
+<section id="comparing-to-the-simple-i.i.d.-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="comparing-to-the-simple-i.i.d.-model">Comparing to the simple i.i.d. model</h3>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd.png" class="column-page img-fluid"></p>
+</section>
+</section>
+<section id="differences-between-ar1-and-two-step-model" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="differences-between-ar1-and-two-step-model">Differences between AR(1) and Two-Step Model</h2>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_by_size.png" class="column-page img-fluid"></p>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_by_size2.png" class="column-page img-fluid"></p>
 
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1930,38 +2134,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    const typesetMath = (el) => {
-      if (window.MathJax) {
-        // MathJax Typeset
-        window.MathJax.typeset([el]);
-      } else if (window.katex) {
-        // KaTeX Render
-        var mathElements = el.getElementsByClassName("math");
-        var macros = [];
-        for (var i = 0; i < mathElements.length; i++) {
-          var texText = mathElements[i].firstChild;
-          if (mathElements[i].tagName == "SPAN") {
-            window.katex.render(texText.data, mathElements[i], {
-              displayMode: mathElements[i].classList.contains('display'),
-              throwOnError: false,
-              macros: macros,
-              fleqn: false
-            });
-          }
-        }
-      }
-    }
     if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
         }
-        typesetMath(container);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
         return container.innerHTML
       } else {
-        typesetMath(note);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -1970,8 +2164,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      typesetMath(note);
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {

@@ -8,9 +8,9 @@ author:
         url: "bggj.is"
         affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
         affiliation-url: "https://www.hi.is/tolfraedi_0"
-date: "2023/08/28"
+date: "2023/12/11"
 bibliography: references.bib
-draft: true
+draft: false
 format: 
     html:
         code-fold: show
@@ -20,9 +20,7 @@ execute:
   echo: true
   warning: false
 editor: source
-theme: flatly
-title-block-banner: true
-image: Figures/spatial_gamma.png
+image: https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png
 categories:
     - english
     - R
@@ -277,6 +275,7 @@ R |>
 We will want more than one observation from each *"site"*, so we write a helped function for tidying this output into a tibble.
 
 ```{r}
+#| column: page
 tidy_mvgauss <- function(mvnorm_matrix) {
   colnames(mvnorm_matrix) <- seq_len(ncol(mvnorm_matrix))
   
@@ -300,8 +299,13 @@ mvnorm_data <- R |>
   tidy_mvgauss()
 
 mvnorm_data |> 
+  filter(replicate <= 5) |> 
+  pivot_wider(names_from = replicate, values_from = Z) |> 
   gt() |> 
-  opt_interactive()
+  tab_spanner(
+    columns = -id,
+    label = "Replicate"
+  )
 ```
 
 
@@ -455,37 +459,52 @@ d |> plot_data()
 
 [R scripts used for modeling](https://github.com/bgautijonsson/stan_experiments/blob/master/R/modeling.R)
 
-I wrote two different models in stan.
 
-1. A model that wraps the GEV margins into an AR(1) Gaussian copula
-2. A model that assumes i.i.d. GEV margins
 
-::: {.panel-tabset}
+### AR(1) Model
 
-### AR(1) Copula
+We can fit the `AR(1)` model directly using Stan. 
 
-::: {.panel-tabset}
-
-#### Math
-
-Our data
-
-$$
-\begin{gathered}
-H(\mathbf y \vert \mu, \sigma, \xi, R) = \Phi_d\left(\mathrm{GEV}(y_1 \vert \mu, \sigma, \xi), \dots, \mathrm{GEV}(y_d \vert \mu, \sigma, \xi) \vert R\right) \\
-R \sim \mathrm{AR}(1)
-\end{gathered}
-$$
-
-#### Stan
-
-```{stan, output.var = "model1"}
+```{stan}
+#| output.var: model_ar1
 #| eval: false
-#| column:  page-right
+#| column: screen-right
 functions {
-  /*
-  Log pdf of GEV distribution
-  */
+  real normal_ar1_lpdf(vector x, real rho) {
+    int N = num_elements(x);
+    real out;
+    real log_det = - (N - 1) * (log(1 + rho) + log(1 - rho)) / 2;
+    vector[N] q;
+    real scl = sqrt(1 / (1 - rho^2));
+    
+    q[1:(N - 1)] = scl * (x[1:(N - 1)] - rho * x[2:N]);
+    q[N] = x[N];
+    
+    out = log_det - dot_self(q) / 2;
+    
+    return out;
+  }
+
+  real normal_copula_ar1_lpdf(vector U, real rho) {
+    int N = rows(U);
+    vector[N] Z = inv_Phi(U);
+    return normal_ar1_lpdf(Z | rho) + dot_self(Z) / 2;
+  }
+
+  real gev_cdf(real y, real mu, real sigma, real xi) {
+    if (abs(xi) < 1e-10) {
+      real z = (y - mu) / sigma;
+      return exp(-exp(z));
+    } else {
+      real z = 1 + xi * (y - mu) / sigma;
+      if (z > 0) {
+        return exp(-pow(z, -1/xi));
+      } else {
+        reject("Found incompatible GEV parameter values");
+      }
+    }
+  } 
+
   real gev_lpdf(real y, real mu, real sigma, real xi) {
     if (abs(xi) < 1e-10) {
       real z = (y - mu) / sigma;
@@ -499,35 +518,6 @@ functions {
       }
     }
   }
-  /*
-  Log pdf of a normal copula with precision matrix parametrization
-  */
-  real normal_copula_prec_lpdf(vector U, matrix L) {
-    int N = rows(U);
-    vector[N] Z = inv_Phi(U);
-    vector[N] mu = rep_vector(0, N);
-    matrix[N, N] I = diag_matrix(rep_vector(1, N));
-    return multi_normal_prec_lpdf(Z | mu, L) - multi_normal_prec_lpdf(Z | mu, I);
-  }
-  /*
-  Function for creating AR(1) precision matrix
-  */
-  matrix AR1_precision_matrix(int n_id, real rho) {
-    real rho_scaler = pow(1 - rho^2, -1);
-    real diag_inside = rho^2 * rho_scaler;
-    real off_diag = -rho * rho_scaler;
-    matrix[n_id, n_id] Omega = diag_matrix(rep_vector(rho_scaler, n_id));
-    Omega[2:(n_id - 1), 2:(n_id - 1)] = add_diag(Omega[2:(n_id - 1), 2:(n_id - 1)], diag_inside);
-    for (i in 1:n_id) {
-      if (i > 1) {
-        Omega[i, i - 1] = off_diag;
-      }
-      if (i < n_id) {
-        Omega[i, i + 1] = off_diag;
-      }
-    }
-  return Omega;
-  }
 }
 
 data {
@@ -540,26 +530,24 @@ data {
 parameters {
   real<lower = 0> mu;
   real<lower = 0> sigma;
-  real<lower = 0, upper = 0.5> xi;
+  real<lower = -0.5, upper = 1> xi;
   real<lower = -1, upper = 1> rho;
 }
 
 model {
-  matrix[n_id, n_id] Omega = AR1_precision_matrix(n_id, rho);
   for (i in 1:n_replicate) {
     vector[n_id] U;
-    for (j in 1:n_id) {
+    for (j in 1:n_id) {    
       U[j] = gev_cdf(y[i, j] | mu, sigma, xi);
       target += gev_lpdf(y[i, j] | mu, sigma, xi);
-    }
-    target += normal_copula_prec_lpdf(U | Omega);
+    } 
+    target += normal_copula_ar1_lpdf(U | rho);
   }
 }
-
+ 
 generated quantities {
   real log_lik = 0;
   {
-    matrix[n_id, n_id] Omega = AR1_precision_matrix(n_id, rho);
     
     for (i in 1:n_replicate) {
       vector[n_id] U;
@@ -567,36 +555,20 @@ generated quantities {
         U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);
         log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);
       }
-      log_lik += normal_copula_prec_lpdf(U | Omega);
+      log_lik += normal_copula_ar1_lpdf(U | rho);
     }
   }
+  
 }
 ```
 
+### i.i.d. Model
 
-:::
-
-### i.i.d.
-
-::: {.panel-tabset}
-
-#### Math
-
-$$
-\begin{gathered}
-y_1, \dots, y_d \overset{iid}{\sim} \mathrm{GEV}(\mu, \sigma, \xi)
-\end{gathered}
-$$
-
-#### Stan
-
-```{stan, output.var = "model2"}
+```{stan}
+#| output.var: model_iid
 #| eval: false
-#| column: page-right
+#| column: screen-right
 functions {
-  /*
-  Log pdf of GEV distribution
-  */
   real gev_lpdf(real y, real mu, real sigma, real xi) {
     if (abs(xi) < 1e-10) {
       real z = (y - mu) / sigma;
@@ -622,7 +594,7 @@ data {
 parameters {
   real<lower = 0> mu;
   real<lower = 0> sigma;
-  real<lower = 0, upper = 0.5> xi;
+  real<lower = -0.5, upper = 1> xi;
 }
 
 transformed parameters {
@@ -648,24 +620,146 @@ generated quantities {
     }
   }
 }
+
 ```
 
+### Two-Step Estimation
 
-:::
+We can't fit this model directly using one stan file. What we do is:
 
-:::
+1. Estimate the marginal distributions
+2. Use the empirical CDFs to transform the data into uniformly distributed variables
+3. Transform these uniformly distributed variables into standard normal variables
+4. Estimate the precision matrix using these variables
+5. Make sure the precision matrix is semi-positive definite and normalize it so that its inverse is a correlation matrix
+6. Re-estimate the marginal distributions with a gaussian copula assuming this precision matrix is known
+
+```{stan}
+#| output.var: model_twostep
+#| eval: false
+#| column: screen-right
+functions {
+  real gev_cdf(real y, real mu, real sigma, real xi) {
+    if (abs(xi) < 1e-10) {
+      real z = (y - mu) / sigma;
+      return exp(-exp(z));
+    } else {
+      real z = 1 + xi * (y - mu) / sigma;
+      if (z > 0) {
+        return exp(-pow(z, -1/xi));
+      } else {
+        reject("Found incompatible GEV parameter values");
+      }
+    }
+  }
+
+  real gev_lpdf(real y, real mu, real sigma, real xi) {
+    if (abs(xi) < 1e-10) {
+      real z = (y - mu) / sigma;
+      return -log(sigma) - z - exp(-z);
+    } else {
+      real z = 1 + xi * (y - mu) / sigma;
+      if (z > 0) {
+        return -log(sigma) - (1 + 1/xi) * log(z) - pow(z, -1/xi);
+      } else {
+        reject("Found incompatible GEV parameter values");
+      }
+    }
+  }
+
+  real normal_prec_chol_lpdf(vector x, array[] int n_values, array[] int index, vector values, real log_det) {
+    int N = num_elements(x);
+    int counter = 1;
+    vector[N] q = rep_vector(0, N);
+
+    for (i in 1:N) {
+      for (j in 1:n_values[i]) {
+        q[i] += values[counter] * x[index[counter]];
+        counter += 1;
+      }
+    }
+
+    return log_det - dot_self(q) / 2;
+
+  }
+
+  real normal_copula_prec_chol_lpdf(vector U, array[] int n_values, array[] int index, vector value, real log_det) {
+    int N = rows(U);
+    vector[N] Z = inv_Phi(U);
+
+    return normal_prec_chol_lpdf(Z | n_values, index, value, log_det) + dot_self(Z) / 2;
+  }
+
+}
+
+data {
+  int<lower = 0> n_replicate;
+  int<lower = 0> n_id;
+  array[n_replicate, n_id] real y;
+  array[n_replicate, n_id] real y_test;
+
+  int<lower = 0> n_nonzero_chol_Q;
+  real log_det_Q;
+  array[n_id] int n_values;
+  array[n_nonzero_chol_Q] int index;
+  vector[n_nonzero_chol_Q] value;
+}
+
+parameters {
+  real<lower = 0> mu;
+  real<lower = 0> sigma;
+  real<lower = -0.5, upper = 1> xi;
+}
+
+model {
+  for (i in 1:n_replicate) {
+    for (j in 1:n_id) {
+      target += gev_lpdf(y[i, j] | mu, sigma, xi);
+    }
+  }
+}
+ 
+generated quantities {
+  real log_lik = 0;
+  {
+    
+    for (i in 1:n_replicate) {
+      vector[n_id] U;
+      for (j in 1:n_id) {
+        U[j] = gev_cdf(y_test[i, j] | mu, sigma, xi);
+        log_lik += gev_lpdf(y_test[i, j] | mu, sigma, xi);
+      }
+      log_lik += normal_copula_prec_chol_lpdf(U | n_values, index, value, log_det_Q);
+    }
+  }
+  
+}
+
+
+
+```
 
 # Results
 
-![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors.png){.column-page}
+## Estimates of GEV Parameters
 
-![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/param_errors_abs.png){.column-page}
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/param_errors.png){.column-page}
 
-![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png){.column-page}
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/param_errors_abs.png){.column-page}
 
-![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/diff_elppd.png){.column-page}
+## Expected log predicted probability density
+
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/elppd.png){.column-page}
+
+### Comparing to the simple i.i.d. model
+
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd.png){.column-page}
 
 
+## Differences between AR(1) and Two-Step Model
 
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_ar1.png){.column-page}
 
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_by_size.png){.column-page}
 
+![](https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_by_size2.png){.column-page}

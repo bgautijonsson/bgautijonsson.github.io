@@ -8,7 +8,7 @@ author:
         url: "bggj.is"
         affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
         affiliation-url: "https://www.hi.is/tolfraedi_0"
-date: "2023/11/21"
+date: "2024/02/04"
 bibliography: references.bib
 format: 
     html:
@@ -21,7 +21,6 @@ execute:
   eval: false
 code-fold: show
 editor: source
-theme: flatly
 title-block-banner: true
 image: Figures/spatial_gamma.png
 categories:
@@ -40,15 +39,11 @@ categories:
 #| eval: true
 library(bggjphd)
 library(tidyverse)
-library(cmdstanr)
-library(posterior)
-library(bayesplot)
-library(progressr)
-library(future)
 library(glue)
-library(skimr)
 library(here)
 library(gt)
+library(skimr)
+library(arrow)
 theme_set(theme_bggj())
 ```
 
@@ -309,22 +304,6 @@ N_stations <- ncol(precip_matrix)
 N_years <- nrow(precip_matrix)
 ```
 
-
-
-```{r}
-update_names <- function(table, variable) {
-  table |> 
-    inner_join(
-      new_names,
-      by = join_by({{ variable }} == station)
-    ) |> 
-    mutate(
-      "{{variable}}" := new_name
-    ) |> 
-    select(-new_name)
-}
-```
-
 ```{r}
 edges <- twelve_neighbors |>
   filter(
@@ -348,15 +327,41 @@ node2 <- edges$neighbor
 ```
 
 ```{r}
+nbs <- edges |>
+  filter(neighbor > station) |>
+  rename(node1 = station, node2 = neighbor)
+
+N <- nrow(model_stations)
+
+adj.matrix <- sparseMatrix(i = nbs$node1, j = nbs$node2, x = 1, symmetric = TRUE)
+# The ICAR precision matrix (note! This is singular)
+Q <- Diagonal(N, rowSums(adj.matrix)) - adj.matrix
+# Add a small jitter to the diagonal for numerical stability (optional but recommended)
+Q_pert <- Q + Diagonal(N) * max(diag(Q)) * sqrt(.Machine$double.eps)
+
+# Compute the diagonal elements of the covariance matrix subject to the
+# constraint that the entries of the ICAR sum to zero.
+# See the inla.qinv function help for further details.
+Q_inv <- inla.qinv(Q_pert, constr = list(A = matrix(1, 1, N), e = 0))
+
+# Compute the geometric mean of the variances, which are on the diagonal of Q.inv
+scaling_factor <- exp(mean(log(diag(Q_inv))))
+```
+
+
+```{r}
 stan_data <- list(
   N_stations = N_stations,
   N_years = N_years,
   precip = precip_matrix,
   N_neighbors = N_neighbors,
   node1 = node1,
-  node2 = node2
+  node2 = node2,
+  scaling_factor = scaling_factor
 )
 ```
+
+
 
 # Model
 
@@ -379,14 +384,14 @@ y_{it} \sim \mathrm{GEV}(\mu_{it}, \sigma_i, \xi_i) \\
 f_\phi(\xi) \\
 f_\gamma(\Delta)
 \end{pmatrix} \\
-\psi \sim \mathrm{Normal}(\mu_\psi, \sigma_\psi^*) \quad
-\sigma_\psi^* \sim \mathrm{BYM2}_\psi(\sigma_\psi, \rho_\psi) \\
-\tau \sim \mathrm{Normal}(\mu_\tau, \sigma^*_\tau) \quad
-\sigma^*_\tau \sim \mathrm{BYM2}_\tau(\sigma_\tau, \rho_\tau) \\
-\phi \sim \mathrm{Normal}(\mu_\phi, \sigma^*_\phi) \quad
-\sigma^*_\phi \sim \mathrm{BYM2}_\phi(\sigma_\phi, \rho_\phi) \\
-\gamma \sim \mathrm{Normal}(\mu_\gamma, \sigma^*_\gamma) \quad
-\sigma^*_\gamma \sim \mathrm{BYM2}_\gamma(\sigma_\gamma, \rho_\gamma) \\
+\psi \sim \mathrm{Normal}(\mu_\psi, \Sigma_\psi^*) \quad
+\Sigma_\psi^* \sim \mathrm{BYM2}_\psi(\sigma_\psi, \rho_\psi) \\
+\tau \sim \mathrm{Normal}(\mu_\tau, \Sigma^*_\tau) \quad
+\Sigma^*_\tau \sim \mathrm{BYM2}_\tau(\sigma_\tau, \rho_\tau) \\
+\phi \sim \mathrm{Normal}(\mu_\phi, \Sigma^*_\phi) \quad
+\Sigma^*_\phi \sim \mathrm{BYM2}_\phi(\sigma_\phi, \rho_\phi) \\
+\gamma \sim \mathrm{Normal}(\mu_\gamma, \Sigma^*_\gamma) \quad
+\Sigma^*_\gamma \sim \mathrm{BYM2}_\gamma(\sigma_\gamma, \rho_\gamma) \\
 \sigma_\psi, \sigma_\tau, \sigma_\phi, \sigma_\gamma \sim \mathrm{Exponential}(1) \\
 \mathrm{logit}(\rho_\phi), \dots, \mathrm{logit(\rho_\gamma)} \sim \mathrm{Normal}(0, 1)
 \end{gathered}
@@ -394,189 +399,177 @@ $$
 
 ## Stan
 
-```{stan, output.var = "model"}
-#| column: page-right
+```{stan}
+#| output.var: modell
+#| eval: false
+#| column: screen-right
 functions{
-/*
-Fit a GEV distribution with trend
-*/
-real gevt_lpdf(vector y, real mu0, real sigma, real xi, real delta) {
-int N = rows(y);
-vector[N] z;
-vector[N] mu;
-real lp = 0;
+  /*
+  Fit a GEV distribution with trend
+  */
+  real gevt_lpdf(vector y, real mu0, real sigma, real xi, real delta) {
+    int N = rows(y);
+    vector[N] z;
+    vector[N] mu;
+    real lp = 0;
 
-for (i in 1:N) {
-mu[i] = mu0 * (1 + delta * (i - 1));
+    for (i in 1:N) {
+      mu[i] = mu0 * (1 + delta * (i - 1));
 
 
-if (z[i] <= -1) {
-reject("found incompatible variable values");
-}
+      if (z[i] <= -1) {
+        reject("found incompatible variable values");
+      }
+      
+      if (abs(xi) < 1e-12) {
+        z[i] = (y[i] - mu[i]) / sigma;
+        lp += - z[i] - exp(-z[i]);
+      } else {
+        z[i] = xi * (y[i] - mu[i]) / sigma;
+        lp += - (1 + 1 / xi) * log(1 + z[i]) - pow((1 + z[i]), -1/xi);
+      }
+    }
 
-if (abs(xi) < 1e-12) {
-z[i] = (y[i] - mu[i]) / sigma;
-lp += - z[i] - exp(-z[i]);
-} else {
-z[i] = xi * (y[i] - mu[i]) / sigma;
-lp += - (1 + 1 / xi) * log(1 + z[i]) - pow((1 + z[i]), -1/xi);
-}
-}
+    lp += -N * log(sigma);
 
-lp += -N * log(sigma);
-
-return lp;
-}
-/*
-Put an ICAR prior on coefficients
-*/
-real icar_normal_lpdf(vector phi, int N, array[] int node1, array[] int node2) {
-return - 0.5 * dot_self((phi[node1] - phi[node2])) 
-+ normal_lpdf(sum(phi) | 0, 0.001 * N);
-}
+    return lp;
+  }
+  /*
+  Put an ICAR prior on coefficients
+  */
+  real icar_normal_lpdf(vector phi, int N, array[] int node1, array[] int node2) {
+    return - 0.5 * dot_self((phi[node1] - phi[node2])) 
+      + normal_lpdf(sum(phi) | 0, 0.001 * N);
+  }
 }
 
 data {
-int<lower = 0> N_years;
-int<lower = 0> N_stations;
-matrix[N_years, N_stations] precip;
+  int<lower = 0> N_years;
+  int<lower = 0> N_stations;
+  matrix[N_years, N_stations] precip;
 
 
-int<lower = 0> N_neighbors;
-array[N_neighbors] int node1;
-array[N_neighbors] int node2;
+  int<lower = 0> N_neighbors;
+  array[N_neighbors] int node1;
+  array[N_neighbors] int node2;
+  real<lower = 0> scaling_factor;
 }
 
 
 
 parameters {
-vector[N_stations] psi_random;
-vector[N_stations] psi_spatial;
-real<lower = 0> sigma_psi;
-real mu_psi;
-real logit_rho_psi;
-
-vector[N_stations] tau_random;
-vector[N_stations] tau_spatial;
-real<lower = 0> sigma_tau;
-real mu_tau;
-real logit_rho_tau;
-
-vector[N_stations] phi_random;
-vector[N_stations] phi_spatial;
-real<lower = 0> sigma_phi;
-real mu_phi;
-real logit_rho_phi;
-
-vector[N_stations] gamma_random;
-vector[N_stations] gamma_spatial;
-real<lower = 0> sigma_gamma;
-real mu_gamma;
-real logit_rho_gamma;
+  vector[N_stations] psi_random;
+  vector[N_stations] psi_spatial;
+  real<lower = 0> sigma_psi;
+  real mu_psi;
+  real logit_rho_psi;
+  
+  vector[N_stations] tau_random;
+  vector[N_stations] tau_spatial;
+  real<lower = 0> sigma_tau;
+  real mu_tau;
+  real logit_rho_tau;
+  
+  vector[N_stations] phi_random;
+  vector[N_stations] phi_spatial;
+  real<lower = 0> sigma_phi;
+  real mu_phi;
+  real logit_rho_phi;
+  
+  vector[N_stations] gamma_random;
+  vector[N_stations] gamma_spatial;
+  real<lower = 0> sigma_gamma;
+  real mu_gamma;
+  real logit_rho_gamma;
 }
 
 transformed parameters {
-real<lower = 0, upper = 1> rho_psi = inv_logit(logit_rho_psi);
-real<lower = 0, upper = 1> rho_tau = inv_logit(logit_rho_tau);
-real<lower = 0, upper = 1> rho_phi = inv_logit(logit_rho_phi);
-real<lower = 0, upper = 1> rho_gamma = inv_logit(logit_rho_gamma);
-
-vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
-vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
-vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
-vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
-
-vector<lower = 0>[N_stations] mu0 = exp(psi);
-vector<lower = 0>[N_stations] sigma = exp(psi + tau);
-vector<lower = -0.5, upper = 0.5>[N_stations] xi = 0.5 * inv_logit(phi);
-vector<lower = -0.008, upper = 0.008>[N_stations] delta = 0.008 * inv_logit(gamma);
+  real<lower = 0, upper = 1> rho_psi = inv_logit(logit_rho_psi);
+  real<lower = 0, upper = 1> rho_tau = inv_logit(logit_rho_tau);
+  real<lower = 0, upper = 1> rho_phi = inv_logit(logit_rho_phi);
+  real<lower = 0, upper = 1> rho_gamma = inv_logit(logit_rho_gamma);
+  
+  vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi / scaling_factor) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
+  vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau / scaling_factor) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
+  vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi / scaling_factor) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
+  vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma / scaling_factor) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
+  
+  vector<lower = 0>[N_stations] mu0 = exp(psi);
+  vector<lower = 0>[N_stations] sigma = exp(psi + tau);
+  vector<lower = -0.5, upper = 0.5>[N_stations] xi = inv_logit(phi) - 0.5;
+  vector<lower = -0.01, upper = 0.01>[N_stations] delta = 0.02 * inv_logit(gamma) - 0.01;
 }
 
 model {
-for (i in 1:N_stations) {
-precip[ , i] ~ gevt(mu0[i], sigma[i], xi[i], delta[i]);
-}
+  for (i in 1:N_stations) {
+    precip[ , i] ~ gevt(mu0[i], sigma[i], xi[i], delta[i]);
+  }
 
-psi_spatial ~ icar_normal(N_neighbors, node1, node2);
-psi_random ~ std_normal();
-sigma_psi ~ exponential(1);
-logit_rho_psi ~ std_normal();
-mu_psi ~ normal(2.2, 1);
-
-tau_spatial ~ icar_normal(N_neighbors, node1, node2);
-tau_random ~ std_normal();
-sigma_tau ~ exponential(1);
-logit_rho_tau ~ std_normal();
-mu_tau ~ normal(-0.9, 1);
-
-phi_spatial ~ icar_normal(N_neighbors, node1, node2);
-phi_random ~ std_normal();
-sigma_phi ~ exponential(1);
-logit_rho_phi ~ std_normal();
-mu_phi ~ normal(0, 1);
-
-gamma_spatial ~ icar_normal(N_neighbors, node1, node2);
-gamma_random ~ std_normal();
-sigma_gamma ~ exponential(1);
-logit_rho_gamma ~ std_normal();
-mu_gamma ~ normal(0, 1);
-
+  psi_spatial ~ icar_normal(N_neighbors, node1, node2);
+  psi_random ~ std_normal();
+  sigma_psi ~ exponential(1);
+  logit_rho_psi ~ std_normal();
+  mu_psi ~ normal(2.2, 1);
+  
+  tau_spatial ~ icar_normal(N_neighbors, node1, node2);
+  tau_random ~ std_normal();
+  sigma_tau ~ exponential(1);
+  logit_rho_tau ~ std_normal();
+  mu_tau ~ normal(-0.9, 1);
+  
+  phi_spatial ~ icar_normal(N_neighbors, node1, node2);
+  phi_random ~ std_normal();
+  sigma_phi ~ exponential(1);
+  logit_rho_phi ~ std_normal();
+  mu_phi ~ normal(0, 1);
+  
+  gamma_spatial ~ icar_normal(N_neighbors, node1, node2);
+  gamma_random ~ std_normal();
+  sigma_gamma ~ exponential(1);
+  logit_rho_gamma ~ std_normal();
+  mu_gamma ~ normal(0, 1);
 }
 ```
+
 
 :::
 
 
-```{r}
-#| output: false
-#| eval: false
-model_file <- here("posts", "icar_gev", "Stan", "BYM_GEV_LOGIT.stan")
-
-mod <- cmdstan_model(model_file)
-```
 
 ```{r}
-#| output: false
 #| eval: false
-fit <- mod$sample(
+
+model <- cmdstan_model(
+  here("posts", "icar_gev", "Stan", "BYM_GEV_LOGIT.stan")
+)
+
+fit <- model$sample(
   data = stan_data,
   chains = 4,
   parallel_chains = 4,
-  refresh = 100,
-  # init = 0,
-  iter_warmup = 1000, 
+  iter_warmup = 1000,
   iter_sampling = 1000,
+  save_warmup = FALSE,
+  refresh = 10,
   output_dir = here("posts", "icar_gev", "Stan", "Draws")
 )
-
-fit$save_object(file = "Stan/Model_Objects/fit.RDS")
 ```
 
 # Results
 
-```{r}
-#| eval: true
-#| cache: true
-fit <- read_rds("Stan/Model_Objects/fit.RDS")
-draws <- fit$draws() |> as_draws_df()
-```
-
-
 I won't show convergence analytics here, but after doing our due diligence we can move on to looking at parameter estimates.
 
 ## BYM2 Parameters
+
+
 
 ```{r}
 #| code-fold: true
 #| eval: true
 #| column: screen-inset-right
 
-
-bym2 <- draws |> 
-  subset_draws(variable = c("^rho_", "sigma_", "mu_"), regex = TRUE) |> 
-  summarise_draws()
-
-bym2 |> 
+here("posts", "icar_gev", "results", "bym_results.csv") |> 
+  read_csv() |> 
   mutate(
     variable = str_c("<b>&", variable, ";</sub></b>") |> 
       str_replace("_", ";<sub>&")
@@ -596,85 +589,38 @@ bym2 |>
     columns = ess_bulk:ess_tail,
     decimals = 0
   ) |> 
-  tab_options(table.width = pct(100)) |> 
-  opt_interactive( 
-    use_sorting = FALSE, 
-    use_compact_mode = TRUE,
-    use_highlight = TRUE,
-    page_size_default = 12
-  )
+  tab_options(table.width = pct(100))
 ```
-
-
-## Pairs Plot for Station 5
-
-```{r}
-#| code-fold: true
-station_pairs_plot <- function(station, link = TRUE) {
-  if (link == TRUE) {
-    my_pars <- c(glue("psi[{station}]"), glue("tau[{station}]"), glue("phi[{station}]"), glue("gamma[{station}]"))
-  } else {
-    my_pars <- c(glue("mu0[{station}]"), glue("sigma[{station}]"), glue("xi[{station}]"), glue("delta[{station}]"))
-  }
-  
-  
-  draws |>
-    mcmc_pairs(
-      pars = my_pars,
-      off_diag_fun = "hex",
-      diag_fun = "dens"
-    )
-}
-```
-
-::: {.panel-tabset}
-
-### Unconstrained Scale
-
-```{r}
-#| code-fold: true
-p <- station_pairs_plot(5)
-
-ggsave(
-  plot = p,
-  filename = "Figures/station_pairs_plot_link.png",
-  width = 8, height = 1 * 8, scale = 1.3
-)
-```
-
-![Here we see a pairs plot of all four GEV parameters for station 5. The plot is shown on the unconstrained scale.](Figures/station_pairs_plot_link.png){.fig-cap-location-margin}
-
-### Original Scale
-
-```{r}
-#| code-fold: true
-p <- station_pairs_plot(5, link = FALSE)
-
-ggsave(
-  plot = p,
-  filename = "Figures/station_pairs_plot_no_link.png",
-  width = 8, height = 1 * 8, scale = 1.3
-)
-```
-
-![Here we see a pairs plot of all four GEV parameters for station 5. The plot is shown on the original scale.](Figures/station_pairs_plot_no_link.png)
-
-
-:::
 
 ## Spatial Distribution
 
 ```{r}
 #| code-fold: true
-spatial_plot <- function(variable) {
-  
-  draws |>
-    subset_draws(variable = glue("^{variable}\\["), regex = TRUE) |>
-    summarise_draws() |> 
-    mutate(station = parse_number(str_replace(variable, "mu0", "mu"))) |>
+
+gev_params <- open_dataset(
+  here("posts", "icar_gev", "results", "gev_results.parquet")
+)
+
+model_stations <- read_csv(
+  here("posts", "icar_gev", "data", "model_stations.csv")
+)
+
+new_names <- read_csv(
+  here("posts", "icar_gev", "data", "new_names.csv")
+)
+
+spatial_plot <- function(plot_var) {
+  box::use(
+    posts/icar_gev/R/utils[update_names]
+  )
+  gev_params |>
+    filter(
+      variable == plot_var
+    ) |> 
+    collect() |> 
     inner_join(
       model_stations |> 
-        update_names(station),
+        update_names(station, new_names),
       by = join_by(station)
     ) |>
     ggplot(aes(proj_x, proj_y)) +
@@ -682,7 +628,6 @@ spatial_plot <- function(variable) {
     scale_fill_viridis_c() +
     coord_cartesian(expand = FALSE)
 }
-
 ```
 
 ### Location

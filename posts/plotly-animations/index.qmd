@@ -18,7 +18,6 @@ execute:
   echo: true
   warning: false
 editor: source
-title-block-banner: true
 image: image.png
 categories:
     - english

@@ -48,6 +48,7 @@ data {
   int<lower = 0> N_neighbors;
   array[N_neighbors] int node1;
   array[N_neighbors] int node2;
+  real<lower = 0> scaling_factor;
 }
 
 
@@ -84,15 +85,15 @@ transformed parameters {
   real<lower = 0, upper = 1> rho_phi = inv_logit(logit_rho_phi);
   real<lower = 0, upper = 1> rho_gamma = inv_logit(logit_rho_gamma);
   
-  vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
-  vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
-  vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
-  vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
+  vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi / scaling_factor) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
+  vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau / scaling_factor) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
+  vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi / scaling_factor) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
+  vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma / scaling_factor) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
   
   vector<lower = 0>[N_stations] mu0 = exp(psi);
   vector<lower = 0>[N_stations] sigma = exp(psi + tau);
-  vector<lower = -0.5, upper = 0.5>[N_stations] xi = 0.5 * inv_logit(phi);
-  vector<lower = -0.008, upper = 0.008>[N_stations] delta = 0.008 * inv_logit(gamma);
+  vector<lower = -0.5, upper = 0.5>[N_stations] xi = inv_logit(phi) - 0.5;
+  vector<lower = -0.01, upper = 0.01>[N_stations] delta = 0.02 * inv_logit(gamma) - 0.01;
 }
 
 model {

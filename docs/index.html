@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.449">
+<meta name="generator" content="quarto-1.4.548">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -47,6 +47,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -94,12 +95,39 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="alternate" type="application/rss+xml" title="bggj" href="index.xml" data-external="1"><meta property="og:title" content="">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="alternate" type="application/rss+xml" title="bggj" href="index.xml" data-external="1"><meta property="og:title" content="bggj">
 <meta property="og:image" content="https://www.bggj.is/posts/forest-plot-table/featured.png">
 <meta property="og:site_name" content="bggj">
 <meta property="og:image:height" content="834">
 <meta property="og:image:width" content="1344">
-<meta name="twitter:title" content="">
+<meta name="twitter:title" content="bggj">
 <meta name="twitter:image" content="https://www.bggj.is/posts/forest-plot-table/featured.png">
 <meta name="twitter:creator" content="@bggjonsson">
 <meta name="twitter:site" content="@bggjonsson">
@@ -111,7 +139,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -161,7 +189,7 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Category</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(4)</span></div><div class="category" data-category="bayesian">bayesian <span class="quarto-category-count">(1)</span></div><div class="category" data-category="big data">big data <span class="quarto-category-count">(1)</span></div><div class="category" data-category="english">english <span class="quarto-category-count">(4)</span></div><div class="category" data-category="ggplot">ggplot <span class="quarto-category-count">(1)</span></div><div class="category" data-category="hierarchical modeling">hierarchical modeling <span class="quarto-category-count">(1)</span></div><div class="category" data-category="phd">phd <span class="quarto-category-count">(2)</span></div><div class="category" data-category="plotly">plotly <span class="quarto-category-count">(1)</span></div><div class="category" data-category="plots">plots <span class="quarto-category-count">(1)</span></div><div class="category" data-category="scraping">scraping <span class="quarto-category-count">(1)</span></div><div class="category" data-category="spatial statistics">spatial statistics <span class="quarto-category-count">(1)</span></div><div class="category" data-category="stan">stan <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tutorial">tutorial <span class="quarto-category-count">(1)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Category</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(5)</span></div><div class="category" data-category="bayesian">bayesian <span class="quarto-category-count">(2)</span></div><div class="category" data-category="big data">big data <span class="quarto-category-count">(1)</span></div><div class="category" data-category="copulas">copulas <span class="quarto-category-count">(1)</span></div><div class="category" data-category="english">english <span class="quarto-category-count">(5)</span></div><div class="category" data-category="ggplot">ggplot <span class="quarto-category-count">(1)</span></div><div class="category" data-category="hierarchical modeling">hierarchical modeling <span class="quarto-category-count">(1)</span></div><div class="category" data-category="phd">phd <span class="quarto-category-count">(3)</span></div><div class="category" data-category="plotly">plotly <span class="quarto-category-count">(1)</span></div><div class="category" data-category="plots">plots <span class="quarto-category-count">(1)</span></div><div class="category" data-category="scraping">scraping <span class="quarto-category-count">(1)</span></div><div class="category" data-category="spatial statistics">spatial statistics <span class="quarto-category-count">(2)</span></div><div class="category" data-category="stan">stan <span class="quarto-category-count">(2)</span></div><div class="category" data-category="tutorial">tutorial <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -170,18 +198,18 @@ gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
 
 <div id="listing-listing-blog" class="quarto-listing quarto-listing-container-default">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="english,R,phd,stan,bayesian,spatial statistics,hierarchical modeling" data-listing-date-sort="1700524800000" data-listing-file-modified-sort="1700655834705" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3274">
+<div class="quarto-post image-right" data-index="0" data-categories="english,R,phd,stan,bayesian,spatial statistics,hierarchical modeling" data-listing-date-sort="1707004800000" data-listing-file-modified-sort="1707046019691" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3426">
 <div class="thumbnail">
-<p><a href="./posts/icar_gev/index.html"></a></p><a href="./posts/icar_gev/index.html">
+<p><a href="./posts/icar_gev/index.html" class="no-external"></a></p><a href="./posts/icar_gev/index.html" class="no-external">
 <p><img src="./posts/icar_gev/Figures/spatial_gamma.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/icar_gev/index.html"></a></p>
+</a><p><a href="./posts/icar_gev/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
 <h3 class="no-anchor listing-title">
-<a href="./posts/icar_gev/index.html">Spatially Dependent Generalized Extreme Value Parameters</a>
+<a href="./posts/icar_gev/index.html" class="no-external">Spatially Dependent Generalized Extreme Value Parameters</a>
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/icar_gev/index.html">Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters</a>
+<a href="./posts/icar_gev/index.html" class="no-external">Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters</a>
 </div>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('english'); return false;">
@@ -207,13 +235,13 @@ hierarchical modeling
 </div>
 </div>
 <div class="listing-description">
-<a href="./posts/icar_gev/index.html">For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors. </a>
+<a href="./posts/icar_gev/index.html" class="no-external">For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors. </a>
 </div>
 </div>
 <div class="metadata">
-<a href="./posts/icar_gev/index.html">
+<a href="./posts/icar_gev/index.html" class="no-external">
 <div class="listing-date">
-Nov 21, 2023
+Feb 4, 2024
 </div>
 <div class="listing-author">
 Brynjólfur Gauti Guðrúnar Jónsson
@@ -221,18 +249,69 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="english,R,ggplot,plotly" data-listing-date-sort="1675641600000" data-listing-file-modified-sort="1675703277531" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1420">
+<div class="quarto-post image-right" data-index="1" data-categories="english,R,phd,stan,bayesian,spatial statistics,copulas" data-listing-date-sort="1702252800000" data-listing-file-modified-sort="1707046068023" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3567">
 <div class="thumbnail">
-<p><a href="./posts/plotly-animations/index.html"></a></p><a href="./posts/plotly-animations/index.html">
-<p><img src="./posts/plotly-animations/image.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/plotly-animations/index.html"></a></p>
+<p><a href="./posts/gev_copula_ar1/index.html" class="no-external"></a></p><a href="./posts/gev_copula_ar1/index.html" class="no-external">
+<p><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/gev_copula_ar1/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
 <h3 class="no-anchor listing-title">
-<a href="./posts/plotly-animations/index.html">Making interactive animations with ggplotly</a>
+<a href="./posts/gev_copula_ar1/index.html" class="no-external">Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins</a>
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/plotly-animations/index.html">Simple examples of how to use the <code>frame</code> aesthetic in <code>ggplotly()</code> for easy animations</a>
+<a href="./posts/gev_copula_ar1/index.html" class="no-external">A simulation study of the differences between AR(1) copula and i.i.d copula</a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('english'); return false;">
+english
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('R'); return false;">
+R
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('phd'); return false;">
+phd
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('stan'); return false;">
+stan
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('bayesian'); return false;">
+bayesian
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('spatial statistics'); return false;">
+spatial statistics
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('copulas'); return false;">
+copulas
+</div>
+</div>
+<div class="listing-description">
+<a href="./posts/gev_copula_ar1/index.html" class="no-external">Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent <em>(parameter)</em> level. </a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/gev_copula_ar1/index.html" class="no-external">
+<div class="listing-date">
+Dec 11, 2023
+</div>
+<div class="listing-author">
+Brynjólfur Gauti Guðrúnar Jónsson
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="english,R,ggplot,plotly" data-listing-date-sort="1675641600000" data-listing-file-modified-sort="1707046095352" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1420">
+<div class="thumbnail">
+<p><a href="./posts/plotly-animations/index.html" class="no-external"></a></p><a href="./posts/plotly-animations/index.html" class="no-external">
+<p><img src="./posts/plotly-animations/image.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/plotly-animations/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/plotly-animations/index.html" class="no-external">Making interactive animations with ggplotly</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/plotly-animations/index.html" class="no-external">Simple examples of how to use the <code>frame</code> aesthetic in <code>ggplotly()</code> for easy animations</a>
 </div>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('english'); return false;">
@@ -249,11 +328,11 @@ plotly
 </div>
 </div>
 <div class="listing-description">
-<a href="./posts/plotly-animations/index.html">I’ve recently been making a lot of <code>plotly</code> graphs for my Icelandic website <span>metill.is</span>, where I look at official data on current topics. Since it is so simple to make animations with <code>ggplotly</code> I thought I might write a short tutorial on it. </a>
+<a href="./posts/plotly-animations/index.html" class="no-external">I’ve recently been making a lot of <code>plotly</code> graphs for my Icelandic website <span>metill.is</span>, where I look at official data on current topics. Since it is so simple to make animations with <code>ggplotly</code> I thought I might write a short tutorial on it. </a>
 </div>
 </div>
 <div class="metadata">
-<a href="./posts/plotly-animations/index.html">
+<a href="./posts/plotly-animations/index.html" class="no-external">
 <div class="listing-date">
 Feb 6, 2023
 </div>
@@ -263,18 +342,18 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="english,R,phd,big data,scraping" data-listing-date-sort="1675382400000" data-listing-file-modified-sort="1675421618603" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1101">
+<div class="quarto-post image-right" data-index="3" data-categories="english,R,phd,big data,scraping" data-listing-date-sort="1675382400000" data-listing-file-modified-sort="1707046044652" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1101">
 <div class="thumbnail">
-<p><a href="./posts/ceda-archive/index.html"></a></p><a href="./posts/ceda-archive/index.html">
+<p><a href="./posts/ceda-archive/index.html" class="no-external"></a></p><a href="./posts/ceda-archive/index.html" class="no-external">
 <p class="card-img-top"><img src="posts/ceda-archive/Figures/ceda_data.png"  class="thumbnail-image card-img"/></p>
-</a><p><a href="./posts/ceda-archive/index.html"></a></p>
+</a><p><a href="./posts/ceda-archive/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
 <h3 class="no-anchor listing-title">
-<a href="./posts/ceda-archive/index.html">Fetching FTP data from the Ceda Archives</a>
+<a href="./posts/ceda-archive/index.html" class="no-external">Fetching FTP data from the Ceda Archives</a>
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/ceda-archive/index.html">Using R and FTP to programmatically fetch a large amount of data for processing</a>
+<a href="./posts/ceda-archive/index.html" class="no-external">Using R and FTP to programmatically fetch a large amount of data for processing</a>
 </div>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('english'); return false;">
@@ -294,11 +373,11 @@ scraping
 </div>
 </div>
 <div class="listing-description">
-<a href="./posts/ceda-archive/index.html">For my PhD modeling I needed to fetch a large amount of data from the CEDA Archive, specifically I use hourly precipitation projections from <span>UKCP Local Projections on a 5km grid over the UK for 1980-2080</span>. The hourly precipitation projections are stored in 720 files that are all approximately 120mb to 130mb. Here I write out my processing in case someone needs help with doing something similar. </a>
+<a href="./posts/ceda-archive/index.html" class="no-external">For my PhD modeling I needed to fetch a large amount of data from the CEDA Archive, specifically I use hourly precipitation projections from <span>UKCP Local Projections on a 5km grid over the UK for 1980-2080</span>. The hourly precipitation projections are stored in 720 files that are all approximately 120mb to 130mb. Here I write out my processing in case someone needs help with doing something similar. </a>
 </div>
 </div>
 <div class="metadata">
-<a href="./posts/ceda-archive/index.html">
+<a href="./posts/ceda-archive/index.html" class="no-external">
 <div class="listing-date">
 Feb 3, 2023
 </div>
@@ -308,18 +387,18 @@ Brynjólfur Gauti Guðrúnar Jónsson
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="english,R,plots,tutorial" data-listing-date-sort="1656374400000" data-listing-file-modified-sort="1675422159190" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="897">
+<div class="quarto-post image-right" data-index="4" data-categories="english,R,plots,tutorial" data-listing-date-sort="1656374400000" data-listing-file-modified-sort="1707046054198" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="897">
 <div class="thumbnail">
-<p><a href="./posts/forest-plot-table/index.html"></a></p><a href="./posts/forest-plot-table/index.html">
+<p><a href="./posts/forest-plot-table/index.html" class="no-external"></a></p><a href="./posts/forest-plot-table/index.html" class="no-external">
 <p><img src="./posts/forest-plot-table/featured.png" class="thumbnail-image"></p>
-</a><p><a href="./posts/forest-plot-table/index.html"></a></p>
+</a><p><a href="./posts/forest-plot-table/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
 <h3 class="no-anchor listing-title">
-<a href="./posts/forest-plot-table/index.html">Forest Plots with Built-In Tables</a>
+<a href="./posts/forest-plot-table/index.html" class="no-external">Forest Plots with Built-In Tables</a>
 </h3>
 <div class="listing-subtitle">
-<a href="./posts/forest-plot-table/index.html">Creating forest plots with coefficient tables in ggplot2 with cowplot</a>
+<a href="./posts/forest-plot-table/index.html" class="no-external">Creating forest plots with coefficient tables in ggplot2 with cowplot</a>
 </div>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('english'); return false;">
@@ -336,11 +415,11 @@ tutorial
 </div>
 </div>
 <div class="listing-description">
-<a href="./posts/forest-plot-table/index.html">I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the <code>ggplot2</code> and <code>cowplot</code> packages. </a>
+<a href="./posts/forest-plot-table/index.html" class="no-external">I’ve seen this kind of figure poking around, but I didn’t really think about them until the other day I was asked about how to make one in R. Here I will walk through making one of these plots using the <code>ggplot2</code> and <code>cowplot</code> packages. </a>
 </div>
 </div>
 <div class="metadata">
-<a href="./posts/forest-plot-table/index.html">
+<a href="./posts/forest-plot-table/index.html" class="no-external">
 <div class="listing-date">
 Jun 28, 2022
 </div>
@@ -488,38 +567,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
     stripColumnClz(note)
-    const typesetMath = (el) => {
-      if (window.MathJax) {
-        // MathJax Typeset
-        window.MathJax.typeset([el]);
-      } else if (window.katex) {
-        // KaTeX Render
-        var mathElements = el.getElementsByClassName("math");
-        var macros = [];
-        for (var i = 0; i < mathElements.length; i++) {
-          var texText = mathElements[i].firstChild;
-          if (mathElements[i].tagName == "SPAN") {
-            window.katex.render(texText.data, mathElements[i], {
-              displayMode: mathElements[i].classList.contains('display'),
-              throwOnError: false,
-              macros: macros,
-              fleqn: false
-            });
-          }
-        }
-      }
-    }
     if (id === null || id.startsWith('sec-')) {
       // Special case sections, only their first couple elements
       const container = document.createElement("div");
       if (note.children && note.children.length > 2) {
-        for (let i = 0; i < 2; i++) {
-          container.appendChild(note.children[i].cloneNode(true));
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
         }
-        typesetMath(container);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
         return container.innerHTML
       } else {
-        typesetMath(note);
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
         return note.innerHTML;
       }
     } else {
@@ -528,8 +597,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (anchorLink) {
         anchorLink.remove();
       }
-      typesetMath(note);
-      return note.innerHTML;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
     }
   }
   for (var i=0; i<xrefs.length; i++) {
