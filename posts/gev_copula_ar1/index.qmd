@@ -8,7 +8,7 @@ author:
         url: "bggj.is"
         affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
         affiliation-url: "https://www.hi.is/tolfraedi_0"
-date: "2023/12/11"
+date: "2024/02/06"
 bibliography: references.bib
 draft: false
 format: 
@@ -20,7 +20,7 @@ execute:
   echo: true
   warning: false
 editor: source
-image: https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png
+image: https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/elppd.png
 categories:
     - english
     - R

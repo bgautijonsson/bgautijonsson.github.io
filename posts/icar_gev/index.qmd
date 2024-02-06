@@ -2,7 +2,7 @@
 title: "Spatially Dependent Generalized Extreme Value Parameters"
 subtitle: "Using Stan to fit a Generalized Extreme Value Distribution with spatially dependent parameters"
 description: |
-  For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors.
+For my PhD modeling I need to model maximum precipitation data on a large grid. Each location has four parameters in our GEV distribution: location, scale, shape and trend. Here I will write up and do my best to explain a Stan program that puts spatial dependence on these parameters using a BYM2 prior based on each locations neighbors.
 author: 
     -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
         url: "bggj.is"
@@ -44,6 +44,9 @@ library(here)
 library(gt)
 library(skimr)
 library(arrow)
+library(leafsync)
+library(sf)
+library(mapview)
 theme_set(theme_bggj())
 ```
 
@@ -404,130 +407,130 @@ $$
 #| eval: false
 #| column: screen-right
 functions{
-  /*
-  Fit a GEV distribution with trend
-  */
-  real gevt_lpdf(vector y, real mu0, real sigma, real xi, real delta) {
-    int N = rows(y);
-    vector[N] z;
-    vector[N] mu;
-    real lp = 0;
+/*
+Fit a GEV distribution with trend
+*/
+real gevt_lpdf(vector y, real mu0, real sigma, real xi, real delta) {
+int N = rows(y);
+vector[N] z;
+vector[N] mu;
+real lp = 0;
 
-    for (i in 1:N) {
-      mu[i] = mu0 * (1 + delta * (i - 1));
+for (i in 1:N) {
+mu[i] = mu0 * (1 + delta * (i - 1));
 
 
-      if (z[i] <= -1) {
-        reject("found incompatible variable values");
-      }
-      
-      if (abs(xi) < 1e-12) {
-        z[i] = (y[i] - mu[i]) / sigma;
-        lp += - z[i] - exp(-z[i]);
-      } else {
-        z[i] = xi * (y[i] - mu[i]) / sigma;
-        lp += - (1 + 1 / xi) * log(1 + z[i]) - pow((1 + z[i]), -1/xi);
-      }
-    }
+if (z[i] <= -1) {
+reject("found incompatible variable values");
+}
 
-    lp += -N * log(sigma);
+if (abs(xi) < 1e-12) {
+z[i] = (y[i] - mu[i]) / sigma;
+lp += - z[i] - exp(-z[i]);
+} else {
+z[i] = xi * (y[i] - mu[i]) / sigma;
+lp += - (1 + 1 / xi) * log(1 + z[i]) - pow((1 + z[i]), -1/xi);
+}
+}
 
-    return lp;
-  }
-  /*
-  Put an ICAR prior on coefficients
-  */
-  real icar_normal_lpdf(vector phi, int N, array[] int node1, array[] int node2) {
-    return - 0.5 * dot_self((phi[node1] - phi[node2])) 
-      + normal_lpdf(sum(phi) | 0, 0.001 * N);
-  }
+lp += -N * log(sigma);
+
+return lp;
+}
+/*
+Put an ICAR prior on coefficients
+*/
+real icar_normal_lpdf(vector phi, int N, array[] int node1, array[] int node2) {
+return - 0.5 * dot_self((phi[node1] - phi[node2])) 
++ normal_lpdf(sum(phi) | 0, 0.001 * N);
+}
 }
 
 data {
-  int<lower = 0> N_years;
-  int<lower = 0> N_stations;
-  matrix[N_years, N_stations] precip;
+int<lower = 0> N_years;
+int<lower = 0> N_stations;
+matrix[N_years, N_stations] precip;
 
 
-  int<lower = 0> N_neighbors;
-  array[N_neighbors] int node1;
-  array[N_neighbors] int node2;
-  real<lower = 0> scaling_factor;
+int<lower = 0> N_neighbors;
+array[N_neighbors] int node1;
+array[N_neighbors] int node2;
+real<lower = 0> scaling_factor;
 }
 
 
 
 parameters {
-  vector[N_stations] psi_random;
-  vector[N_stations] psi_spatial;
-  real<lower = 0> sigma_psi;
-  real mu_psi;
-  real logit_rho_psi;
-  
-  vector[N_stations] tau_random;
-  vector[N_stations] tau_spatial;
-  real<lower = 0> sigma_tau;
-  real mu_tau;
-  real logit_rho_tau;
-  
-  vector[N_stations] phi_random;
-  vector[N_stations] phi_spatial;
-  real<lower = 0> sigma_phi;
-  real mu_phi;
-  real logit_rho_phi;
-  
-  vector[N_stations] gamma_random;
-  vector[N_stations] gamma_spatial;
-  real<lower = 0> sigma_gamma;
-  real mu_gamma;
-  real logit_rho_gamma;
+vector[N_stations] psi_random;
+vector[N_stations] psi_spatial;
+real<lower = 0> sigma_psi;
+real mu_psi;
+real logit_rho_psi;
+
+vector[N_stations] tau_random;
+vector[N_stations] tau_spatial;
+real<lower = 0> sigma_tau;
+real mu_tau;
+real logit_rho_tau;
+
+vector[N_stations] phi_random;
+vector[N_stations] phi_spatial;
+real<lower = 0> sigma_phi;
+real mu_phi;
+real logit_rho_phi;
+
+vector[N_stations] gamma_random;
+vector[N_stations] gamma_spatial;
+real<lower = 0> sigma_gamma;
+real mu_gamma;
+real logit_rho_gamma;
 }
 
 transformed parameters {
-  real<lower = 0, upper = 1> rho_psi = inv_logit(logit_rho_psi);
-  real<lower = 0, upper = 1> rho_tau = inv_logit(logit_rho_tau);
-  real<lower = 0, upper = 1> rho_phi = inv_logit(logit_rho_phi);
-  real<lower = 0, upper = 1> rho_gamma = inv_logit(logit_rho_gamma);
-  
-  vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi / scaling_factor) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
-  vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau / scaling_factor) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
-  vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi / scaling_factor) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
-  vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma / scaling_factor) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
-  
-  vector<lower = 0>[N_stations] mu0 = exp(psi);
-  vector<lower = 0>[N_stations] sigma = exp(psi + tau);
-  vector<lower = -0.5, upper = 0.5>[N_stations] xi = inv_logit(phi) - 0.5;
-  vector<lower = -0.01, upper = 0.01>[N_stations] delta = 0.02 * inv_logit(gamma) - 0.01;
+real<lower = 0, upper = 1> rho_psi = inv_logit(logit_rho_psi);
+real<lower = 0, upper = 1> rho_tau = inv_logit(logit_rho_tau);
+real<lower = 0, upper = 1> rho_phi = inv_logit(logit_rho_phi);
+real<lower = 0, upper = 1> rho_gamma = inv_logit(logit_rho_gamma);
+
+vector[N_stations] psi = mu_psi + sigma_psi * (sqrt(rho_psi / scaling_factor) * psi_spatial + sqrt(1 - rho_psi) * psi_random);
+vector[N_stations] tau = mu_tau + sigma_tau * (sqrt(rho_tau / scaling_factor) * tau_spatial + sqrt(1 - rho_tau) * tau_random);
+vector[N_stations] phi = mu_phi + sigma_phi * (sqrt(rho_phi / scaling_factor) * phi_spatial + sqrt(1 - rho_phi) * phi_random);
+vector[N_stations] gamma = mu_gamma + sigma_gamma * (sqrt(rho_gamma / scaling_factor) * gamma_spatial + sqrt(1 - rho_gamma) * gamma_random);
+
+vector<lower = 0>[N_stations] mu0 = exp(psi);
+vector<lower = 0>[N_stations] sigma = exp(psi + tau);
+vector<lower = -0.5, upper = 0.5>[N_stations] xi = inv_logit(phi) - 0.5;
+vector<lower = -0.01, upper = 0.01>[N_stations] delta = 0.02 * inv_logit(gamma) - 0.01;
 }
 
 model {
-  for (i in 1:N_stations) {
-    precip[ , i] ~ gevt(mu0[i], sigma[i], xi[i], delta[i]);
-  }
+for (i in 1:N_stations) {
+precip[ , i] ~ gevt(mu0[i], sigma[i], xi[i], delta[i]);
+}
 
-  psi_spatial ~ icar_normal(N_neighbors, node1, node2);
-  psi_random ~ std_normal();
-  sigma_psi ~ exponential(1);
-  logit_rho_psi ~ std_normal();
-  mu_psi ~ normal(2.2, 1);
-  
-  tau_spatial ~ icar_normal(N_neighbors, node1, node2);
-  tau_random ~ std_normal();
-  sigma_tau ~ exponential(1);
-  logit_rho_tau ~ std_normal();
-  mu_tau ~ normal(-0.9, 1);
-  
-  phi_spatial ~ icar_normal(N_neighbors, node1, node2);
-  phi_random ~ std_normal();
-  sigma_phi ~ exponential(1);
-  logit_rho_phi ~ std_normal();
-  mu_phi ~ normal(0, 1);
-  
-  gamma_spatial ~ icar_normal(N_neighbors, node1, node2);
-  gamma_random ~ std_normal();
-  sigma_gamma ~ exponential(1);
-  logit_rho_gamma ~ std_normal();
-  mu_gamma ~ normal(0, 1);
+psi_spatial ~ icar_normal(N_neighbors, node1, node2);
+psi_random ~ std_normal();
+sigma_psi ~ exponential(1);
+logit_rho_psi ~ std_normal();
+mu_psi ~ normal(2.2, 1);
+
+tau_spatial ~ icar_normal(N_neighbors, node1, node2);
+tau_random ~ std_normal();
+sigma_tau ~ exponential(1);
+logit_rho_tau ~ std_normal();
+mu_tau ~ normal(-0.9, 1);
+
+phi_spatial ~ icar_normal(N_neighbors, node1, node2);
+phi_random ~ std_normal();
+sigma_phi ~ exponential(1);
+logit_rho_phi ~ std_normal();
+mu_phi ~ normal(0, 1);
+
+gamma_spatial ~ icar_normal(N_neighbors, node1, node2);
+gamma_random ~ std_normal();
+sigma_gamma ~ exponential(1);
+logit_rho_gamma ~ std_normal();
+mu_gamma ~ normal(0, 1);
 }
 ```
 
@@ -596,6 +599,11 @@ here("posts", "icar_gev", "results", "bym_results.csv") |>
 
 ```{r}
 #| code-fold: true
+#| eval: true
+
+box::use(
+  posts/icar_gev/R/utils[update_names]
+)
 
 gev_params <- open_dataset(
   here("posts", "icar_gev", "results", "gev_results.parquet")
@@ -609,215 +617,78 @@ new_names <- read_csv(
   here("posts", "icar_gev", "data", "new_names.csv")
 )
 
-spatial_plot <- function(plot_var) {
-  box::use(
-    posts/icar_gev/R/utils[update_names]
-  )
+gev_params <- gev_params |> 
+  collect() |>
+  pivot_wider(names_from = variable, values_from = mean) |> 
+  inner_join(
+    model_stations |> 
+      update_names(station, new_names),
+    by = join_by(station)
+  ) 
+
+n_x <- length(unique(gev_params$proj_x))
+n_y <- length(unique(gev_params$proj_y))
+
+
+gev_params <- gev_params |> 
+  bggjphd::stations_to_sf() |> 
+  sf::st_transform("WGS84") |> 
+  bggjphd::points_to_grid(n_x = n_x, n_y = n_y)
+
+variables <- c(
+  "psi", "mu0",
+  "tau", "sigma",
+  "phi", "xi",
+  "gamma", "delta"
+)
+
+labels <- c(
+  "log(Location)", "Location",
+  "log(Signal to Noise)", "Scale",
+  "Shape<br>(Unconstrained)", "Shape<br>(Constrained)",
+  "Trend<br>(Unconstrained)", "Trend<br>(Constrained)"
+)
+
+make_plot <- function(
+    variable_name,
+    label_name = NULL
+) {
+  
+  gev_params$label <- scales::number(gev_params[[variable_name]], accuracy = 0.001)
+  
   gev_params |>
-    filter(
-      variable == plot_var
-    ) |> 
-    collect() |> 
-    inner_join(
-      model_stations |> 
-        update_names(station, new_names),
-      by = join_by(station)
-    ) |>
-    ggplot(aes(proj_x, proj_y)) +
-    geom_raster(interpolate = F, aes(fill = mean)) +
-    scale_fill_viridis_c() +
-    coord_cartesian(expand = FALSE)
+    mapview(
+      zcol = variable_name,
+      lwd = 0,
+      layer.name = label_name,
+      popup = NULL,
+      label = "label"
+    )
 }
+
+
+plots <- map2(variables, labels, make_plot)
+
 ```
 
-### Location
+### Unconstrained Scale
 
 ```{r}
 #| code-fold: true
-p <- spatial_plot("psi")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\psi$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_psi.png",
-  width = 8, height = 8, scale = 1.3
-)
-
-
-p <- spatial_plot("mu0")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\mu_0$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_mu0.png",
-  width = 8, height = 8, scale = 1.3
-)
+#| eval: true
+#| column: page
+sync(plots[seq(1, 7, by = 2)])
 ```
 
-::: {layout-ncol=2 .column-page}
-![](Figures/spatial_psi.png)
-
-![](Figures/spatial_mu0.png)
-:::
 
 
-### Scale
+### Constrained Scale
 
 ```{r}
 #| code-fold: true
-p <- spatial_plot("tau")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\tau$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_tau.png",
-  width = 8, height = 8, scale = 1.3
-)
-
-
-p <- spatial_plot("sigma")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\sigma$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_sigma.png",
-  width = 8, height = 8, scale = 1.3
-)
+#| eval: true
+#| column: page
+sync(plots[seq(1, 7, by = 2) + 1])
 ```
 
-::: {layout-ncol=2 .column-page}
-![](Figures/spatial_tau.png)
 
-![](Figures/spatial_sigma.png)
-:::
-### Shape
-
-```{r}
-#| code-fold: true
-p <- spatial_plot("phi")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\phi$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_phi.png",
-  width = 8, height = 8, scale = 1.3
-)
-
-
-p <- spatial_plot("xi")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\xi$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_xi.png",
-  width = 8, height = 8, scale = 1.3
-)
-```
-
-::: {layout-ncol=2 .column-page}
-![](Figures/spatial_phi.png)
-
-![](Figures/spatial_xi.png)
-:::
-
-### Trend
-
-```{r}
-#| code-fold: true
-p <- spatial_plot("gamma")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\gamma$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_gamma.png",
-  width = 8, height = 8, scale = 1.3
-)
-
-
-p <- spatial_plot("delta")
-
-p <- p +
-  labs(
-    x = "X Projection",
-    y = "Y Projection",
-    fill = "Posterior mean"
-  ) +
-  ggtitle(
-    label = latex2exp::TeX("Spatial distribution of $\\Delta$")
-  )
-
-ggsave(
-  plot = p,
-  filename = "Figures/spatial_delta.png",
-  width = 8, height = 8, scale = 1.3
-)
-```
-
-::: {layout-ncol=2 .column-page}
-![](Figures/spatial_gamma.png)
-
-![](Figures/spatial_delta.png)
-:::

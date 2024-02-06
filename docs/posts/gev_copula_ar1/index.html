@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
-<meta name="dcterms.date" content="2023-12-11">
+<meta name="dcterms.date" content="2024-02-06">
 <meta name="description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
 
 <title>bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins</title>
@@ -157,11 +157,11 @@ window.Quarto = {
 
 <meta property="og:title" content="bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins">
 <meta property="og:description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
-<meta property="og:image" content="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/elppd.png">
 <meta property="og:site_name" content="bggj">
 <meta name="twitter:title" content="bggj - Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins">
 <meta name="twitter:description" content="Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent (parameter) level.">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Quarto/Results/Figures/elppd.png">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/elppd.png">
 <meta name="twitter:creator" content="@bggjonsson">
 <meta name="twitter:site" content="@bggjonsson">
 <meta name="twitter:card" content="summary_large_image">
@@ -259,7 +259,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">December 11, 2023</p>
+        <p class="date">February 6, 2024</p>
       </div>
     </div>
     
@@ -388,7 +388,7 @@ c(\mathbf u \vert R) = \frac{\phi_d\left(\Phi^{-1}(u_1), \dots, \Phi^{-1}(u_d) \
 <section id="example" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="example">Example</h3>
 <p>Let’s sample from a two-dimensional process with GEV(8, 2, 0.05) margins and a Gaussian copula with correlation <span class="math inline">\(\rho = 0.7\)</span>.</p>
-<div class="cell page-columns page-full" data-fig.asp="0.3">
+<div class="cell page-columns page-full">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>R <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.7</span>, <span class="fl">0.7</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
@@ -1631,7 +1631,7 @@ R = Q^{-1} = \begin{bmatrix}
 <span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell page-columns page-full" data-fig.asp="0.3">
+<div class="cell page-columns page-full">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>gev_data <span class="sc">|&gt;</span> </span>
@@ -1646,7 +1646,7 @@ R = Q^{-1} = \begin{bmatrix}
 </div>
 </div>
 <p>It’s nice to wrap this process in a single function</p>
-<div class="cell" data-fig.asp="1">
+<div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>make_data <span class="ot">&lt;-</span> <span class="cf">function</span>(gev_params, n_replicate, rho) {</span>
@@ -1688,7 +1688,7 @@ R = Q^{-1} = \begin{bmatrix}
 </details>
 </div>
 <p>We see that with higher neighbor correlations we get obvious horizontal stripes corresponding to a large amount of dependence within each replicate.</p>
-<div class="cell page-columns page-full" data-fig.asp="0.3">
+<div class="cell page-columns page-full">
 <details open="" class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> <span class="fu">plot_data</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1997,6 +1997,7 @@ R = Q^{-1} = \begin{bmatrix}
 </section>
 <section id="differences-between-ar1-and-two-step-model" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="differences-between-ar1-and-two-step-model">Differences between AR(1) and Two-Step Model</h2>
+<p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_ar1.png" class="column-page img-fluid"></p>
 <p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_by_size.png" class="column-page img-fluid"></p>
 <p class="page-columns page-full"><img src="https://raw.githubusercontent.com/bgautijonsson/stan_experiments/master/Results/Figures/diff_elppd_by_size2.png" class="column-page img-fluid"></p>
 
