@@ -8,7 +8,7 @@ author:
         url: "bggj.is"
         affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
         affiliation-url: "https://www.hi.is/tolfraedi_0"
-date: "2024/02/04"
+date: "2024/02/06"
 bibliography: references.bib
 format: 
     html:
@@ -22,7 +22,7 @@ execute:
 code-fold: show
 editor: source
 title-block-banner: true
-image: Figures/spatial_gamma.png
+image: Figures/cover.png
 categories:
     - english
     - R
