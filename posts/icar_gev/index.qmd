@@ -76,10 +76,10 @@ $$
 The log-likelihood of the GEV distribution is
 
 $$
-\ell(\mu, \sigma, \xi) = - n\log\sigma - (1 + \frac{1}{\xi})
+\ell(\mu, \sigma, \xi) = - n\log\sigma - (1 + \frac{1}{\xi}) \sum_{i=1}^{n}{\log\left(1 + \xi\left[\frac{z_i - \mu}{\sigma} \right]\right)} - \sum_{i=1}^{n}{\left(1 + \xi \left[ \frac{z_i - \mu}{\sigma} \right]\right)}^{-1/\xi},
 $$
 
-Instead of $\mu$ I will be using the parameter $\mu_t$ where
+provided that $1 + \xi\left( \frac{z_i - \mu}{\sigma} \right) > 0$. Instead of $\mu$ I will be using the parameter $\mu_t$ where
 
 $$
 \mu_t = \mu_0 \cdot (1 + \Delta(t - t_0)) = \mu_0 + \Delta(t - t_0) \cdot \mu_0.
@@ -177,7 +177,6 @@ Here, both $\phi$ and $\theta$ are assumed to follow normal distributions with m
 One difficulty in using this model is that apriori we want *"fair"* hyperpriors for the precision parameters, i.e. we do not want our prior to weight our model in the direction of more or less spatial dependence. One way to choose these priors is the formula from [@lBayesianEstimatesDisease1995]:
 
 
-
 $$
 sd(\theta_i) = \frac{1}{\sqrt{\tau_\phi}} \approx \frac{1}{0.7\sqrt{\bar m \tau_\theta}} \approx sd(\phi_i),
 $$
@@ -191,7 +190,7 @@ The BYM2 model [@rieblerIntuitiveBayesianSpatial2016] rewrites the hyperpriors f
 The combined effects, $\phi + \theta$, are thus rewritten as
 
 $$
-\left( \sqrt{\rho} \cdot \frac{\phi^*}{\sqrt s} + \sqrt{1 - \rho} \cdot\theta^* \right),
+\sigma \cdot \left( \sqrt{\rho} \cdot \frac{\phi^*}{\sqrt s} + \sqrt{1 - \rho} \cdot\theta^* \right),
 $$
 where $0 \leq \rho \leq 1$ determines the amount of spatial/non-spatial error, $\phi^*$ is the ICAR model, $\theta^*$ is an iid random effect, $s$ is the scaling factor for the neighborhood graph, $\sigma \geq 0$ is the overall standard deviation of the combined random effects.
 
@@ -598,97 +597,84 @@ here("posts", "icar_gev", "results", "bym_results.csv") |>
 ## Spatial Distribution
 
 ```{r}
-#| code-fold: true
-#| eval: true
+#| echo: false
+#| include: false
 
-box::use(
-  posts/icar_gev/R/utils[update_names]
-)
-
-gev_params <- open_dataset(
-  here("posts", "icar_gev", "results", "gev_results.parquet")
-)
-
-model_stations <- read_csv(
-  here("posts", "icar_gev", "data", "model_stations.csv")
-)
-
-new_names <- read_csv(
-  here("posts", "icar_gev", "data", "new_names.csv")
-)
-
-gev_params <- gev_params |> 
-  collect() |>
-  pivot_wider(names_from = variable, values_from = mean) |> 
-  inner_join(
-    model_stations |> 
-      update_names(station, new_names),
-    by = join_by(station)
-  ) 
-
-n_x <- length(unique(gev_params$proj_x))
-n_y <- length(unique(gev_params$proj_y))
-
-
-gev_params <- gev_params |> 
-  bggjphd::stations_to_sf() |> 
-  sf::st_transform("WGS84") |> 
-  bggjphd::points_to_grid(n_x = n_x, n_y = n_y)
-
-variables <- c(
-  "psi", "mu0",
-  "tau", "sigma",
-  "phi", "xi",
-  "gamma", "delta"
-)
-
-labels <- c(
-  "log(Location)", "Location",
-  "log(Signal to Noise)", "Scale",
-  "Shape<br>(Unconstrained)", "Shape<br>(Constrained)",
-  "Trend<br>(Unconstrained)", "Trend<br>(Constrained)"
-)
-
-make_plot <- function(
-    variable_name,
-    label_name = NULL
-) {
-  
-  gev_params$label <- scales::number(gev_params[[variable_name]], accuracy = 0.001)
-  
-  gev_params |>
-    mapview(
-      zcol = variable_name,
-      lwd = 0,
-      layer.name = label_name,
-      popup = NULL,
-      label = "label"
-    )
-}
-
-
-plots <- map2(variables, labels, make_plot)
+# box::use(
+#   posts/icar_gev/R/utils[update_names]
+# )
+# 
+# gev_params <- open_dataset(
+#   here("posts", "icar_gev", "results", "gev_results.parquet")
+# )
+# 
+# model_stations <- read_csv(
+#   here("posts", "icar_gev", "data", "model_stations.csv")
+# )
+# 
+# new_names <- read_csv(
+#   here("posts", "icar_gev", "data", "new_names.csv")
+# )
+# 
+# gev_params <- gev_params |> 
+#   collect() |>
+#   pivot_wider(names_from = variable, values_from = mean) |> 
+#   inner_join(
+#     model_stations |> 
+#       update_names(station, new_names),
+#     by = join_by(station)
+#   ) 
+# 
+# n_x <- length(unique(gev_params$proj_x))
+# n_y <- length(unique(gev_params$proj_y))
+# 
+# 
+# gev_params <- gev_params |> 
+#   bggjphd::stations_to_sf() |> 
+#   sf::st_transform("WGS84") |> 
+#   bggjphd::points_to_grid(n_x = n_x, n_y = n_y)
+# 
+# variables <- c(
+#   "psi", "mu0",
+#   "tau", "sigma",
+#   "phi", "xi",
+#   "gamma", "delta"
+# )
+# 
+# labels <- c(
+#   "log(Location)", "Location",
+#   "log(Signal to Noise)", "Scale",
+#   "Shape<br>(Unconstrained)", "Shape<br>(Constrained)",
+#   "Trend<br>(Unconstrained)", "Trend<br>(Constrained)"
+# )
+# 
+# make_plot <- function(
+#     variable_name,
+#     label_name = NULL
+# ) {
+#   
+#   gev_params$label <- scales::number(gev_params[[variable_name]], accuracy = 0.001)
+#   
+#   gev_params |>
+#     mapview(
+#       zcol = variable_name,
+#       lwd = 0,
+#       layer.name = label_name,
+#       popup = NULL,
+#       label = "label"
+#     )
+# }
+# 
+# 
+# plots <- map2(variables, labels, make_plot)
 
 ```
 
 ### Unconstrained Scale
 
-```{r}
-#| code-fold: true
-#| eval: true
-#| column: page
-sync(plots[seq(1, 7, by = 2)])
-```
-
-
+![](Figures/facet_unconstrained.png)
 
 ### Constrained Scale
 
-```{r}
-#| code-fold: true
-#| eval: true
-#| column: page
-sync(plots[seq(1, 7, by = 2) + 1])
-```
-
+![](Figures/facet_constrained.png)
 
