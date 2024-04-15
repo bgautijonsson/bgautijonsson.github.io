@@ -9,7 +9,7 @@
 <link>https://www.bggj.is/</link>
 <atom:link href="https://www.bggj.is/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blogg um tölfræði og gögn</description>
-<generator>quarto-1.4.548</generator>
+<generator>quarto-1.4.551</generator>
 <lastBuildDate>Tue, 06 Feb 2024 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins</title>
@@ -734,6 +734,7 @@ font-style: inherit;">"Replicate"</span></span>
 <span id="cb7-30">  )</span></code></pre></div>
 </details>
 <div class="cell-output-display column-page">
+<div>
 <div id="allyryhvel" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#allyryhvel table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -1233,6 +1234,7 @@ font-style: inherit;">"Replicate"</span></span>
 </tbody>
 </table>
 
+</div>
 </div>
 </div>
 </div>
@@ -4469,6 +4471,7 @@ background-color: null;
 font-style: inherit;">100</span>))</span></code></pre></div>
 </details>
 <div class="cell-output-display column-screen-inset-right">
+<div>
 <div id="snqomnejqc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>#snqomnejqc table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -5088,6 +5091,7 @@ font-style: inherit;">100</span>))</span></code></pre></div>
 </tbody>
 </table>
 
+</div>
 </div>
 </div>
 </div>
@@ -6486,6 +6490,7 @@ background-color: null;
 font-style: inherit;">full_width =</span> F)</span></code></pre></div>
 </details>
 <div class="cell-output-display">
+<div>
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
@@ -6578,6 +6583,7 @@ font-style: inherit;">full_width =</span> F)</span></code></pre></div>
 </table>
 
 
+</div>
 </div>
 </div>
 <section id="the-forest-plot" class="level3">
@@ -7198,7 +7204,7 @@ font-style: inherit;">1</span>))</span></code></pre></div>
   <category>plots</category>
   <category>tutorial</category>
   <guid>https://www.bggj.is/posts/forest-plot-table/</guid>
-  <pubDate>Mon, 27 Jun 2022 23:00:00 GMT</pubDate>
+  <pubDate>Tue, 28 Jun 2022 00:00:00 GMT</pubDate>
   <media:content url="https://www.bggj.is/posts/forest-plot-table/featured.png" medium="image" type="image/png" height="89" width="144"/>
 </item>
 </channel>

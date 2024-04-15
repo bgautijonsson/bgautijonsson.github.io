@@ -58,7 +58,7 @@ My PhD research is mostly about three things:
 -   Spatial Statistics
 -   Copulas
 
-In this post I will write a little about the first two. 
+In this post I will write a little about the first two.
 
 ## Extreme Value Statistics
 
@@ -132,14 +132,13 @@ $$
 Q = D(I - \alpha A).
 $$
 
-Here, D is a diagonal matrix with $D_{ii} = d_i$ being equal to the number of neighbors of $x_i$, $A$ is the adjacency matrix 
+Here, D is a diagonal matrix with $D_{ii} = d_i$ being equal to the number of neighbors of $x_i$, $A$ is the adjacency matrix
 
 $$
 A_{ij} = 1 \iff x_j \in S_i,
 $$
 
 $I$ is the identity matrix, and $0 < \alpha < 1$ is a parameter that encodes the amount of spatial dependence. If $\alpha = 0$ then there is no spatial dependence and if $\alpha = 1$ we get what is called an ICAR model.
-
 
 ### Intrinsic Conditional Autoregression (ICAR) Models
 
@@ -149,7 +148,7 @@ $$
 Q = D(I - A).
 $$
 
-Recall that $D_{ii} = d_i$ is equal to the number of neighbors of $x_i$ and so the diagonal of $Q$ will be equal to the sum of its off-diagonal elements. This can still be used as a prior, but we must take care since it is an improper prior. 
+Recall that $D_{ii} = d_i$ is equal to the number of neighbors of $x_i$ and so the diagonal of $Q$ will be equal to the sum of its off-diagonal elements. This can still be used as a prior, but we must take care since it is an improper prior.
 
 The conditional distribution of $x_i$ given all other observations is
 
@@ -169,13 +168,12 @@ We can easily see that this is not proper, since any constant added to all of th
 
 The BYM model is composed of two different types of random effects:
 
-* An ICAR component $\phi$
-* An iid non-spatial component $\theta$
+-   An ICAR component $\phi$
+-   An iid non-spatial component $\theta$
 
-Here, both $\phi$ and $\theta$ are assumed to follow normal distributions with means 0  and precision parameters $\tau_\phi$ and $\tau_\theta$. We can see that if $\tau_\phi$ is estimated to be much higher than $\tau_\theta$ then our data is implying more spatial than non-spatial dependence *(and vice versa)*. 
+Here, both $\phi$ and $\theta$ are assumed to follow normal distributions with means 0 and precision parameters $\tau_\phi$ and $\tau_\theta$. We can see that if $\tau_\phi$ is estimated to be much higher than $\tau_\theta$ then our data is implying more spatial than non-spatial dependence *(and vice versa)*.
 
 One difficulty in using this model is that apriori we want *"fair"* hyperpriors for the precision parameters, i.e. we do not want our prior to weight our model in the direction of more or less spatial dependence. One way to choose these priors is the formula from [@lBayesianEstimatesDisease1995]:
-
 
 $$
 sd(\theta_i) = \frac{1}{\sqrt{\tau_\phi}} \approx \frac{1}{0.7\sqrt{\bar m \tau_\theta}} \approx sd(\phi_i),
@@ -191,8 +189,7 @@ The combined effects, $\phi + \theta$, are thus rewritten as
 
 $$
 \sigma \cdot \left( \sqrt{\rho} \cdot \frac{\phi^*}{\sqrt s} + \sqrt{1 - \rho} \cdot\theta^* \right),
-$$
-where $0 \leq \rho \leq 1$ determines the amount of spatial/non-spatial error, $\phi^*$ is the ICAR model, $\theta^*$ is an iid random effect, $s$ is the scaling factor for the neighborhood graph, $\sigma \geq 0$ is the overall standard deviation of the combined random effects.
+$$ where $0 \leq \rho \leq 1$ determines the amount of spatial/non-spatial error, $\phi^*$ is the ICAR model, $\theta^*$ is an iid random effect, $s$ is the scaling factor for the neighborhood graph, $\sigma \geq 0$ is the overall standard deviation of the combined random effects.
 
 ## Copulas
 
@@ -200,14 +197,13 @@ Even if we use the aforementioned models to allow spatial dependence between the
 
 This means that our model as it is currently set up can allow spatial dependence in how often extreme precipitation happens in neighboring regions, but it does not allow for spatial dependence in when we observe extreme precipitation. To do this, we will need to apply copulas. I will not write about them here, but I have a post on the way about applying copulas to data with GEV margins.
 
-
 # Data
 
 The data used in this research are downloaded from the CEDA Archive:
 
-* [UKCP Local Projections on a 5km grid over the UK for 1980-2080](https://data.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km)
+-   [UKCP Local Projections on a 5km grid over the UK for 1980-2080](https://data.ceda.ac.uk/badc/ukcp18/data/land-cpm/uk/5km)
 
-The raw data contain climate projections for the UK on a 5km grid from 1980 to 2080 for a high emissions scenario, *RCP8.5*, and contain hourly precipitation rates of $43.920$ squares on a $180 \times 244$ grid. The projections are calculated for $1980 - 2000$, $2020 - 2040$, and $2060 - 2080$, thus giving $60 \times 365 \times 24 \times 180 \times 244 \approx 2.3 \cdot 10^{10}$ data points. 
+The raw data contain climate projections for the UK on a 5km grid from 1980 to 2080 for a high emissions scenario, *RCP8.5*, and contain hourly precipitation rates of $43.920$ squares on a $180 \times 244$ grid. The projections are calculated for $1980 - 2000$, $2020 - 2040$, and $2060 - 2080$, thus giving $60 \times 365 \times 24 \times 180 \times 244 \approx 2.3 \cdot 10^{10}$ data points.
 
 The raw data were processed by calculating the yearly maximum over the hourly precipitation rates for each station, thus reducing the number of data points to $60 \times 180 \times 244 \approx 2.6 \cdot 10^6$.
 
@@ -248,7 +244,6 @@ model_precip <- precip |>
 model_precip |> 
   skim()
 ```
-
 
 ```{r}
 #| fig-asp: 1
@@ -350,7 +345,6 @@ Q_inv <- inla.qinv(Q_pert, constr = list(A = matrix(1, 1, N), e = 0))
 scaling_factor <- exp(mean(log(diag(Q_inv))))
 ```
 
-
 ```{r}
 stan_data <- list(
   N_stations = N_stations,
@@ -363,14 +357,11 @@ stan_data <- list(
 )
 ```
 
-
-
 # Model
 
 The model is written below in mathematical notation and Stan code.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## Math
 
 $$
@@ -532,11 +523,7 @@ logit_rho_gamma ~ std_normal();
 mu_gamma ~ normal(0, 1);
 }
 ```
-
-
 :::
-
-
 
 ```{r}
 #| eval: false
@@ -562,8 +549,6 @@ fit <- model$sample(
 I won't show convergence analytics here, but after doing our due diligence we can move on to looking at parameter estimates.
 
 ## BYM2 Parameters
-
-
 
 ```{r}
 #| code-fold: true
@@ -677,4 +662,3 @@ here("posts", "icar_gev", "results", "bym_results.csv") |>
 ### Constrained Scale
 
 ![](Figures/facet_constrained.png)
-

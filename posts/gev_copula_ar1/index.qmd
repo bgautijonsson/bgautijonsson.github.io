@@ -3,11 +3,7 @@ title: "Applying a Gaussian AR(1) Copula to Generalized Extreme Value Margins"
 subtitle: "A simulation study of the differences between AR(1) copula and i.i.d copula"
 description: |
   Another step in my PhD studies is to apply multivariate copulas to data with Generalized Extreme Value marginal distributions. This is important to enable us to model dependence on the data leve, as opposed to the latent *(parameter)* level. 
-author: 
-    -   name: "Brynjólfur Gauti Guðrúnar Jónsson"
-        url: "bggj.is"
-        affiliation: "Tölfræði, Raunvísindadeild Háskóla Íslands"
-        affiliation-url: "https://www.hi.is/tolfraedi_0"
+
 date: "2024/02/06"
 bibliography: references.bib
 draft: false

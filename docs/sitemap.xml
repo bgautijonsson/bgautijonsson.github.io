@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://www.bggj.is/about.html</loc>
-    <lastmod>2023-01-27T10:16:04.531Z</lastmod>
+    <lastmod>2024-02-08T14:44:51.775Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/talks/databeers_2022_09_16/index.html</loc>
@@ -25,24 +25,24 @@
     <lastmod>2023-01-27T22:38:08.841Z</lastmod>
   </url>
   <url>
-    <loc>https://www.bggj.is/posts/forest-plot-table/index.html</loc>
-    <lastmod>2024-02-04T11:27:34.198Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/posts/icar_gev/index.html</loc>
-    <lastmod>2024-02-07T14:18:22.132Z</lastmod>
-  </url>
-  <url>
-    <loc>https://www.bggj.is/posts/gev_copula_ar1/index.html</loc>
-    <lastmod>2024-02-06T11:36:18.296Z</lastmod>
+    <loc>https://www.bggj.is/posts/plotly-animations/index.html</loc>
+    <lastmod>2024-02-04T11:28:15.352Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/posts/ceda-archive/index.html</loc>
     <lastmod>2024-02-04T11:27:24.652Z</lastmod>
   </url>
   <url>
-    <loc>https://www.bggj.is/posts/plotly-animations/index.html</loc>
-    <lastmod>2024-02-04T11:28:15.352Z</lastmod>
+    <loc>https://www.bggj.is/posts/gev_copula_ar1/index.html</loc>
+    <lastmod>2024-02-08T14:56:41.039Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/posts/icar_gev/index.html</loc>
+    <lastmod>2024-02-08T15:52:11.835Z</lastmod>
+  </url>
+  <url>
+    <loc>https://www.bggj.is/posts/forest-plot-table/index.html</loc>
+    <lastmod>2024-02-04T11:27:34.198Z</lastmod>
   </url>
   <url>
     <loc>https://www.bggj.is/phd/articles/methods/data/ukcp/index.html</loc>
