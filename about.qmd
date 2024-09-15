@@ -29,7 +29,7 @@ listing:
 
 ## About me
 
-I am a statistics PhD student at the University of Iceland researching improved 21st century projections of sub-daily extreme precipitation by spatio-temporal recalibration. I also teach [Statistical consulting](https://ugla.hi.is/kennsluskra/index.php?tab=nam&chapter=namskeid&id=70742120230&namskra=0){target="_blank"} and work at [The Icelandic Heart Association](https://hjarta.is/en/){target="_blank"}. 
+I am a statistics PhD student at the University of Iceland researching spatially distributed extreme values. I also teach [Statistical consulting](https://ugla.hi.is/kennsluskra/index.php?tab=nam&chapter=namskeid&id=70742120230&namskra=0){target="_blank"} at the University of Iceland.
 
 :::
 
