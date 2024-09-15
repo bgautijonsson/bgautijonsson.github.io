@@ -6,3 +6,5 @@
 **/**.parquet
 **/**.csv
 **/**.rds
+
+/.quarto/
