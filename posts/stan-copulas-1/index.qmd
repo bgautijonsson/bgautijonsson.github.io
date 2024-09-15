@@ -137,14 +137,24 @@ model {
   matrix[n_obs, dim] U;
   for (i in 1:n_obs) {
     for (j in 1:dim) {
-      target += marginal_lpdf(x[i, j] | theta_marginal)
-      U[i, j] = marginal_cdf(x[i, j] | theta_marginal)
+      target += marginal_lpdf(X[i, j] | theta_marginal)
+      U[i, j] = marginal_cdf(X[i, j] | theta_marginal)
     }
     target += log_c(U[i, ] | theta_copula);
   }
 }
 ```
 
+# Reading Material
+
+For general purpose reading material on copulas, I recommend the following books:
+
+* [Elements of Copula Modeling with R (2018)](https://link.springer.com/book/10.1007/978-3-319-89635-9)
+* [An Introduction to Copulas (2006)](https://link.springer.com/book/10.1007/0-387-28678-0)
+* [Extremes in Nature: An Approach Using Copulas (2007)](https://link.springer.com/book/10.1007/1-4020-4415-1)
+* [Dependence Modeling with Copulas (2014)](https://www.taylorfrancis.com/books/mono/10.1201/b17116/dependence-modeling-copulas-harry-joe)
+
+
 # Coming up
 
-Next post will be about the Gaussian copula with a couple of examples in Stan.
+The next post will be about the Gaussian copula with a couple of examples in Stan. I'll aim to publish a new post every week.

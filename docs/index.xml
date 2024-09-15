@@ -182,6 +182,16 @@ font-style: inherit;">target +=</span> log_c(U[i, ] | theta_copula);</span>
 </details>
 </div>
 </section>
+<section id="reading-material" class="level1">
+<h1>Reading Material</h1>
+<p>For general purpose reading material on copulas, I recommend the following books:</p>
+<ul>
+<li><a href="https://link.springer.com/book/10.1007/978-3-319-89635-9">Elements of Copula Modeling with R (2018)</a></li>
+<li><a href="https://link.springer.com/book/10.1007/0-387-28678-0">An Introduction to Copulas (2006)</a></li>
+<li><a href="https://link.springer.com/book/10.1007/1-4020-4415-1">Extremes in Nature: An Approach Using Copulas (2007)</a></li>
+<li><a href="https://www.taylorfrancis.com/books/mono/10.1201/b17116/dependence-modeling-copulas-harry-joe">Dependence Modeling with Copulas (2014)</a></li>
+</ul>
+</section>
 <section id="coming-up" class="level1">
 <h1>Coming up</h1>
 <p>Next post will be about the Gaussian copula with a couple of examples in Stan.</p>
