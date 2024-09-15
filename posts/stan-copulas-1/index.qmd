@@ -1,0 +1,150 @@
+---
+title: "If It Bleeds, We Can Kill It"
+subtitle: "Copulas in Stan: Episode 1"
+description: "This is the first post in what's going to be a series on using Copulas in Stan. Each post is going to be short to keep me from postponing writing them. In this post I lightly introduce the series and give a quick primer on copulas."
+date: "2024/09/15"
+draft: false
+format: 
+    html:
+        code-fold: show
+        toc: true
+        toc-location: left
+execute: 
+  echo: true
+  warning: false
+editor: source
+image: images/predator.jpg
+engine: knitr
+categories:
+    - stan
+    - copulas
+    - copulas in stan
+---
+
+# Introduction
+
+Welcome to the first post in my series on **copulas in Stan**. After StanCon2024 I was inspired to start writing short blog posts about this both to help get other started and also because I often don't really know how a thing works until I have to write about it or present it.
+
+If you've ever felt intimidated by Sklar's theorem or how the Frank Copula is defined
+
+$$
+C_\theta^F(\mathbf u) = -\frac1\theta\log\left(1 + \frac{(e^{-\theta u_1} - 1)(e^{-\theta u_2} - 1)}{e^{-\theta} - 1}\right),
+$$
+
+just remember Arnold's famous words from Predator
+
+![](images/predator.jpg)
+
+# What Are Copulas?
+
+At their core, copulas are functions that **link univariate marginal distribution functions to form a multivariate distribution**. According to **Sklar's Theorem**, any multivariate joint distribution can be expressed in terms of its marginals and a copula that captures the dependence structure between variables.
+
+If we let $\mathbf{X} = (x_1, \dots, x_n)$ be a multivariate random variable with marginal distribution functions $F_i$, the joint distribution function of $\mathbf{X}$ can be written
+
+$$
+H(\mathbf{X}) = C\left( F_1(x_1), \dots, F_n(x_n) \right)
+$$
+
+where:
+
+* $H(\mathbf{X})$ is the joint cumulative distribution function (CDF) of the collection of random variables $\mathbf{X}$.
+* $F_i(x_i)$ are the marginal CDFs of each variate.
+* $C$ is **the copula function**.
+
+## Copulas as Densities
+
+Copulas are multivariate distribution functions for random variables with uniform marginal distributions, i.e. they are functions that map the unit cube $[0,1]^n$ to $[0,1]$. They can also be described using **copula density functions** when the marginals are continuous.
+
+$$
+h(x) = c(F_1(x_1), \dots, F_d(x_d)) \prod_{i=1}^d f_i(x_i),
+$$
+
+or (even better) a log-density function
+
+$$
+\log h(\mathbf x) = \log c\left(F_1(x_1), \dots, F_d(x_d)\right) + \sum_{i=1}^d \log f_i(x_i)
+$$
+
+Notice that $\sum_{i=1}^d \log f_i(x_i)$ is just the usual sum over marginal log-densities. Let's rewrite the other term a little bit and explicitly write the parameters we're conditioning on
+
+$$
+\begin{aligned}
+\log h(\mathbf x) &= \log c\left(u_1, \dots, u_d\right) + \sum_{i=1}^d \log f_i(x_i \vert \theta_i) \\
+u_i &= F_i(x_i \vert \theta_i)
+\end{aligned}
+$$
+
+The main difference when modeling with a copula is 
+
+1. We need to use the CDFs $F_i(x_i \vert \theta_i)$ as well as the pdfs.
+2. We need to code up some function $\log c(u_1, \dots, u_i)$ that takes as input the data $\mathbf X$ after it's been transformed to $[0,1]^n$ by our CDFs and outputs a density.
+
+# The Copula We All Use
+
+The simplest copula is the independence copula where we simply multiply together the uniform variates:
+
+$$
+\begin{aligned}
+C(\mathbf{u}) &= \prod_{i=1}^n F(x_i\vert \theta_i) =  \prod_{i=1}^n u_i \\
+c(\mathbf{u}) &= 1 \\
+\log c(\mathbf{u}) &= 0
+\end{aligned}
+$$
+
+We see that if we use the independence copula, we just end up with the usual likelihood
+
+$$
+\begin{aligned}
+\log h(\mathbf x) &= 0 + \sum_{i=1}^d \log f_i(x_i \vert \theta_i) \\
+&= \log f_i(x_i \vert \theta_i)
+\end{aligned}
+$$
+
+In this way, we all use copulas whether we want to or not!
+
+# An Imaginary Stan Model
+
+The Stan code below is just to give an idea of what a barebones model that uses copulas might look like in Stan. In future posts I'll write models that are based on this blueprint to implement different types of copulas.
+
+```{stan}
+#| eval: false
+#| output.var: fake_model
+functions {
+  real log_c(vector u, vector theta) {
+    return copula_log_density
+  }
+
+  real marginal_lpdf(real x, vector theta) {
+    return marginal_log_density
+  }
+
+  real marginal_cdf(real x, vector theta) {
+    return uniform_variable
+  }
+}
+
+data {
+  int<lower = 0> n_obs;
+  matrix[n_obs, dim] X;
+}
+
+parameters {
+  vector[maginal_params] theta_marginal;
+  vector[copula_params] theta_copula;
+}
+
+model {
+  matrix[n_obs, dim] U;
+  for (i in 1:n_obs) {
+    for (j in 1:dim) {
+      target += marginal_lpdf(x[i, j] | theta_marginal)
+      U[i, j] = marginal_cdf(x[i, j] | theta_marginal)
+    }
+    target += log_c(U[i, ] | theta_copula);
+  }
+}
+```
+
+# Coming up
+
+Next post will be about the Gaussian copula with a couple of examples in Stan.
