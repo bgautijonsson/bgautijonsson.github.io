@@ -275,9 +275,9 @@ C_\theta^F(\mathbf u) = -\frac1\theta\log\left(1 + \frac{(e^{-\theta u_1} - 1)(e
 <section id="what-are-copulas" class="level1">
 <h1>What Are Copulas?</h1>
 <p>At their core, copulas are functions that <strong>link univariate marginal distribution functions to form a multivariate distribution</strong>. According to <strong>Sklar’s Theorem</strong>, any multivariate joint distribution can be expressed in terms of its marginals and a copula that captures the dependence structure between variables.</p>
-<p>If we let <span class="math inline">\(X = (X_1, \dots, X_d)\)</span> be a multivariate random variable with marginal distribution functions <span class="math inline">\(F_i\)</span>, the joint distribution function of <span class="math inline">\(X\)</span> can be written</p>
+<p>If we let <span class="math inline">\(X = (X_1, \dots, X_D)\)</span> be a multivariate random variable with marginal distribution functions <span class="math inline">\(F_i\)</span>, the joint distribution function of <span class="math inline">\(X\)</span> can be written</p>
 <p><span class="math display">\[
-H(X) = C\left( F_1(X_1), \dots, F_d(X_d) \right)
+H(X) = C\left( F_1(X_1), \dots, F_D(X_D) \right)
 \]</span></p>
 <p>where:</p>
 <ul>
@@ -287,25 +287,25 @@ H(X) = C\left( F_1(X_1), \dots, F_d(X_d) \right)
 </ul>
 <section id="copulas-as-densities" class="level2">
 <h2 class="anchored" data-anchor-id="copulas-as-densities">Copulas as Densities</h2>
-<p>Copulas are multivariate distribution functions for random variables with uniform marginal distributions, i.e.&nbsp;they are functions that map the unit cube <span class="math inline">\([0,1]^d\)</span> to <span class="math inline">\([0,1]\)</span>. They can also be described using <strong>copula density functions</strong> when the marginals are continuous.</p>
+<p>Copulas are multivariate distribution functions for random variables with uniform marginal distributions, i.e.&nbsp;they are functions that map the unit cube <span class="math inline">\([0,1]^D\)</span> to <span class="math inline">\([0,1]\)</span>. They can also be described using <strong>copula density functions</strong> when the marginals are continuous. If <span class="math inline">\(H(X)\)</span> is the CDF of <span class="math inline">\(X\)</span>, and the multivariate distribution has a PDF, <span class="math inline">\(h\)</span>, we write</p>
 <p><span class="math display">\[
-h(X) = c(F_1(X_1), \dots, F_d(X_d)) \prod_{i=1}^d f_i(x_i),
+h(X) = c\left(F_1(X_1), \dots, F_D(X_D)\right) \prod_{i=1}^D f_i(x_i),
 \]</span></p>
-<p>or (even better) a log-density function</p>
+<p>where <span class="math inline">\(c\)</span> is the density of the copula. Most often, we’d model the log of the PDF</p>
 <p><span class="math display">\[
-\log h(X) = \log c\left(F_1(X_1), \dots, F_d(X_d)\right) + \sum_{i=1}^d \log f_i(X_i)
+\log h(X) = \log c\left(F_1(X_1), \dots, F_D(X_D)\right) + \sum_{i=1}^D \log f_i(X_i).
 \]</span></p>
-<p>Notice that <span class="math inline">\(\sum_{i=1}^d \log f_i(X_i)\)</span> is just the usual sum over marginal log-densities. Let’s rewrite the other term a little bit and explicitly write the parameters we’re conditioning on</p>
+<p>Notice that <span class="math inline">\(\sum_{i=1}^D \log f_i(X_i)\)</span> is just the usual sum over marginal log-densities. Let’s rewrite the other term a little bit and explicitly write the parameters we’re conditioning on</p>
 <p><span class="math display">\[
 \begin{aligned}
-\log h(X) &amp;= \log c\left(u_1, \dots, u_d\right) + \sum_{i=1}^d \log f_i(X_i \vert \theta_i) \\
+\log h(X) &amp;= \log c\left(u_1, \dots, u_D \vert \theta_{c}\right) + \sum_{i=1}^D \log f_i(X_i \vert \theta_i) \\
 u_i &amp;= F_i(X_i \vert \theta_i)
 \end{aligned}
 \]</span></p>
 <p>The main difference when modeling with a copula is</p>
 <ol type="1">
 <li>We need to use the CDFs <span class="math inline">\(F_i(X_i \vert \theta_i)\)</span> as well as the pdfs.</li>
-<li>We need to code up some function <span class="math inline">\(\log c(u_1, \dots, u_d)\)</span> that takes as input the data <span class="math inline">\(X\)</span> after it’s been transformed to <span class="math inline">\([0,1]^d\)</span> by our CDFs and outputs a density.</li>
+<li>We need to code up some function <span class="math inline">\(\log c\left(u_1, \dots, u_D\vert \theta_c\right)\)</span> that takes as input the data <span class="math inline">\(X\)</span> after it’s been transformed to <span class="math inline">\([0,1]^D\)</span> by our CDFs and outputs a density.</li>
 </ol>
 </section>
 </section>
@@ -314,7 +314,7 @@ u_i &amp;= F_i(X_i \vert \theta_i)
 <p>The simplest copula is the independence copula where we simply multiply together the uniform variates:</p>
 <p><span class="math display">\[
 \begin{aligned}
-C(\mathbf{u}) &amp;= \prod_{i=1}^d F(X_i\vert \theta_i) =  \prod_{i=1}^d u_i \\
+C(\mathbf{u}) &amp;= \prod_{i=1}^D F(X_i\vert \theta_i) =  \prod_{i=1}^D u_i \\
 c(\mathbf{u}) &amp;= 1 \\
 \log c(\mathbf{u}) &amp;= 0
 \end{aligned}
@@ -322,7 +322,7 @@ c(\mathbf{u}) &amp;= 1 \\
 <p>We see that if we use the independence copula, we just end up with the usual likelihood</p>
 <p><span class="math display">\[
 \begin{aligned}
-\log h(X) &amp;= 0 + \sum_{i=1}^d \log f_i(X_i \vert \theta_i) \\
+\log h(X) &amp;= 0 + \sum_{i=1}^D \log f_i(X_i \vert \theta_i) \\
 &amp;= \log f_i(X_i \vert \theta_i)
 \end{aligned}
 \]</span></p>
@@ -334,11 +334,11 @@ c(\mathbf{u}) &amp;= 1 \\
 <p>The code is basically a simple implementation of this equation from above:</p>
 <p><span class="math display">\[
 \begin{aligned}
-\log h(X) &amp;= \log c\left(u_1, \dots, u_d\right) + \sum_{i=1}^d \log f_i(X_i \vert \theta_i) \\
+\log h(X) &amp;= \log c\left(u_1, \dots, u_D \vert \theta_{c}\right) + \sum_{i=1}^D \log f_i(X_i \vert \theta_i) \\
 u_i &amp;= F_i(X_i \vert \theta_i),
 \end{aligned}
 \]</span></p>
-<p>except we’re allowing for <span class="math inline">\(n\)</span> realisations of the d-dimensional random variable <span class="math inline">\(X\)</span>, so the input data becomes an <span class="math inline">\(n \times d\)</span> matrix.</p>
+<p>except we’re allowing for <span class="math inline">\(N\)</span> realisations of the <span class="math inline">\(D\)</span>-dimensional random variable <span class="math inline">\(X\)</span>, so the input data becomes an <span class="math inline">\(N \times D\)</span> matrix.</p>
 <div class="cell" data-output.var="fake_model">
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -357,8 +357,8 @@ u_i &amp;= F_i(X_i \vert \theta_i),
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; n;</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; d;</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; N;</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span> = <span class="dv">0</span>&gt; D;</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[n, d] X;</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
@@ -368,9 +368,9 @@ u_i &amp;= F_i(X_i \vert \theta_i),
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[n, d] U;</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n) {</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:d) {</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, D] U;</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:D) {</span>
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> marginal_lpdf(X[i, j] | theta_marginal)</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      U[i, j] = marginal_cdf(X[i, j] | theta_marginal)</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    }</span>
