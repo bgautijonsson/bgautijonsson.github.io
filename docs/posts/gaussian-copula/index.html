@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2024-09-23">
 <meta name="description" content="This post continues the series on copulas in Stan by introducing the Gaussian copula, discussing its properties, applications, and providing examples of how to implement it in Stan.">
 
-<title>A Gentle Introduction: The Bivariate Gaussian Copula – bggj</title>
+<title>A Gentle Introduction: The Gaussian Copula – bggj</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -128,11 +128,11 @@ window.Quarto = {
 };
 </script>
 
-<meta property="og:title" content="A Gentle Introduction: The Bivariate Gaussian Copula – bggj">
+<meta property="og:title" content="A Gentle Introduction: The Gaussian Copula – bggj">
 <meta property="og:description" content="This post continues the series on copulas in Stan by introducing the Gaussian copula, discussing its properties, applications, and providing examples of how to implement it in Stan.">
 <meta property="og:image" content="https://www.bggj.is/posts/gaussian-copula/images/IMG_4426.jpeg">
 <meta property="og:site_name" content="bggj">
-<meta name="twitter:title" content="A Gentle Introduction: The Bivariate Gaussian Copula – bggj">
+<meta name="twitter:title" content="A Gentle Introduction: The Gaussian Copula – bggj">
 <meta name="twitter:description" content="This post continues the series on copulas in Stan by introducing the Gaussian copula, discussing its properties, applications, and providing examples of how to implement it in Stan.">
 <meta name="twitter:image" content="https://www.bggj.is/posts/gaussian-copula/images/IMG_4426.jpeg">
 <meta name="twitter:creator" content="@bggjonsson">
@@ -187,7 +187,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">A Gentle Introduction: The Bivariate Gaussian Copula</h1>
+      <h1 class="title">A Gentle Introduction: The Gaussian Copula</h1>
             <p class="subtitle lead">Copulas in Stan: Episode II</p>
                   <div>
         <div class="description">
@@ -271,7 +271,7 @@ window.Quarto = {
 
 
 
-<p>This post is a continuation of last week’s blog post that introduces Copulas in Stan. This post will introduce the bivariate Gaussian copula, some of its positives and negatives, and how to code it up in Stan with an example.</p>
+<p>This post is a continuation of last week’s blog post that introduces Copulas in Stan. This post will introduce the Gaussian copula, some of its positives and negatives, and how to code it up in Stan with an example.</p>
 <p><strong>Other posts in this series:</strong></p>
 <ol type="1">
 <li><a href="../../posts/stan-copulas-1/index.html">Introduction to Copulas in Stan</a>.</li>
@@ -1212,7 +1212,7 @@ Q(u) = -\frac{\ln(1 - u)}{\lambda},
 <li><strong>Dependence Between Asset Returns</strong>: Joint negative returns are observed frequently due to macro-events affecting both stock prices, while joint positive returns are less frequent and mostly idiosyncratic. Radial symmetry fails to capture this asymmetry.</li>
 <li><strong>Dependence Between Time-to-Failure Events</strong>: In risk management, it is crucial not to underestimate the effects of joint early failures <em>(of structural components, companies, etc)</em>. Radial symmetry implies that the dependence in the event of a joint long survival is the same as in the event of a joint early failure, which may not be realistic. Different lower-tail and upper-tail dependence is typically desired for modeling time-to-failure events.</li>
 </ul></li>
-<li><strong>Exchangeability</strong>: The bivariate copula is invariant under permutations of its arguments, <span class="math inline">\(C_\rho(u_1, u_2) = C_\rho(u_2, u_1)\)</span>. This means that points are symmetrically scattered around the diagonal <span class="math inline">\(\{(u_1, u_2) \in [0, 1]^2 : u_2 = u_1\}\)</span>. However, exchangeability can be problematic when combined with inhomogeneous marginals:
+<li><strong>Exchangeability</strong>: The <em>bivariate</em> copula <em>(or multivariate of all correlations are the same)</em> is invariant under permutations of its arguments, <span class="math inline">\(C_\rho(u_1, u_2) = C_\rho(u_2, u_1)\)</span>. This means that points are symmetrically scattered around the diagonal <span class="math inline">\(\{(u_1, u_2) \in [0, 1]^2 : u_2 = u_1\}\)</span>. However, exchangeability can be problematic when combined with inhomogeneous marginals:
 <ul>
 <li><strong>Dependence Between Event Times</strong>: When modeling the dependence between two time-to-event scenarios with different marginal distributions (e.g., exponential distributions with different parameters), exchangeability can lead to unintuitive results. For example, under perfect dependence (<span class="math inline">\(\rho = 1\)</span>), the event times do not coincide unless the marginal distributions are identical. Instead, the occurrence of one event triggers the occurrence of the other at a later time <em>(corresponding to the same quantile as the former event happened)</em>, depending on the marginal distributions. This can lead to incorrect modeling of joint events, which is critical in various applications.</li>
 </ul></li>
