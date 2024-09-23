@@ -88,5 +88,8 @@
   },
   "posts/stan-copulas-1/index.qmd": {
     "index.html": "52d20b36"
+  },
+  "posts/gaussian-copula/index.qmd": {
+    "index.html": "0b7801de"
   }
 }

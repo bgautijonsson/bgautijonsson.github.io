@@ -8,3 +8,5 @@
 **/**.rds
 
 /.quarto/
+**/reading_material/
+.cursorignore

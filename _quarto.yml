@@ -54,3 +54,4 @@ format:
 
 
 editor: source
+engine: knitr

@@ -12,7 +12,6 @@ format:
 execute: 
   echo: true
   warning: false
-editor: source
 image: images/predator.jpg
 engine: knitr
 categories:
@@ -137,7 +136,7 @@ functions {
 data {
   int<lower = 0> N;
   int<lower = 0> D;
-  matrix[n, d] X;
+  matrix[N, D] X;
 }
 
 parameters {

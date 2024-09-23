@@ -10,7 +10,1634 @@
 <atom:link href="https://www.bggj.is/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blogg um tölfræði og gögn</description>
 <generator>quarto-1.5.57</generator>
-<lastBuildDate>Sun, 15 Sep 2024 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 23 Sep 2024 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>A Gentle Introduction: The Bivariate Gaussian Copula</title>
+  <dc:creator>Brynjólfur Gauti Guðrúnar Jónsson</dc:creator>
+  <link>https://www.bggj.is/posts/gaussian-copula/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This post is a continuation of last week’s blog post that introduces Copulas in Stan. This post will introduce the bivariate Gaussian copula, some of its positives and negatives, and how to code it up in Stan with an example.</p>
+<p><strong>Other posts in this series:</strong></p>
+<ol type="1">
+<li><a href="../../posts/stan-copulas-1/index.html">Introduction to Copulas in Stan</a>.</li>
+</ol>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I don’t consider myself an expert in copulas. I just thought I might write up the things that I know so that it will hopefully help someone, or be corrected by someone who knows more. As Liam Neeson would say if he were a PhD student:</p>
+<p><img src="https://www.bggj.is/posts/gaussian-copula/images/IMG_4426.jpeg" class="img-fluid"></p>
+</div>
+</div>
+<section id="the-gaussian-copula" class="level2">
+<h2 class="anchored" data-anchor-id="the-gaussian-copula">The Gaussian Copula</h2>
+<section id="high-level-summary" class="level3">
+<h3 class="anchored" data-anchor-id="high-level-summary">High-Level Summary</h3>
+<p>Modeling with the Gaussian copula can be summarised in a few steps:</p>
+<ol type="1">
+<li>Let <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%20X%20=%20(X_1,%20%5Cdots,%20X_D)"> be a multivariate random variable with marginal distribution functions <img src="https://latex.codecogs.com/png.latex?F_i"></li>
+<li>Each <img src="https://latex.codecogs.com/png.latex?F_i%5Cleft(X_i%20%5Cvert%20%5Ctheta_i%5Cright)"> converts the data, <img src="https://latex.codecogs.com/png.latex?X_i">, to uniformly distributed variables, <img src="https://latex.codecogs.com/png.latex?u_i">.</li>
+<li>Use the standard normal quantile function to convert each <img src="https://latex.codecogs.com/png.latex?u_i"> to <img src="https://latex.codecogs.com/png.latex?z_i">, <img src="https://latex.codecogs.com/png.latex?z_i%20=%20%5CPhi%5E%7B-1%7D(u_i)"></li>
+<li>Model the dependencies using a correlation matrix <em>(or precision matrix if you make sure its inverse is a correlation matrix)</em></li>
+</ol>
+</section>
+<section id="a-tiny-bit-of-math" class="level3">
+<h3 class="anchored" data-anchor-id="a-tiny-bit-of-math">A Tiny Bit of Math</h3>
+<p>More formally, the multivariate CDF of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%20X"> is written</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AH(%5Cmathbf%20X)%20=%20%5CPhi_%5CSigma%5Cleft(%20%5CPhi%5E%7B-1%7D(F_1(X_1%20%5Cvert%20%5Ctheta_1)),%20%5Cdots,%20%5CPhi%5E%7B-1%7D(F_D(X_D%20%5Cvert%20%5Ctheta_D))%20%20%5Cvert%20%5CSigma%20%5Cright)%0A"></p>
+<p>where:</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?H(%5Cmathbf%20X)"> is the joint cumulative distribution function (CDF) of the collection of random variables <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%20X">.</li>
+<li><img src="https://latex.codecogs.com/png.latex?F_i(X_i%20%5Cvert%20%5Ctheta_i)"> are the marginal CDFs of each variate.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5CPhi%5E%7B-1%7D"> is the inverse of the standard normal CDF.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5CPhi_%5CSigma"> is the CDF of the multivariate normal distribution with mean vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%200"> and correlation matrix <img src="https://latex.codecogs.com/png.latex?%5CSigma">.</li>
+</ul>
+<p>Writing out the multivariate density, we get</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ah(%5Cmathbf%20X)%20&amp;=%20%5Cfrac%7Bf_%5CSigma(z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma)%7D%7B%5Cphi(z_1,%20%5Cdots,%20z_D)%7D%20%5Cprod_%7Bi=1%7D%5ED%20f_i(X_i%20%5Cvert%20%5Ctheta_i)%20%5C%5C%0Az_i%20&amp;=%20%5CPhi%5E%7B-1%7D(u_i)%20%5C%5C%0Au_i%20&amp;=%20F_i(X_i%20%5Cvert%20%5Ctheta_i)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>where:</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%20X)"> is the joint density corresponding to the CDF, <img src="https://latex.codecogs.com/png.latex?H(%5Cmathbf%20X)">.</li>
+<li><img src="https://latex.codecogs.com/png.latex?f_%5CSigma"> is the density of the multivariate Gaussian distribution with mean vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%200"> and correlation matrix <img src="https://latex.codecogs.com/png.latex?%5CSigma">.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cphi"> is the density of the multivariate standard normal distribution.</li>
+<li><img src="https://latex.codecogs.com/png.latex?f_i(X_i%20%5Cvert%20%5Ctheta_i)"> are the marginal densities of each variate.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Deriving the Joint Density Using the Chain Rule and the Inverse Function Theorem
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We start with the joint cumulative distribution function (CDF):</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AH(%5Cmathbf%7BX%7D)%20=%20%5CPhi_%5CSigma%5Cleft(%20%5CPhi%5E%7B-1%7D(F_1(X_1%20%5Cvert%20%5Ctheta_1)),%20%5Cdots,%20%5CPhi%5E%7B-1%7D(F_D(X_D%20%5Cvert%20%5Ctheta_D))%20%5Cmid%20%5CSigma%20%5Cright)%0A"></p>
+<p>To obtain the joint density <img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7BX%7D)">, we are basically applying the <a href="https://en.wikipedia.org/wiki/Chain_rule">chain rule</a> to three functions:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Cfrac%7Bd%7D%7Bdx%7D%20%5Bf(g(h(x)))%5D%20&amp;=%20f'(g(h(x)))%20%5Ccdot%20g'(h(x))%20%5Ccdot%20h'(x)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?f"> is our multivariate Gaussian, <img src="https://latex.codecogs.com/png.latex?g"> is the standard normal quantile function and <img src="https://latex.codecogs.com/png.latex?h"> corresponds to each of the marginal CDFs. The first and last parts should be pretty clear, and we can get the derivative of the quantile function with the <a href="https://en.wikipedia.org/wiki/Inverse_function_theorem">inverse function theorem</a></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cleft(%5CPhi%5E%7B-1%7D%5Cright)'(u)%20=%20%5Cfrac%7B1%7D%7B%5CPhi'(%5CPhi%5E%7B-1%7D(u))%7D%20=%20%5Cfrac%7B1%7D%7B%5Cphi(%5CPhi%5E%7B-1%7D(u))%7D,%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cphi(z)"> is the standard normal pdf. Knowing this, we can write out the density as</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ah(%5Cmathbf%7BX%7D)%20&amp;=%20f_%7B%5CSigma%7D(z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma)%20%5Cprod_%7Bi=1%7D%5ED%20%5Cfrac%7B1%7D%7B%5Cphi(z_i)%7D%20%5Cprod_%7Bi=1%7D%5ED%20f_i(X_i%20%5Cvert%20%5Ctheta_i)%20%5C%5C%0A&amp;=%20%5Cfrac%7Bf_%5CSigma(z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma)%7D%7B%5Cphi(z_1,%20%5Cdots,%20z_D)%7D%20%5Cprod_%7Bi=1%7D%5ED%20f_i(X_i%20%5Cvert%20%5Ctheta_i),%0A%5Cend%7Baligned%7D%0A"></p>
+<p>where we used the shorthand <img src="https://latex.codecogs.com/png.latex?%5Cphi(z_1,%20%5Cdots,%20z_d)%20=%20%5Cprod_%7Bi=1%7D%5ED%20%5Cfrac%7B1%7D%7B%5Cphi(z_i)%7D">, to mean the density of a multivariate standard normal distribution.</p>
+</div>
+</div>
+<p>In practice we <em>(like lumberjacks)</em> love logs, so we write:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Clog%20h(%5Cmathbf%20X)%20&amp;=%20%5Clog%20f_%5CSigma%5Cleft(%20z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma%20%5Cright)%20-%20%5Clog%20%5Cphi(z_1,%20%5Cdots,%20z_D)%20+%20%5Csum_%7Bi=1%7D%5ED%20%5Clog%20f_i(X_i%20%5Cvert%20%5Ctheta_i)%20%5C%5C%0Az_i%20&amp;=%20%5CPhi%5E%7B-1%7D(u_i)%20%5C%5C%0Au_i%20&amp;=%20F_i(X_i%20%5Cvert%20%5Ctheta_i)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>If the correlation matrix, <img src="https://latex.codecogs.com/png.latex?%5CSigma">, is equal to a diagonal matrix, this will just reduce to the i.i.d. copula mentioned in the previous post.</p>
+</section>
+</section>
+<section id="a-simple-example" class="level1 page-columns page-full">
+<h1>A Simple Example</h1>
+<p>Let’s consider an example with two variables, <img src="https://latex.codecogs.com/png.latex?X_1"> and <img src="https://latex.codecogs.com/png.latex?X_2">. We will model each asset’s marginal distribution as exponential, and apply a bivariate Gaussian copula to model their dependence. Alltogether this can be written <img src="https://latex.codecogs.com/png.latex?%0A%5Clog%20h(%5Cmathbf%7BX%7D)%20=%20%5Clog%20f_%5CSigma(z_1,%20z_2%20%5Cvert%20%5CSigma)%20-%20%5Clog%20%5Cphi(z_1,%20z_2)%20+%20%5Csum_%7Bi=1%7D%5E2%20f_%7B%5Cmathrm%7BExp%7D%7D(X_i%20%5Cvert%20%5Clambda_i)%0A"></p>
+<section id="sampling-the-data" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sampling-the-data">Sampling the Data</h2>
+<section id="in-words" class="level3">
+<h3 class="anchored" data-anchor-id="in-words">In words</h3>
+<p>To sample from this data-generating process we</p>
+<ol type="1">
+<li>Generate <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BZ%7D%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmathbf%7B0%7D,%20%5Cmathbf%7BI%7D)">.</li>
+<li>Induce desired correlation structure using the Cholesky factor, <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BL%7D">, of the correlation matrix: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BZ%7D'%20=%20%5Cmathbf%7BL%7D%20%5Cmathbf%7BZ%7D">.</li>
+<li>Apply the standard normal CDF, <img src="https://latex.codecogs.com/png.latex?%5CPhi">, to obtain uniform random variables, <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BU%7D%20=%20%5CPhi(%5Cmathbf%7BZ%7D')">.</li>
+<li>Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution$: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BX%7D%20=%20F%5E%7B-1%7D_%7B%5Ctext%7Bexp%7D%7D(%5Cmathbf%7BU%7D%20%5Cvert%20%5Clambda)">.</li>
+</ol>
+</section>
+<section id="in-code" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="in-code">In code</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(cmdstanr)</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(bayesplot)</span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(patchwork)</span>
+<span id="cb1-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(gt)</span>
+<span id="cb1-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_set</span>(bggjphd<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bggj</span>())</span></code></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">n_obs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span></span>
+<span id="cb2-2">rho <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.6</span></span>
+<span id="cb2-3">lambda1 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb2-4">lambda2 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span></span>
+<span id="cb2-5">sigma <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">matrix</span>(</span>
+<span id="cb2-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(</span>
+<span id="cb2-7">    <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, rho,</span>
+<span id="cb2-8">    rho, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb2-9">  ),</span>
+<span id="cb2-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">nrow =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb2-11">)</span>
+<span id="cb2-12">L <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">chol</span>(sigma)</span>
+<span id="cb2-13"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb2-14">Z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">matrix</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n =</span> n_obs <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">nrow =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb2-15">Z <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">t</span>(L <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%*%</span> Z)</span>
+<span id="cb2-16"></span>
+<span id="cb2-17">d <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(</span>
+<span id="cb2-18">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">z1 =</span> Z[, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>],</span>
+<span id="cb2-19">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">z2 =</span> Z[, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>],</span>
+<span id="cb2-20">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq_len</span>(n_obs)</span>
+<span id="cb2-21">)  <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb2-22">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pivot_longer</span>(</span>
+<span id="cb2-23">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>time), </span>
+<span id="cb2-24">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_to =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"variable"</span>, </span>
+<span id="cb2-25">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_transform =</span> parse_number,</span>
+<span id="cb2-26">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">values_to =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"z"</span></span>
+<span id="cb2-27">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb2-28">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">inner_join</span>(</span>
+<span id="cb2-29">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(</span>
+<span id="cb2-30">      <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">variable =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>),</span>
+<span id="cb2-31">      <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lambda =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(lambda1, lambda2)</span>
+<span id="cb2-32">    )</span>
+<span id="cb2-33">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb2-34">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb2-35">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">u =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pnorm</span>(z),</span>
+<span id="cb2-36">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">qexp</span>(u, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">rate =</span> lambda)</span>
+<span id="cb2-37">  )</span></code></pre></div>
+</details>
+</div>
+<div class="cell page-columns page-full">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">d <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>lambda) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pivot_longer</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(z, u, y)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pivot_wider</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_from =</span> variable, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_prefix =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"v"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mutate</span>(</span>
+<span id="cb3-6">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">name =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fct_relevel</span>(name, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"z"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"u"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-7">      <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fct_recode</span>(</span>
+<span id="cb3-8">        <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Gaussian"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"z"</span>,</span>
+<span id="cb3-9">        <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Uniform"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"u"</span>,</span>
+<span id="cb3-10">        <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Exponential"</span> <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y"</span></span>
+<span id="cb3-11">      )</span>
+<span id="cb3-12">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-13">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n2 =</span> name) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-14">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_map</span>(</span>
+<span id="cb3-15">    \(data, ...) {</span>
+<span id="cb3-16">      data  <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-17">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(v1, v2)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-18">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_density_2d_filled</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">alpha =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-19">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_point</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">size =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.4</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-20">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_x_continuous</span>(</span>
+<span id="cb3-21">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">expand =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb3-22">        ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-23">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_y_continuous</span>(</span>
+<span id="cb3-24">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">expand =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb3-25">        ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-26">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">legend.position =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"none"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-27">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(</span>
+<span id="cb3-28">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">subtitle =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">unique</span>(data<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>name),</span>
+<span id="cb3-29">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(X[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]),</span>
+<span id="cb3-30">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(X[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>])</span>
+<span id="cb3-31">        ) </span>
+<span id="cb3-32">    }</span>
+<span id="cb3-33">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-34">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">wrap_plots</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">widths =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb3-35">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">plot_annotation</span>(</span>
+<span id="cb3-36">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">title =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Going from Gaussian to Uniform to Exponential"</span></span>
+<span id="cb3-37">  )</span></code></pre></div>
+</details>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="https://www.bggj.is/posts/gaussian-copula/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="stan-model" class="level2">
+<h2 class="anchored" data-anchor-id="stan-model">Stan Model</h2>
+<p>Stan has built-in functions for the exponential lpdf and cdf, so the only thing we have to implement to fit our model is the Gaussian copula lpdf:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ac(u_1,%20%5Cdots,%20u_D%20%5Cvert%20%5CSigma)%20&amp;=%20%5Clog%20f_%5CSigma(z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma)%20-%20%5Clog%20%5Cphi(z_1,%20%5Cdots,%20z_D)%20%5C%5C%0Az_i%20&amp;=%20%5CPhi%5E%7B-1%7D(u_i)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>We will code it up using the Cholesky factor of the correlation matrix</p>
+<div class="cell" data-output.var="gaussianlpdf">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb4-1"><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> gaussian_copula_lpdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span> u, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span> L) {</span>
+<span id="cb4-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> D = num_elements(u);</span>
+<span id="cb4-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[D] z = inv_Phi(u);</span>
+<span id="cb4-4">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> multi_normal_cholesky_lpdf(z | rep_vector(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, D), L) - normal_lpdf(z | <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>);</span>
+<span id="cb4-5">}</span></code></pre></div>
+</details>
+</div>
+<p>To perform posterior predictive checks we’ll also have to define the exponential quantile function</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AQ(u)%20=%20-%5Cfrac%7B%5Cln(1%20-%20u)%7D%7B%5Clambda%7D,%0A"></p>
+<p>and use it in the <code>generated quantities</code> block.</p>
+<div class="cell" data-output.var="genquan">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">functions</span> {</span>
+<span id="cb5-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> exponential_icdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> u, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> lambda) {</span>
+<span id="cb5-3">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> -log(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - u) / lambda;</span>
+<span id="cb5-4">  }</span>
+<span id="cb5-5">}</span>
+<span id="cb5-6"></span>
+<span id="cb5-7">...</span>
+<span id="cb5-8">...</span>
+<span id="cb5-9"></span>
+<span id="cb5-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">generated quantities</span> {</span>
+<span id="cb5-11">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] yrep;</span>
+<span id="cb5-12"></span>
+<span id="cb5-13">  {</span>
+<span id="cb5-14">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] Z_rep;</span>
+<span id="cb5-15">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] U_rep;</span>
+<span id="cb5-16"></span>
+<span id="cb5-17">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> (i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:N) {</span>
+<span id="cb5-18">      Z_rep[i, ] = to_row_vector(multi_normal_cholesky_rng(rep_vector(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, D), L));</span>
+<span id="cb5-19">      <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> (j <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:D) {</span>
+<span id="cb5-20">        U_rep[i, j] = Phi(Z_rep[i, j]);</span>
+<span id="cb5-21">        yrep[i, j] = exponential_icdf(U_rep[i, j], lambda[j]);</span>
+<span id="cb5-22">      }</span>
+<span id="cb5-23">    }</span>
+<span id="cb5-24">  }</span>
+<span id="cb5-25">}</span></code></pre></div>
+</details>
+</div>
+<p>Thus, we can write up our complete Stan model as below.</p>
+<div class="cell" data-output.var="example1">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">functions</span> {</span>
+<span id="cb6-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> gaussian_copula_lpdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span> u, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span> L) {</span>
+<span id="cb6-3">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> D = num_elements(u);</span>
+<span id="cb6-4">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[D] z = inv_Phi(u);</span>
+<span id="cb6-5">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> multi_normal_cholesky_lpdf(z | rep_vector(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, D), L) - normal_lpdf(z | <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>);</span>
+<span id="cb6-6">  }</span>
+<span id="cb6-7"></span>
+<span id="cb6-8">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> exponential_icdf(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> u, <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> lambda) {</span>
+<span id="cb6-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> -log(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - u) / lambda;</span>
+<span id="cb6-10">  }</span>
+<span id="cb6-11"></span>
+<span id="cb6-12">}</span>
+<span id="cb6-13"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">data</span> {</span>
+<span id="cb6-14">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lower</span> = <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; N;</span>
+<span id="cb6-15">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lower</span> = <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; D;</span>
+<span id="cb6-16">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] X;</span>
+<span id="cb6-17">}</span>
+<span id="cb6-18"></span>
+<span id="cb6-19"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">parameters</span> {</span>
+<span id="cb6-20">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[D] lambda;</span>
+<span id="cb6-21">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">cholesky_factor_corr</span>[D] L;</span>
+<span id="cb6-22">}</span>
+<span id="cb6-23"></span>
+<span id="cb6-24"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">model</span> {</span>
+<span id="cb6-25">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] U;</span>
+<span id="cb6-26">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> (i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:N) {</span>
+<span id="cb6-27">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> (j <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:D) {</span>
+<span id="cb6-28">      <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">target +=</span> exponential_lpdf(X[i, j] | lambda[j]);</span>
+<span id="cb6-29">      U[i, j] = exponential_cdf(X[i, j] | lambda[j]);</span>
+<span id="cb6-30">    }</span>
+<span id="cb6-31">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">target +=</span> gaussian_copula_lpdf(to_vector(U[i, ]) | L);</span>
+<span id="cb6-32">  }</span>
+<span id="cb6-33">  </span>
+<span id="cb6-34">  <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">target +=</span> lkj_corr_cholesky_lpdf(L | <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>);</span>
+<span id="cb6-35">}</span>
+<span id="cb6-36"></span>
+<span id="cb6-37"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">generated quantities</span> {</span>
+<span id="cb6-38">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">corr_matrix</span>[D] Sigma = multiply_lower_tri_self_transpose(L);</span>
+<span id="cb6-39">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] yrep;</span>
+<span id="cb6-40"></span>
+<span id="cb6-41">  {</span>
+<span id="cb6-42">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] Z_rep;</span>
+<span id="cb6-43">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">matrix</span>[N, D] U_rep;</span>
+<span id="cb6-44"></span>
+<span id="cb6-45">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> (i <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:N) {</span>
+<span id="cb6-46">      Z_rep[i, ] = to_row_vector(multi_normal_cholesky_rng(rep_vector(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, D), L));</span>
+<span id="cb6-47">      <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> (j <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:D) {</span>
+<span id="cb6-48">        U_rep[i, j] = Phi(Z_rep[i, j]);</span>
+<span id="cb6-49">        yrep[i, j] = exponential_icdf(U_rep[i, j], lambda[j]);</span>
+<span id="cb6-50">      }</span>
+<span id="cb6-51">    }</span>
+<span id="cb6-52">  }</span>
+<span id="cb6-53">}</span></code></pre></div>
+</details>
+</div>
+</section>
+<section id="sampling-from-the-posterior" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sampling-from-the-posterior">Sampling from the posterior</h2>
+<p>Prepare the data and sample from the model.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">X <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> d <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span></span>
+<span id="cb7-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(time, variable, y) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pivot_wider</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">names_from =</span> variable, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">values_from =</span> y) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">select</span>(<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>time) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.matrix</span>()</span>
+<span id="cb7-6"></span>
+<span id="cb7-7">stan_data <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(</span>
+<span id="cb7-8">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">X =</span> X,</span>
+<span id="cb7-9">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">N =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">nrow</span>(X),</span>
+<span id="cb7-10">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">D =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ncol</span>(X)</span>
+<span id="cb7-11">)</span>
+<span id="cb7-12"></span>
+<span id="cb7-13">example1 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cmdstan_model</span>(here<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"posts"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"gaussian-copula"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"stan"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"example1.stan"</span>))</span>
+<span id="cb7-14"></span>
+<span id="cb7-15">result <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> example1<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sample</span>(</span>
+<span id="cb7-16">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> stan_data,</span>
+<span id="cb7-17">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">chains =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>,</span>
+<span id="cb7-18">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">parallel_chains =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>,</span>
+<span id="cb7-19">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>,</span>
+<span id="cb7-20">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">show_messages =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>,</span>
+<span id="cb7-21">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">show_exceptions =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span></span>
+<span id="cb7-22">)</span></code></pre></div>
+</details>
+</div>
+<p>Below, we can see that we’ve come pretty close to the correct parameters.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">result<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Sigma[1,2]"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb8-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">gt</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb8-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">fmt_number</span>()</span></code></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="cmiygynegt" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#cmiygynegt table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#cmiygynegt thead, #cmiygynegt tbody, #cmiygynegt tfoot, #cmiygynegt tr, #cmiygynegt td, #cmiygynegt th {
+  border-style: none;
+}
+
+#cmiygynegt p {
+  margin: 0;
+  padding: 0;
+}
+
+#cmiygynegt .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#cmiygynegt .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#cmiygynegt .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#cmiygynegt .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#cmiygynegt .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#cmiygynegt .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#cmiygynegt .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#cmiygynegt .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#cmiygynegt .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#cmiygynegt .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#cmiygynegt .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cmiygynegt .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#cmiygynegt .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#cmiygynegt .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#cmiygynegt .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cmiygynegt .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#cmiygynegt .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#cmiygynegt .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#cmiygynegt .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cmiygynegt .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#cmiygynegt .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cmiygynegt .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#cmiygynegt .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cmiygynegt .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cmiygynegt .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cmiygynegt .gt_left {
+  text-align: left;
+}
+
+#cmiygynegt .gt_center {
+  text-align: center;
+}
+
+#cmiygynegt .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cmiygynegt .gt_font_normal {
+  font-weight: normal;
+}
+
+#cmiygynegt .gt_font_bold {
+  font-weight: bold;
+}
+
+#cmiygynegt .gt_font_italic {
+  font-style: italic;
+}
+
+#cmiygynegt .gt_super {
+  font-size: 65%;
+}
+
+#cmiygynegt .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#cmiygynegt .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#cmiygynegt .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#cmiygynegt .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#cmiygynegt .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#cmiygynegt .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#cmiygynegt .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#cmiygynegt .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#cmiygynegt div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_col_headings">
+<th id="variable" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">variable</th>
+<th id="mean" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mean</th>
+<th id="median" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">median</th>
+<th id="sd" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">sd</th>
+<th id="mad" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mad</th>
+<th id="q5" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">q5</th>
+<th id="q95" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">q95</th>
+<th id="rhat" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">rhat</th>
+<th id="ess_bulk" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">ess_bulk</th>
+<th id="ess_tail" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">ess_tail</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="variable">lambda[1]</td>
+<td class="gt_row gt_right" headers="mean">1.71</td>
+<td class="gt_row gt_right" headers="median">1.70</td>
+<td class="gt_row gt_right" headers="sd">0.23</td>
+<td class="gt_row gt_right" headers="mad">0.22</td>
+<td class="gt_row gt_right" headers="q5">1.36</td>
+<td class="gt_row gt_right" headers="q95">2.10</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,367.64</td>
+<td class="gt_row gt_right" headers="ess_tail">2,733.44</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="variable">lambda[2]</td>
+<td class="gt_row gt_right" headers="mean">4.65</td>
+<td class="gt_row gt_right" headers="median">4.61</td>
+<td class="gt_row gt_right" headers="sd">0.64</td>
+<td class="gt_row gt_right" headers="mad">0.63</td>
+<td class="gt_row gt_right" headers="q5">3.68</td>
+<td class="gt_row gt_right" headers="q95">5.75</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,316.02</td>
+<td class="gt_row gt_right" headers="ess_tail">2,465.39</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="variable">Sigma[1,2]</td>
+<td class="gt_row gt_right" headers="mean">0.58</td>
+<td class="gt_row gt_right" headers="median">0.59</td>
+<td class="gt_row gt_right" headers="sd">0.09</td>
+<td class="gt_row gt_right" headers="mad">0.09</td>
+<td class="gt_row gt_right" headers="q5">0.40</td>
+<td class="gt_row gt_right" headers="q95">0.71</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,334.49</td>
+<td class="gt_row gt_right" headers="ess_tail">2,343.22</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell page-columns page-full">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mcmc_trace</span>(result<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">draws</span>(), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pars =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda[1]"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda[2]"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Sigma[1,2]"</span>))</span></code></pre></div>
+</details>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="https://www.bggj.is/posts/gaussian-copula/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can also run a basic posterior predictive check</p>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">yrep <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> result<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">draws</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"yrep"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">format =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"matrix"</span>)</span>
+<span id="cb10-2">y <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">as.numeric</span>(X)</span>
+<span id="cb10-3"></span>
+<span id="cb10-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ppc_dens_overlay</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> y[<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>)], <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yrep =</span> yrep[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>)]) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggtitle</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(X[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]))</span>
+<span id="cb10-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ppc_dens_overlay</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> y[<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)], <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yrep =</span> yrep[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">seq</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)]) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggtitle</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">expression</span>(X[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>]))</span></code></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://www.bggj.is/posts/gaussian-copula/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://www.bggj.is/posts/gaussian-copula/index_files/figure-html/unnamed-chunk-9-2.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="some-facts-about-the-bivariate-gaussian-copula" class="level1">
+<h1>Some Facts About the (Bivariate) Gaussian Copula</h1>
+<p>To end this post, I’ll list some facts about the (bivariate) Gaussian copula to keep in mind before applying it to data.</p>
+<ol type="1">
+<li><p><strong>Dependence Range</strong>: The correlation parameter <img src="https://latex.codecogs.com/png.latex?%5Crho"> ranges from <img src="https://latex.codecogs.com/png.latex?-1"> to <img src="https://latex.codecogs.com/png.latex?1">, allowing the Gaussian copula <img src="https://latex.codecogs.com/png.latex?C_%5Crho"> to interpolate between both types of complete dependence and also allow for independence.</p></li>
+<li><p><strong>Concordance Measures</strong>: The Gaussian copula has simple closed-form formulas for concordance measures:</p>
+<ul>
+<li><strong>Kendall’s <img src="https://latex.codecogs.com/png.latex?%5Ctau"></strong>: <img src="https://latex.codecogs.com/png.latex?%5Ctau_%5Crho%20=%20%5Cfrac%7B2%7D%7B%5Cpi%7D%20%5Carcsin(%5Crho)"></li>
+<li><strong>Spearman’s <img src="https://latex.codecogs.com/png.latex?%5Crho_S"></strong>: <img src="https://latex.codecogs.com/png.latex?%5Crho_S%20=%20%5Cfrac%7B6%7D%7B%5Cpi%7D%20%5Carcsin%5Cleft(%5Cfrac%7B%5Crho%7D%7B2%7D%5Cright)"></li>
+</ul></li>
+<li><p><strong>Symmetries</strong>: The Gaussian copula exhibits two strong symmetries:</p>
+<ul>
+<li><strong>Radial Symmetry</strong>: The copula is equal to its own survival copula, <img src="https://latex.codecogs.com/png.latex?C_%5Crho%20=%20%5Chat%7BC%7D_%5Crho">. This means that points are symmetrically scattered around the counterdiagonal <img src="https://latex.codecogs.com/png.latex?%5C%7B(u_1,%20u_2)%20%5Cin%20%5B0,%201%5D%5E2%20:%20u_2%20=%201%20-%20u_1%5C%7D">. However, radial symmetry can be a limitation in financial modeling:
+<ul>
+<li><strong>Dependence Between Asset Returns</strong>: Joint negative returns are observed frequently due to macro-events affecting both stock prices, while joint positive returns are less frequent and mostly idiosyncratic. Radial symmetry fails to capture this asymmetry.</li>
+<li><strong>Dependence Between Time-to-Failure Events</strong>: In risk management, it is crucial not to underestimate the effects of joint early failures <em>(of structural components, companies, etc)</em>. Radial symmetry implies that the dependence in the event of a joint long survival is the same as in the event of a joint early failure, which may not be realistic. Different lower-tail and upper-tail dependence is typically desired for modeling time-to-failure events.</li>
+</ul></li>
+<li><strong>Exchangeability</strong>: The bivariate copula is invariant under permutations of its arguments, <img src="https://latex.codecogs.com/png.latex?C_%5Crho(u_1,%20u_2)%20=%20C_%5Crho(u_2,%20u_1)">. This means that points are symmetrically scattered around the diagonal <img src="https://latex.codecogs.com/png.latex?%5C%7B(u_1,%20u_2)%20%5Cin%20%5B0,%201%5D%5E2%20:%20u_2%20=%20u_1%5C%7D">. However, exchangeability can be problematic when combined with inhomogeneous marginals:
+<ul>
+<li><strong>Dependence Between Event Times</strong>: When modeling the dependence between two time-to-event scenarios with different marginal distributions (e.g., exponential distributions with different parameters), exchangeability can lead to unintuitive results. For example, under perfect dependence (<img src="https://latex.codecogs.com/png.latex?%5Crho%20=%201">), the event times do not coincide unless the marginal distributions are identical. Instead, the occurrence of one event triggers the occurrence of the other at a later time <em>(corresponding to the same quantile as the former event happened)</em>, depending on the marginal distributions. This can lead to incorrect modeling of joint events, which is critical in various applications.</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Tail Independence</strong>: The Gaussian copula does not exhibit tail dependence for <img src="https://latex.codecogs.com/png.latex?%5Crho%20%5Cin%20(-1,%201)">. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of capital requirements for extreme scenarios.</p></li>
+</ol>
+</section>
+<section id="next-up" class="level1">
+<h1>Next up</h1>
+<p>To help deal with the lack of tail dependence in the Gaussian copula, the next post will introduce the t-copula as well as actually defining the notion of tail dependence.</p>
+</section>
+<section id="more-reading-material" class="level1">
+<h1>More reading material</h1>
+<ul>
+<li><a href="https://people.math.ethz.ch/~embrecht/ftp/copulas_personalview.pdf">Copulas: A personal view - Paul Embrechts</a>. Keep in mind that the copula at the top of page 13 is actually the Gumbel copula, not the Clayton copula.</li>
+<li><a href="https://link.springer.com/book/10.1057/9781137346315">Financial Engineering With Copulas Explained - Jan-Frederik Mai and Matthias Scherer</a></li>
+<li><a href="https://www.uni-muenster.de/Physik.TP/~lemm/seminarSS08/JHE-2007.pdf">Everything You Always Wanted to Know about Copula Modeling but Were Afraid to Ask - Christian Genest and Anne-Catherine Favre</a></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>stan</category>
+  <category>copulas</category>
+  <category>copulas in stan</category>
+  <guid>https://www.bggj.is/posts/gaussian-copula/</guid>
+  <pubDate>Mon, 23 Sep 2024 00:00:00 GMT</pubDate>
+  <media:content url="https://www.bggj.is/posts/gaussian-copula/images/IMG_4426.jpeg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>If It Bleeds, We Can Kill It</title>
   <dc:creator>Brynjólfur Gauti Guðrúnar Jónsson</dc:creator>
