@@ -318,7 +318,8 @@ H(\mathbf X) = \Phi_\Sigma\left( \Phi^{-1}(F_1(X_1 \vert \theta_1)), \dots, \Phi
 <p>Writing out the multivariate density, we get</p>
 <p><span class="math display">\[
 \begin{aligned}
-h(\mathbf X) &amp;= \frac{f_\Sigma(z_1, \dots, z_D \vert \Sigma)}{\phi(z_1, \dots, z_D)} \prod_{i=1}^D f_i(X_i \vert \theta_i) \\
+h(\mathbf X) &amp;= c\left(F_1(X_1 \vert \theta_1),  \dots, F_D(X_D \vert \theta_D)\right) \prod_{i=1}^D f_i(X_i \vert \theta_i)\\
+&amp;=\frac{f_\Sigma(z_1, \dots, z_D \vert \Sigma)}{\phi(z_1, \dots, z_D)} \prod_{i=1}^D f_i(X_i \vert \theta_i) \\
 z_i &amp;= \Phi^{-1}(u_i) \\
 u_i &amp;= F_i(X_i \vert \theta_i)
 \end{aligned}
@@ -389,7 +390,7 @@ u_i &amp;= F_i(X_i \vert \theta_i)
 <li>Generate <span class="math inline">\(\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})\)</span>.</li>
 <li>Induce desired correlation structure using the Cholesky factor, <span class="math inline">\(\mathbf{L}\)</span>, of the correlation matrix: <span class="math inline">\(\mathbf{Z}' = \mathbf{L} \mathbf{Z}\)</span>.</li>
 <li>Apply the standard normal CDF, <span class="math inline">\(\Phi\)</span>, to obtain uniform random variables, <span class="math inline">\(\mathbf{U} = \Phi(\mathbf{Z}')\)</span>.</li>
-<li>Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution$: <span class="math inline">\(\mathbf{X} = F^{-1}_{\text{exp}}(\mathbf{U} \vert \lambda)\)</span>.</li>
+<li>Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution: <span class="math inline">\(\mathbf{X} = F^{-1}_{\text{exp}}(\mathbf{U} \vert \lambda)\)</span>.</li>
 </ol>
 </section>
 <section id="in-code" class="level3 page-columns page-full">
@@ -1216,7 +1217,7 @@ Q(u) = -\frac{\ln(1 - u)}{\lambda},
 <li><strong>Dependence Between Event Times</strong>: When modeling the dependence between two time-to-event scenarios with different marginal distributions (e.g., exponential distributions with different parameters), exchangeability can lead to unintuitive results. For example, under perfect dependence (<span class="math inline">\(\rho = 1\)</span>), the event times do not coincide unless the marginal distributions are identical. Instead, the occurrence of one event triggers the occurrence of the other at a later time <em>(corresponding to the same quantile as the former event happened)</em>, depending on the marginal distributions. This can lead to incorrect modeling of joint events, which is critical in various applications.</li>
 </ul></li>
 </ul></li>
-<li><p><strong>Tail Independence</strong>: The Gaussian copula does not exhibit tail dependence for <span class="math inline">\(\rho \in (-1, 1)\)</span>. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of capital requirements for extreme scenarios.</p></li>
+<li><p><strong>Tail Independence</strong>: The Gaussian copula does not exhibit tail dependence for <span class="math inline">\(\rho \in (-1, 1)\)</span>. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of joint extreme scenarios such as insurance, finance or extreme weather.</p></li>
 </ol>
 </section>
 <section id="next-up" class="level1">

@@ -64,7 +64,7 @@ Caution
 <li><img src="https://latex.codecogs.com/png.latex?%5CPhi_%5CSigma"> is the CDF of the multivariate normal distribution with mean vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%200"> and correlation matrix <img src="https://latex.codecogs.com/png.latex?%5CSigma">.</li>
 </ul>
 <p>Writing out the multivariate density, we get</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ah(%5Cmathbf%20X)%20&amp;=%20%5Cfrac%7Bf_%5CSigma(z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma)%7D%7B%5Cphi(z_1,%20%5Cdots,%20z_D)%7D%20%5Cprod_%7Bi=1%7D%5ED%20f_i(X_i%20%5Cvert%20%5Ctheta_i)%20%5C%5C%0Az_i%20&amp;=%20%5CPhi%5E%7B-1%7D(u_i)%20%5C%5C%0Au_i%20&amp;=%20F_i(X_i%20%5Cvert%20%5Ctheta_i)%0A%5Cend%7Baligned%7D%0A"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ah(%5Cmathbf%20X)%20&amp;=%20c%5Cleft(F_1(X_1%20%5Cvert%20%5Ctheta_1),%20%20%5Cdots,%20F_D(X_D%20%5Cvert%20%5Ctheta_D)%5Cright)%20%5Cprod_%7Bi=1%7D%5ED%20f_i(X_i%20%5Cvert%20%5Ctheta_i)%5C%5C%0A&amp;=%5Cfrac%7Bf_%5CSigma(z_1,%20%5Cdots,%20z_D%20%5Cvert%20%5CSigma)%7D%7B%5Cphi(z_1,%20%5Cdots,%20z_D)%7D%20%5Cprod_%7Bi=1%7D%5ED%20f_i(X_i%20%5Cvert%20%5Ctheta_i)%20%5C%5C%0Az_i%20&amp;=%20%5CPhi%5E%7B-1%7D(u_i)%20%5C%5C%0Au_i%20&amp;=%20F_i(X_i%20%5Cvert%20%5Ctheta_i)%0A%5Cend%7Baligned%7D%0A"></p>
 <p>where:</p>
 <ul>
 <li><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%20X)"> is the joint density corresponding to the CDF, <img src="https://latex.codecogs.com/png.latex?H(%5Cmathbf%20X)">.</li>
@@ -110,7 +110,7 @@ Deriving the Joint Density Using the Chain Rule and the Inverse Function Theorem
 <li>Generate <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BZ%7D%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmathbf%7B0%7D,%20%5Cmathbf%7BI%7D)">.</li>
 <li>Induce desired correlation structure using the Cholesky factor, <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BL%7D">, of the correlation matrix: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BZ%7D'%20=%20%5Cmathbf%7BL%7D%20%5Cmathbf%7BZ%7D">.</li>
 <li>Apply the standard normal CDF, <img src="https://latex.codecogs.com/png.latex?%5CPhi">, to obtain uniform random variables, <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BU%7D%20=%20%5CPhi(%5Cmathbf%7BZ%7D')">.</li>
-<li>Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution$: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BX%7D%20=%20F%5E%7B-1%7D_%7B%5Ctext%7Bexp%7D%7D(%5Cmathbf%7BU%7D%20%5Cvert%20%5Clambda)">.</li>
+<li>Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BX%7D%20=%20F%5E%7B-1%7D_%7B%5Ctext%7Bexp%7D%7D(%5Cmathbf%7BU%7D%20%5Cvert%20%5Clambda)">.</li>
 </ol>
 </section>
 <section id="in-code" class="level3 page-columns page-full">
@@ -1612,7 +1612,7 @@ font-style: inherit;">2</span>]))</span></code></pre></div>
 <li><strong>Dependence Between Event Times</strong>: When modeling the dependence between two time-to-event scenarios with different marginal distributions (e.g., exponential distributions with different parameters), exchangeability can lead to unintuitive results. For example, under perfect dependence (<img src="https://latex.codecogs.com/png.latex?%5Crho%20=%201">), the event times do not coincide unless the marginal distributions are identical. Instead, the occurrence of one event triggers the occurrence of the other at a later time <em>(corresponding to the same quantile as the former event happened)</em>, depending on the marginal distributions. This can lead to incorrect modeling of joint events, which is critical in various applications.</li>
 </ul></li>
 </ul></li>
-<li><p><strong>Tail Independence</strong>: The Gaussian copula does not exhibit tail dependence for <img src="https://latex.codecogs.com/png.latex?%5Crho%20%5Cin%20(-1,%201)">. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of capital requirements for extreme scenarios.</p></li>
+<li><p><strong>Tail Independence</strong>: The Gaussian copula does not exhibit tail dependence for <img src="https://latex.codecogs.com/png.latex?%5Crho%20%5Cin%20(-1,%201)">. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of joint extreme scenarios such as insurance, finance or extreme weather.</p></li>
 </ol>
 </section>
 <section id="next-up" class="level1">

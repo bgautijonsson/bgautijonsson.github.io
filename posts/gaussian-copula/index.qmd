@@ -65,7 +65,8 @@ Writing out the multivariate density, we get
 
 $$
 \begin{aligned}
-h(\mathbf X) &= \frac{f_\Sigma(z_1, \dots, z_D \vert \Sigma)}{\phi(z_1, \dots, z_D)} \prod_{i=1}^D f_i(X_i \vert \theta_i) \\
+h(\mathbf X) &= c\left(F_1(X_1 \vert \theta_1),  \dots, F_D(X_D \vert \theta_D)\right) \prod_{i=1}^D f_i(X_i \vert \theta_i)\\
+&=\frac{f_\Sigma(z_1, \dots, z_D \vert \Sigma)}{\phi(z_1, \dots, z_D)} \prod_{i=1}^D f_i(X_i \vert \theta_i) \\
 z_i &= \Phi^{-1}(u_i) \\
 u_i &= F_i(X_i \vert \theta_i) 
 \end{aligned}
@@ -143,7 +144,7 @@ To sample from this data-generating process we
 1. Generate $\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$.
 2. Induce desired correlation structure using the Cholesky factor, $\mathbf{L}$, of the correlation matrix: $\mathbf{Z}' = \mathbf{L} \mathbf{Z}$.
 3. Apply the standard normal CDF, $\Phi$, to obtain uniform random variables, $\mathbf{U} = \Phi(\mathbf{Z}')$.
-4. Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution$: $\mathbf{X} = F^{-1}_{\text{exp}}(\mathbf{U} \vert \lambda)$.
+4. Transform the uniform random variables to the desired marginal distributions using the inverse CDF of the exponential distribution: $\mathbf{X} = F^{-1}_{\text{exp}}(\mathbf{U} \vert \lambda)$.
 
 ### In code
 
@@ -446,7 +447,7 @@ To end this post, I'll list some facts about the (bivariate) Gaussian copula to 
     - **Exchangeability**: The bivariate copula is invariant under permutations of its arguments, $C_\rho(u_1, u_2) = C_\rho(u_2, u_1)$. This means that points are symmetrically scattered around the diagonal $\{(u_1, u_2) \in [0, 1]^2 : u_2 = u_1\}$. However, exchangeability can be problematic when combined with inhomogeneous marginals:
       - **Dependence Between Event Times**: When modeling the dependence between two time-to-event scenarios with different marginal distributions (e.g., exponential distributions with different parameters), exchangeability can lead to unintuitive results. For example, under perfect dependence ($\rho = 1$), the event times do not coincide unless the marginal distributions are identical. Instead, the occurrence of one event triggers the occurrence of the other at a later time *(corresponding to the same quantile as the former event happened)*, depending on the marginal distributions. This can lead to incorrect modeling of joint events, which is critical in various applications.
 
-4. **Tail Independence**: The Gaussian copula does not exhibit tail dependence for $\rho \in (-1, 1)$. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of capital requirements for extreme scenarios. 
+4. **Tail Independence**: The Gaussian copula does not exhibit tail dependence for $\rho \in (-1, 1)$. This means that it may not be suitable for modeling extreme co-movements in the tails of the distribution, as it underestimates the probability of joint extreme events. The notion of tail dependence is crucial in credit-risk modeling because it quantifies dependence in extremely distressed situations. Models with zero tail dependence, like the Gaussian copula, are inadequate for applications requiring the quantification of joint extreme scenarios such as insurance, finance or extreme weather.
 
 # Next up
 
