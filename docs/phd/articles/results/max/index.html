@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -86,10 +86,10 @@ div.csl-indent {
 <script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-ac866aed7c6e28a9d250fd53e0d1b6ea.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../../../../site_libs/bootstrap/bootstrap-25756194e7ad27d67dfde92e39ce2c95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -147,12 +147,18 @@ window.Quarto = {
 
 <meta property="og:title" content="The Max Step – bggj">
 <meta property="og:description" content="Blogg um tölfræði og gögn">
+<meta property="og:image" content="https://www.bggj.is/phd/articles/results/max/index_files/figure-html/unnamed-chunk-3-1.png">
 <meta property="og:site_name" content="bggj">
+<meta property="og:image:height" content="960">
+<meta property="og:image:width" content="1344">
 <meta name="twitter:title" content="The Max Step – bggj">
 <meta name="twitter:description" content="Blogg um tölfræði og gögn">
+<meta name="twitter:image" content="https://www.bggj.is/phd/articles/results/max/index_files/figure-html/unnamed-chunk-3-1.png">
 <meta name="twitter:creator" content="@bggjonsson">
 <meta name="twitter:site" content="@bggjonsson">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image-height" content="960">
+<meta name="twitter:image-width" content="1344">
 </head>
 
 <body class="nav-fixed">
@@ -908,8 +914,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -1020,7 +1024,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

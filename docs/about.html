@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -33,10 +33,10 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ac866aed7c6e28a9d250fd53e0d1b6ea.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-25756194e7ad27d67dfde92e39ce2c95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "language": {
     "search-no-results-text": "No results",
@@ -234,7 +234,7 @@ window.Quarto = {
 <h2 data-anchor-id="talks-interviews-etc.">Talks, interviews etc.</h2>
 <div id="listing-listing-talks" class="quarto-listing quarto-listing-container-grid">
 <div class="list grid quarto-listing-cols-3">
-<div class="g-col-1" data-index="0" data-categories="english,presentation,data literacy" data-listing-date-sort="1663286400000" data-listing-file-modified-sort="1674814564588" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="35">
+<div class="g-col-1" data-index="0" data-categories="ZW5nbGlzaCUyQ3ByZXNlbnRhdGlvbiUyQ2RhdGElMjBsaXRlcmFjeQ==" data-listing-date-sort="1663286400000" data-listing-file-modified-sort="1674814564588" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="35">
 <a href="./talks/databeers_2022_09_16/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <p class="card-img-top">
@@ -284,7 +284,7 @@ Dec 22, 2020
 </div>
 </a>
 </div>
-<div class="g-col-1" data-index="2" data-categories="english,presentation,covid19,bayesian statistics,trustworthiness" data-listing-date-sort="1597276800000" data-listing-file-modified-sort="1674814564587" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="15">
+<div class="g-col-1" data-index="2" data-categories="ZW5nbGlzaCUyQ3ByZXNlbnRhdGlvbiUyQ2NvdmlkMTklMkNiYXllc2lhbiUyMHN0YXRpc3RpY3MlMkN0cnVzdHdvcnRoaW5lc3M=" data-listing-date-sort="1597276800000" data-listing-file-modified-sort="1674814564587" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="15">
 <a href="./talks/covid-model/index.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <p class="card-img-top">
@@ -396,8 +396,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -508,7 +506,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

@@ -385,15 +385,13 @@ stan_data <- list(
   D = ncol(X)
 )
 
-example1 <- cmdstan_model(here::here("posts", "gaussian-copula", "stan", "example1.stan"))
+example1 <- cmdstan_model(here::here("posts", "gaussian-copula", "stan", "gaussian-copula.stan"))
 
 result <- example1$sample(
   data = stan_data,
   chains = 4,
   parallel_chains = 4,
-  refresh = 1000,
-  show_messages = FALSE,
-  show_exceptions = FALSE
+  refresh = 1000
 )
 ```
 

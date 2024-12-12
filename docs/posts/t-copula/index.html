@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
+<meta name="dcterms.date" content="2024-12-12">
+<meta name="description" content="This post continues the series on copulas in Stan by introducing the t-copula, discussing its properties, applications, and providing examples of how to implement it in Stan.">
+
+<title>It was the best of tails, it was the worst of tails: The T-Copula – bggj</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<link href="../../favicon.ico" rel="icon">
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ac866aed7c6e28a9d250fd53e0d1b6ea.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-25756194e7ad27d67dfde92e39ce2c95.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-EGQ9KVCY2C"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-EGQ9KVCY2C', { 'anonymize_ip': true});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="It was the best of tails, it was the worst of tails: The T-Copula – bggj">
+<meta property="og:description" content="The Gaussian copula’s inability to model tail dependence can be a serious limitation in practice. This post introduces the t-copula, which shares many convenient properties with the Gaussian copula while also capturing the tendency of extreme events to occur together. We’ll examine its mathematical properties, discuss when to use it instead of the Gaussian copula, and provide a complete implementation in Stan.">
+<meta property="og:image" content="https://www.bggj.is/posts/t-copula/images/t_copula_meme.jpg">
+<meta property="og:site_name" content="bggj">
+<meta name="twitter:title" content="It was the best of tails, it was the worst of tails: The T-Copula – bggj">
+<meta name="twitter:description" content="The Gaussian copula’s inability to model tail dependence can be a serious limitation in practice. This post introduces the t-copula, which shares many convenient properties with the Gaussian copula while also capturing the tendency of extreme events to occur together. We’ll examine its mathematical properties, discuss when to use it instead of the Gaussian copula, and provide a complete implementation in Stan.">
+<meta name="twitter:image" content="https://www.bggj.is/posts/t-copula/images/t_copula_meme.jpg">
+<meta name="twitter:creator" content="@bggjonsson">
+<meta name="twitter:site" content="@bggjonsson">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="floating nav-fixed slimcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">bggj</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">about</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/bggjonsson"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/bgautijonsson/bgautijonsson.github.io"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">It was the best of tails, it was the worst of tails: The T-Copula</h1>
+            <p class="subtitle lead">Copulas in Stan: Episode III</p>
+                  <div>
+        <div class="description">
+          This post continues the series on copulas in Stan by introducing the t-copula, discussing its properties, applications, and providing examples of how to implement it in Stan.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">stan</div>
+                <div class="quarto-category">copulas</div>
+                <div class="quarto-category">copulas in stan</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div class="quarto-title-meta-author">
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-heading">Affiliation</div>
+    
+      <div class="quarto-title-meta-contents">
+      <p class="author"><a href="bggj.is">Brynjólfur Gauti Guðrúnar Jónsson</a> </p>
+    </div>
+    <div class="quarto-title-meta-contents">
+          <p class="affiliation">
+              <a href="https://www.hi.is/tolfraedi_0">
+              Tölfræði, Raunvísindadeild Háskóla Íslands
+              </a>
+            </p>
+        </div>
+    </div>
+
+  <div class="quarto-title-meta">
+
+        
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 12, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#motivation-the-need-for-tail-dependence" id="toc-motivation-the-need-for-tail-dependence" class="nav-link active" data-scroll-target="#motivation-the-need-for-tail-dependence">Motivation: The Need for Tail Dependence</a></li>
+  <li><a href="#the-t-copula-a-gentle-introduction" id="toc-the-t-copula-a-gentle-introduction" class="nav-link" data-scroll-target="#the-t-copula-a-gentle-introduction">The T-Copula: A Gentle Introduction</a>
+  <ul class="collapse">
+  <li><a href="#what-is-the-t-copula" id="toc-what-is-the-t-copula" class="nav-link" data-scroll-target="#what-is-the-t-copula">What is the t-Copula?</a></li>
+  <li><a href="#building-intuition-the-random-scale-factor" id="toc-building-intuition-the-random-scale-factor" class="nav-link" data-scroll-target="#building-intuition-the-random-scale-factor">Building Intuition: The Random Scale Factor</a></li>
+  <li><a href="#understanding-tail-dependence" id="toc-understanding-tail-dependence" class="nav-link" data-scroll-target="#understanding-tail-dependence">Understanding Tail Dependence</a></li>
+  </ul></li>
+  <li><a href="#mathematical-definition" id="toc-mathematical-definition" class="nav-link" data-scroll-target="#mathematical-definition">Mathematical Definition</a></li>
+  <li><a href="#key-properties" id="toc-key-properties" class="nav-link" data-scroll-target="#key-properties">Key Properties</a>
+  <ul class="collapse">
+  <li><a href="#tail-dependence" id="toc-tail-dependence" class="nav-link" data-scroll-target="#tail-dependence">Tail Dependence</a></li>
+  <li><a href="#limiting-cases" id="toc-limiting-cases" class="nav-link" data-scroll-target="#limiting-cases">Limiting Cases</a></li>
+  <li><a href="#concordance-measures" id="toc-concordance-measures" class="nav-link" data-scroll-target="#concordance-measures">Concordance Measures</a></li>
+  </ul></li>
+  <li><a href="#an-example" id="toc-an-example" class="nav-link" data-scroll-target="#an-example">An Example</a>
+  <ul class="collapse">
+  <li><a href="#sampling-the-data" id="toc-sampling-the-data" class="nav-link" data-scroll-target="#sampling-the-data">Sampling the Data</a>
+  <ul class="collapse">
+  <li><a href="#in-words" id="toc-in-words" class="nav-link" data-scroll-target="#in-words">In words</a></li>
+  <li><a href="#in-code" id="toc-in-code" class="nav-link" data-scroll-target="#in-code">In code</a></li>
+  </ul></li>
+  <li><a href="#stan-model" id="toc-stan-model" class="nav-link" data-scroll-target="#stan-model">Stan Model</a>
+  <ul class="collapse">
+  <li><a href="#student-t-copula-log-density" id="toc-student-t-copula-log-density" class="nav-link" data-scroll-target="#student-t-copula-log-density">Student-t Copula Log-Density</a></li>
+  <li><a href="#student-t-quantile-function" id="toc-student-t-quantile-function" class="nav-link" data-scroll-target="#student-t-quantile-function">Student-t Quantile Function:</a></li>
+  <li><a href="#model-specification" id="toc-model-specification" class="nav-link" data-scroll-target="#model-specification">Model Specification</a></li>
+  <li><a href="#generated-quantities" id="toc-generated-quantities" class="nav-link" data-scroll-target="#generated-quantities">Generated Quantities</a></li>
+  </ul></li>
+  <li><a href="#sampling-from-the-posterior" id="toc-sampling-from-the-posterior" class="nav-link" data-scroll-target="#sampling-from-the-posterior">Sampling from the posterior</a></li>
+  </ul></li>
+  <li><a href="#some-facts-about-the-t-copula" id="toc-some-facts-about-the-t-copula" class="nav-link" data-scroll-target="#some-facts-about-the-t-copula">Some Facts About the t-Copula</a></li>
+  <li><a href="#looking-ahead" id="toc-looking-ahead" class="nav-link" data-scroll-target="#looking-ahead">Looking ahead</a></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bayesplot)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(bggjphd<span class="sc">::</span><span class="fu">theme_bggj</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>This post continues our series on copulas in Stan by introducing the t-copula and comparing it with the Gaussian copula <a href="../../posts/gaussian-copula/index.html">we covered previously</a>. We’ll focus particularly on how the t-copula’s tail dependence makes it more suitable for modeling extreme events.</p>
+<p><strong>Other posts in this series:</strong></p>
+<ol type="1">
+<li><a href="../../posts/stan-copulas-1/index.html">Introduction to Copulas in Stan</a></li>
+<li><a href="../../posts/gaussian-copula/index.html">A Gentle Introduction: The Gaussian Copula</a></li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post assumes you’re familiar with the basics of copulas covered in the previous posts. If you’re new to copulas, I recommend starting with the <a href="../../posts/stan-copulas-1/index.html">introduction post</a>.</p>
+</div>
+</div>
+<section id="motivation-the-need-for-tail-dependence" class="level1">
+<h1>Motivation: The Need for Tail Dependence</h1>
+<p>Before diving into the mathematical details, let’s understand why we need the t-copula in the first place. Consider the following scenarios:</p>
+<ol type="1">
+<li><strong>Stock Market Crashes</strong>: During market crashes, stocks tend to fall together. The Gaussian copula can underestimate the probability of these joint extreme events.</li>
+<li><strong>Credit Default Modeling</strong>: The 2008 financial crisis highlighted the limitations of Gaussian copulas in modeling joint defaults. When one entity defaults, others are more likely to default as well - a phenomenon not well-captured by the Gaussian copula.</li>
+<li><strong>Natural Disasters</strong>: Extreme weather events often exhibit strong dependencies - when one measurement (temperature, rainfall, wind speed) reaches an extreme value, others are more likely to be extreme as well.</li>
+</ol>
+<p>The t-copula addresses these limitations while maintaining many of the nice properties of the Gaussian copula.</p>
+<p><strong>In this post I might use Student-t and t exchangeably</strong></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+A Quick Refresher on the Student-t Distribution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Student-t distribution with <span class="math inline">\(\nu\)</span> degrees of freedom can be viewed as arising from a normally distributed variable whose variability is adjusted by a random scaling factor derived from a chi-square distribution.</p>
+<p>Formally, if we let <span class="math inline">\(Z \sim \mathcal{N}(0,1)\)</span> and <span class="math inline">\(V \sim \chi^2_\nu\)</span> be independent, then the t-distributed variable <span class="math inline">\(T\)</span> can be defined as:</p>
+<p><span class="math display">\[
+T = \frac{Z}{\sqrt{V/\nu}}.
+\]</span></p>
+<p>Here, <span class="math inline">\(Z\)</span> represents a standardized normal deviate, and <span class="math inline">\(V/\nu\)</span> acts like a variance estimate. As <span class="math inline">\(\nu\)</span> grows large, the t-distribution approaches the standard normal distribution, and for smaller <span class="math inline">\(\nu\)</span>, the distribution exhibits heavier tails, capturing extreme values more frequently.</p>
+</div>
+</div>
+</section>
+<section id="the-t-copula-a-gentle-introduction" class="level1 page-columns page-full">
+<h1>The T-Copula: A Gentle Introduction</h1>
+<p><img src="images/t_copula_meme.jpg" class="img-fluid"></p>
+<section id="what-is-the-t-copula" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-the-t-copula">What is the t-Copula?</h2>
+<p>The t-copula is derived from the multivariate t-distribution, just as the Gaussian copula comes from the multivariate normal. It has two key parameters:</p>
+<ol type="1">
+<li>A correlation matrix <span class="math inline">\(\Sigma\)</span> (like the Gaussian copula)</li>
+<li>Degrees of freedom <span class="math inline">\(\nu\)</span> (unique to the t-copula)</li>
+</ol>
+<p>The degrees of freedom parameter <span class="math inline">\(\nu\)</span> controls the heaviness of the tails:</p>
+<ul>
+<li>Lower values <span class="math inline">\(\to\)</span> heavier tails <span class="math inline">\(\to\)</span> stronger tail dependence</li>
+<li>Higher values <span class="math inline">\(\to\)</span> lighter tails <span class="math inline">\(\to\)</span> approaches the Gaussian copula</li>
+<li>As <span class="math inline">\(\nu \to \infty\)</span>, the t-copula becomes the Gaussian copula</li>
+</ul>
+</section>
+<section id="building-intuition-the-random-scale-factor" class="level2">
+<h2 class="anchored" data-anchor-id="building-intuition-the-random-scale-factor">Building Intuition: The Random Scale Factor</h2>
+<p>One of the most intuitive ways to understand the t-copula is through its stochastic representation:</p>
+<ol type="1">
+<li>Start with correlated normal variables <span class="math inline">\(\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \Sigma)\)</span></li>
+<li>Generate a random scale factor <span class="math inline">\(W \sim \chi^2_\nu\)</span></li>
+<li>Multiply everything by <span class="math inline">\(\sqrt{\nu/W}\)</span> to get <span class="math inline">\(\mathbf{X} = \sqrt{\nu/W} \cdot \mathbf{Z}\)</span></li>
+</ol>
+<p>This shared scaling creates tail dependence:</p>
+<ul>
+<li>When <span class="math inline">\(W\)</span> is small, all variables become large together</li>
+<li>The smaller <span class="math inline">\(\nu\)</span> is, the more variable <span class="math inline">\(W\)</span> becomes</li>
+<li>This creates more frequent joint extreme events than the Gaussian copula</li>
+</ul>
+</section>
+<section id="understanding-tail-dependence" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="understanding-tail-dependence">Understanding Tail Dependence</h2>
+<p>Before we proceed further, let’s formally define tail dependence. For a bivariate copula C, the upper and lower tail dependence coefficients are defined as:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\lambda_U &amp;= \lim_{u \to 1} P(U_2 &gt; F_2^{-1}(u) | U_1 &gt; F_1^{-1}(u)) \\
+&amp;= \lim_{u \to 1} \frac{1-2u+C(u,u)}{1-u} \\
+\lambda_L &amp;= \lim_{u \to 0} P(U_2 \leq F_2^{-1}(u) | U_1 \leq F_1^{-1}(u)) \\
+&amp;= \lim_{u \to 0} \frac{C(u,u)}{u}
+\end{aligned}
+\]</span></p>
+<p>Intuitively, <span class="math inline">\(\lambda_U\)</span> measures the probability that one variable is extremely large given that another is extremely large, while <span class="math inline">\(\lambda_L\)</span> measures the probability that one variable is extremely small given that another is extremely small.</p>
+<p>Due to radial symmetry, the t-copula has identical lower- and upper-tail dependence, given by:</p>
+<p><span class="math display">\[
+\lambda_U = \lambda_L = 2t_{\nu+1}\left(-\sqrt{\frac{(\nu + 1)(1-\rho)}{1+\rho}}\right)
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(t_{\nu+1}\)</span> is the cumulative distribution function of a univariate t-distribution with <span class="math inline">\(\nu+1\)</span> degrees of freedom</li>
+<li><span class="math inline">\(\rho\)</span> is the correlation parameter</li>
+<li><span class="math inline">\(\nu\)</span> is the degrees of freedom parameter</li>
+</ul>
+<p>Some key properties of this tail dependence:</p>
+<ol type="1">
+<li>It is decreasing in <span class="math inline">\(\nu\)</span> for fixed <span class="math inline">\(\rho\)</span> (more degrees of freedom <span class="math inline">\(\to\)</span> less tail dependence)</li>
+<li>It is increasing in <span class="math inline">\(\rho\)</span> for fixed <span class="math inline">\(\nu\)</span> (stronger correlation <span class="math inline">\(\to\)</span> stronger tail dependence)</li>
+<li>As <span class="math inline">\(\nu \to \infty\)</span>, <span class="math inline">\(\lambda_U = \lambda_L \to 0\)</span> for <span class="math inline">\(|\rho| &lt; 1\)</span>, recovering the Gaussian case</li>
+<li>For <span class="math inline">\(\rho = 1\)</span>, we have <span class="math inline">\(\lambda_U = \lambda_L = 1\)</span> regardless of <span class="math inline">\(\nu\)</span></li>
+<li>Even for <span class="math inline">\(\rho = 0\)</span>, we have non-zero tail dependence for finite <span class="math inline">\(\nu\)</span>.</li>
+</ol>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>t_tail_dependence <span class="ot">&lt;-</span> <span class="cf">function</span>(rho, nu) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="sc">-</span><span class="fu">sqrt</span>((nu <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> rho) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> rho)), nu <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">crossing</span>(</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">nu =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>, <span class="dv">32</span>, <span class="dv">64</span>, <span class="dv">128</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">rho =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">400</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="fu">t_tail_dependence</span>(rho, nu)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(rho, lambda, <span class="at">color =</span> <span class="fu">as.factor</span>(nu))) <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">1.5</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_brewer</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"Blues"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(rho),</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(lambda[U] <span class="sc">==</span> lambda[L]),</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="fu">expression</span>(nu),</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Asymptotic tail dependence of the t-copula"</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="fu">crossing</span>(</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="at">nu =</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">32</span>, <span class="at">length.out =</span> <span class="dv">100</span>),</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">rho =</span> <span class="dv">0</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">lambda =</span> <span class="fu">t_tail_dependence</span>(rho, nu)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(nu, lambda)) <span class="sc">+</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">32</span>)</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">limits =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fl">0.35</span>),</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">trans =</span> <span class="st">"log10"</span>,</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_log</span>()</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">expression</span>(nu),</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">expression</span>(lambda[U] <span class="sc">==</span> lambda[L]),</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Even for zero correlation, the t-copula has non-zero tail dependence"</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="index_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="mathematical-definition" class="level1">
+<h1>Mathematical Definition</h1>
+<p>Now that we have the intuition, let’s look at the formal definition. Let <span class="math inline">\(\mathbf X = (X_1, \dots, X_D)\)</span> be a multivariate random variable with marginal distribution functions <span class="math inline">\(F_i\)</span> and dependence according to the t-copula. Their joint distribution function and density can be written: <span class="math display">\[
+\begin{aligned}
+H(\mathbf{X}) &amp;= t_{\nu,\Sigma}\left(t_\nu^{-1}(F_1(X_1)), \dots, t_\nu^{-1}(F_D(X_D))\right) \\
+h(\mathbf{X}) &amp;= c\left(F_1(X_1), \dots, F_D(X_D)\right)\prod_{i=1}^D f_i(X_i)
+\end{aligned}
+\]</span></p>
+<p>where:</p>
+<ul>
+<li><span class="math inline">\(H(\mathbf X)\)</span> is the joint cumulative distribution function (CDF) of the collection of random variables <span class="math inline">\(\mathbf X\)</span></li>
+<li><span class="math inline">\(h(\mathbf X)\)</span> is the joint density corresponding to the CDF, <span class="math inline">\(H(\mathbf X)\)</span></li>
+<li><span class="math inline">\(t_{\nu,\Sigma}\)</span> is the CDF of the multivariate t-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom and correlation matrix <span class="math inline">\(\Sigma\)</span></li>
+<li><span class="math inline">\(t_\nu^{-1}\)</span> is the inverse CDF of the univariate t-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom</li>
+<li><span class="math inline">\(F_i\)</span> and <span class="math inline">\(f_i\)</span> are the marginal CDFs and PDFs</li>
+</ul>
+<p>The log-density of the t-copula can be written as: <span class="math display">\[
+\begin{aligned}
+\log c(\mathbf{u}|\nu,\Sigma) &amp;= \log t_{\nu,\Sigma}(\mathbf{z}) - \sum_{i=1}^D \log t_\nu(z_i) \\
+z_i &amp;= t_\nu^{-1}(u_i)
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(t_{\nu,\Sigma}\)</span> is the multivariate t density with correlation matrix <span class="math inline">\(\Sigma\)</span> and <span class="math inline">\(t_\nu\)</span> is the univariate t density.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+The Full Bivariate Density
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For completeness, here’s the explicit bivariate density:</p>
+<p><span class="math display">\[
+c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\nu+1}{2})^2}\frac{(1 + \frac{z_1^2 + z_2^2 - 2\rho z_1z_2}{\nu(1-\rho^2)})^{-\frac{\nu+2}{2}}}{\sqrt{1-\rho^2}(1 + \frac{z_1^2}{\nu})^{\frac{\nu+1}{2}}(1 + \frac{z_2^2}{\nu})^{\frac{\nu+1}{2}}}
+\]</span></p>
+<p>However, we’ll use the hierarchical representation for implementation, which is both more intuitive and numerically stable.</p>
+</div>
+</div>
+</section>
+<section id="key-properties" class="level1 page-columns page-full">
+<h1>Key Properties</h1>
+<section id="tail-dependence" class="level2">
+<h2 class="anchored" data-anchor-id="tail-dependence">Tail Dependence</h2>
+<p>Unlike the Gaussian copula, the t-copula exhibits tail dependence. The upper and lower tail dependence coefficients are:</p>
+<p><span class="math display">\[
+\lambda_U = \lambda_L = 2t_{\nu+1}\left(-\sqrt{\frac{(\nu + 1)(1-\rho)}{1+\rho}}\right)
+\]</span></p>
+<p>This symmetry (<span class="math inline">\(\lambda_U = \lambda_L\)</span>) means the t-copula treats both tails equally.</p>
+</section>
+<section id="limiting-cases" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="limiting-cases">Limiting Cases</h2>
+<ul>
+<li>As <span class="math inline">\(\nu \to \infty\)</span>: Converges to Gaussian copula</li>
+<li>As <span class="math inline">\(\nu \to 0\)</span>: Tail dependence increases<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></li>
+<li><span class="math inline">\(\nu = 1\)</span>: Cauchy copula (strongest tail dependence)</li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;Lower values of <span class="math inline">\(\nu\)</span> produce heavier tails and increase tail dependence. However, taking <span class="math inline">\(\nu\)</span> extremely close to zero is more of a theoretical construct than a practical modeling choice. In most applications, <span class="math inline">\(\nu\)</span> is chosen within a range that provides heavier tails than the Gaussian case, but not so extreme as to be unrealistic.</p></div></div></section>
+<section id="concordance-measures" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="concordance-measures">Concordance Measures</h2>
+<p>Like the Gaussian copula:</p>
+<ul>
+<li>Kendall’s <span class="math inline">\(\tau\)</span>: <span class="math inline">\(\tau = \frac{2}{\pi}\arcsin(\rho)\)</span></li>
+<li>Spearman’s <span class="math inline">\(\rho\)</span>: <span class="math inline">\(\rho_S = \frac{6}{\pi}\arcsin(\rho/2)\)</span></li>
+</ul>
+<p>where <span class="math inline">\(\rho\)</span> is the correlation coefficient.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Note that these concordance measures are identical to the Gaussian copula because multiplying by the scaling factor <span class="math inline">\(\sqrt{\nu/W}\)</span> affects the magnitude of the variables but preserves their ranks. Since Kendall’s <span class="math inline">\(\tau\)</span> and Spearman’s <span class="math inline">\(\rho\)</span> only depend on the ranks of the data, not their actual values, they remain unchanged from the Gaussian case.</p></div></div></section>
+</section>
+<section id="an-example" class="level1 page-columns page-full">
+<h1>An Example</h1>
+<p>Let’s use the same example as in the previous post, except now with three variables, <span class="math inline">\(Y_1\)</span> and <span class="math inline">\(Y_2\)</span> and <span class="math inline">\(Y_3\)</span>. We will model each asset’s marginal distribution as exponential, and apply a multivariate t-copula to model their dependence. Alltogether this can be written <span class="math display">\[
+\log h(\mathbf{Y}) = \log t_{\nu, \Sigma}(z_1, z_2, z_3 \vert \Sigma) - \log t_\nu(z_1, z_2, z_3) + \sum_{i=1}^3 f_{\mathrm{Exp}}(Y_i \vert \lambda_i)
+\]</span></p>
+<section id="sampling-the-data" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sampling-the-data">Sampling the Data</h2>
+<section id="in-words" class="level3">
+<h3 class="anchored" data-anchor-id="in-words">In words</h3>
+<p>To sample from this data-generating process we</p>
+<ol type="1">
+<li>Generate <span class="math inline">\(\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_D)\)</span></li>
+<li>Generate <span class="math inline">\(W \sim \text{Inv-}\chi^2(\nu)\)</span> independently</li>
+<li>Apply correlation structure: <span class="math inline">\(\mathbf{Z}' = \mathbf{L}\mathbf{Z}\)</span></li>
+<li>Scale variables: <span class="math inline">\(\mathbf{X} = \sqrt{\nu/W}\cdot\mathbf{Z}'\)</span></li>
+<li>Transform to uniform: <span class="math inline">\(\mathbf{U} = t_\nu(\mathbf{X})\)</span></li>
+<li>Transform to exponential: <span class="math inline">\(\mathbf{Y} = F^{-1}_{\text{Exp}}(\mathbf{U}|\boldsymbol{\lambda})\)</span></li>
+</ol>
+</section>
+<section id="in-code" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="in-code">In code</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>rho12 <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>rho13 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>rho23 <span class="ot">&lt;-</span> <span class="fl">0.4</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>lambda1 <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>lambda2 <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>lambda3 <span class="ot">&lt;-</span> <span class="dv">6</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, rho12, rho13,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    rho12, <span class="dv">1</span>, rho23,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    rho13, rho23, <span class="dv">1</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">nrow =</span> <span class="dv">3</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fu">chol</span>(sigma)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">rchisq</span>(n_obs, <span class="at">df =</span> df)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_obs <span class="sc">*</span> <span class="dv">3</span>), <span class="at">nrow =</span> <span class="dv">3</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(df <span class="sc">/</span> W) <span class="sc">*</span> <span class="fu">t</span>(L <span class="sc">%*%</span> Z)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">z1 =</span> Z[, <span class="dv">1</span>],</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">z2 =</span> Z[, <span class="dv">2</span>],</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">z3 =</span> Z[, <span class="dv">3</span>],</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">time =</span> <span class="fu">seq_len</span>(n_obs)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>)  <span class="sc">|&gt;</span> </span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="sc">-</span>time), </span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable"</span>, </span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_transform =</span> parse_number,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"z"</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">variable =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">lambda =</span> <span class="fu">c</span>(lambda1, lambda2, lambda3)</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">u =</span> <span class="fu">pt</span>(z, <span class="at">df =</span> df),</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">qexp</span>(u, <span class="at">rate =</span> lambda)</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell page-columns page-full">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>lambda) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">c</span>(z, u, y)) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> variable, <span class="at">names_prefix =</span> <span class="st">"v"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="fu">fct_relevel</span>(name, <span class="st">"z"</span>, <span class="st">"u"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fct_recode</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Student-t"</span> <span class="ot">=</span> <span class="st">"z"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Uniform"</span> <span class="ot">=</span> <span class="st">"u"</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Exponential"</span> <span class="ot">=</span> <span class="st">"y"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="at">n2 =</span> name) <span class="sc">|&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_map</span>(</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    \(data, ...) {</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      <span class="co"># X2 vs X1</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>      p12 <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(<span class="fu">aes</span>(v1, v2)) <span class="sc">+</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_density_2d_filled</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.4</span>) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>          <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>          <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">labs</span>(</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="fu">unique</span>(data<span class="sc">$</span>name),</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="fu">expression</span>(X[<span class="dv">1</span>]),</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="fu">expression</span>(X[<span class="dv">2</span>])</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>      <span class="co"># X3 vs X1</span></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>      p13 <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(<span class="fu">aes</span>(v1, v3)) <span class="sc">+</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_density_2d_filled</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.4</span>) <span class="sc">+</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>          <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>          <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>        <span class="fu">labs</span>(</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="fu">unique</span>(data<span class="sc">$</span>name),</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="fu">expression</span>(X[<span class="dv">1</span>]),</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="fu">expression</span>(X[<span class="dv">3</span>])</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>      <span class="co"># X3 vs X2</span></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>      p23 <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(<span class="fu">aes</span>(v2, v3)) <span class="sc">+</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_density_2d_filled</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">1.4</span>) <span class="sc">+</span></span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>          <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>          <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">+</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>        <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>        <span class="fu">labs</span>(</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>          <span class="at">subtitle =</span> <span class="fu">unique</span>(data<span class="sc">$</span>name),</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>          <span class="at">x =</span> <span class="fu">expression</span>(X[<span class="dv">2</span>]),</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>          <span class="at">y =</span> <span class="fu">expression</span>(X[<span class="dv">3</span>])</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>      <span class="fu">wrap_plots</span>(p12, p13, p23, <span class="at">nrow =</span> <span class="dv">3</span>)</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wrap_plots</span>(</span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">3</span>,</span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">widths =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>,<span class="dv">1</span> )</span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Going from Student-t to Uniform to Exponential"</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="stan-model" class="level2">
+<h2 class="anchored" data-anchor-id="stan-model">Stan Model</h2>
+<p>The Stan implementation has three main components:</p>
+<section id="student-t-copula-log-density" class="level3">
+<h3 class="anchored" data-anchor-id="student-t-copula-log-density">Student-t Copula Log-Density</h3>
+<p>Similar to the Gaussian copula, we need to implement the t-copula log density:</p>
+<div class="cell" data-output.var="t_copula">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">real</span> t_copula_lpdf(<span class="dt">vector</span> u, <span class="dt">matrix</span> L, <span class="dt">real</span> nu) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> D = num_elements(u);</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[D] x;</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> logp;</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Transform U to X via the inverse t CDF</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (d <span class="cf">in</span> <span class="dv">1</span>:D) {</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    x[d] = student_t_icdf(u[d], nu);</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Multivariate t density minus sum of univariate t densities</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  logp = multi_student_t_cholesky_lpdf(x | nu, rep_vector(<span class="dv">0</span>, D), L);</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (d <span class="cf">in</span> <span class="dv">1</span>:D) {</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    logp -= student_t_lpdf(x[d] | nu, <span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> logp;</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The key differences from the Gaussian copula are:</p>
+<ol type="1">
+<li>We use the t-distribution’s quantile function instead of the normal quantile function</li>
+<li>We use the multivariate t-distribution instead of the multivariate normal</li>
+<li>We have an additional parameter nu for the degrees of freedom</li>
+</ol>
+</section>
+<section id="student-t-quantile-function" class="level3">
+<h3 class="anchored" data-anchor-id="student-t-quantile-function">Student-t Quantile Function:</h3>
+<p>Unlike the Gaussian copula where we could use Stan’s built-in inv_Phi(), we need to implement the t-distribution’s quantile function ourselves. The implementation in the Stan model follows numerical approximations for different ranges of the input values to ensure stability and accuracy.</p>
+<p>The function is too long to paste here, but it is <a href="https://discourse.mc-stan.org/t/student-t-quantile-function/31668">based on Sean Pinkey’s implementation from the Stan forums</a></p>
+</section>
+<section id="model-specification" class="level3">
+<h3 class="anchored" data-anchor-id="model-specification">Model Specification</h3>
+<p>The model follows a similar structure to the Gaussian copula but with the addition of the degrees of freedom parameter:</p>
+<div class="cell" data-output.var="model_spec">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[D] lambda;</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cholesky_factor_corr</span>[D] L;</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; nu;   <span class="co">// degrees of freedom for the t-copula</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, D] U;</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Transform data to uniforms using exponential CDF</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:D) {</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">target +=</span> exponential_lpdf(Y[i, j] | lambda[j]);</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      U[i, j] = exponential_cdf(Y[i, j] | lambda[j]);</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Add the t-copula contribution</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">target +=</span> t_copula_lpdf(to_vector(U[i, ]) | L, nu);</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> lkj_corr_cholesky_lpdf(L | <span class="fl">1.0</span>);</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  nu ~ gamma(<span class="dv">2</span>, <span class="fl">0.1</span>);  <span class="co">// Prior for degrees of freedom</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  lambda ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="generated-quantities" class="level3">
+<h3 class="anchored" data-anchor-id="generated-quantities">Generated Quantities</h3>
+<p>For posterior predictive checks, we need to:</p>
+<ol type="1">
+<li>Generate samples from the multivariate t-distribution</li>
+<li>Transform them to uniform variables using the t CDF</li>
+<li>Transform to exponential variables using the exponential quantile function</li>
+</ol>
+<div class="cell" data-output.var="gen_quant">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">corr_matrix</span>[D] Sigma = multiply_lower_tri_self_transpose(L);</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, D] yrep;</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[N, D] U_rep;</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">matrix</span>[N, D] Z_rep;</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      Z_rep[i] = (multi_student_t_cholesky_rng(nu, rep_vector(<span class="dv">0</span>, D), L))';</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:D) {</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        U_rep[i, j] = student_t_cdf(Z_rep[i, j] | nu, <span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        yrep[i, j] = exponential_icdf(U_rep[i, j], lambda[j]);</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The main differences from the Gaussian copula’s generated quantities block are:</p>
+<ol type="1">
+<li>We use multi_student_t_cholesky_rng() instead of multi_normal_cholesky_rng()</li>
+<li>We use student_t_cdf() instead of Phi()</li>
+<li>The degrees of freedom parameter nu is passed to both functions</li>
+<li>This implementation allows us to model tail dependence that the Gaussian copula cannot capture, while maintaining the same marginal distributions.</li>
+</ol>
+</section>
+</section>
+<section id="sampling-from-the-posterior" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sampling-from-the-posterior">Sampling from the posterior</h2>
+<p>Prepare the data and sample from the model.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(time, variable, y) <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> variable, <span class="at">values_from =</span> y) <span class="sc">|&gt;</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>time) <span class="sc">|&gt;</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Y =</span> Y,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(Y),</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">D =</span> <span class="fu">ncol</span>(Y)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>example1 <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"t-copula"</span>, <span class="st">"Stan"</span>, <span class="st">"t-copula.stan"</span>))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> example1<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> stan_data,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_messages =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_exceptions =</span> <span class="cn">FALSE</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>result<span class="sc">$</span><span class="fu">summary</span>(<span class="fu">c</span>(<span class="st">"lambda"</span>, <span class="st">"Sigma[1,2]"</span>, <span class="st">"Sigma[1,3]"</span>, <span class="st">"Sigma[2,3]"</span>, <span class="st">"nu"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="iyhxytnzte" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#iyhxytnzte table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#iyhxytnzte thead, #iyhxytnzte tbody, #iyhxytnzte tfoot, #iyhxytnzte tr, #iyhxytnzte td, #iyhxytnzte th {
+  border-style: none;
+}
+
+#iyhxytnzte p {
+  margin: 0;
+  padding: 0;
+}
+
+#iyhxytnzte .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#iyhxytnzte .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#iyhxytnzte .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#iyhxytnzte .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#iyhxytnzte .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#iyhxytnzte .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#iyhxytnzte .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#iyhxytnzte .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#iyhxytnzte .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#iyhxytnzte .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#iyhxytnzte .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#iyhxytnzte .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#iyhxytnzte .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#iyhxytnzte .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#iyhxytnzte .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iyhxytnzte .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#iyhxytnzte .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#iyhxytnzte .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#iyhxytnzte .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iyhxytnzte .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#iyhxytnzte .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iyhxytnzte .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#iyhxytnzte .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iyhxytnzte .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#iyhxytnzte .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#iyhxytnzte .gt_left {
+  text-align: left;
+}
+
+#iyhxytnzte .gt_center {
+  text-align: center;
+}
+
+#iyhxytnzte .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#iyhxytnzte .gt_font_normal {
+  font-weight: normal;
+}
+
+#iyhxytnzte .gt_font_bold {
+  font-weight: bold;
+}
+
+#iyhxytnzte .gt_font_italic {
+  font-style: italic;
+}
+
+#iyhxytnzte .gt_super {
+  font-size: 65%;
+}
+
+#iyhxytnzte .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#iyhxytnzte .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#iyhxytnzte .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#iyhxytnzte .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#iyhxytnzte .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#iyhxytnzte .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#iyhxytnzte .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#iyhxytnzte .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#iyhxytnzte div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="gt_col_headings header">
+<th id="variable" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">variable</th>
+<th id="mean" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mean</th>
+<th id="median" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">median</th>
+<th id="sd" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">sd</th>
+<th id="mad" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">mad</th>
+<th id="q5" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">q5</th>
+<th id="q95" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">q95</th>
+<th id="rhat" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">rhat</th>
+<th id="ess_bulk" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">ess_bulk</th>
+<th id="ess_tail" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">ess_tail</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="variable">lambda[1]</td>
+<td class="gt_row gt_right" headers="mean">1.53</td>
+<td class="gt_row gt_right" headers="median">1.52</td>
+<td class="gt_row gt_right" headers="sd">0.20</td>
+<td class="gt_row gt_right" headers="mad">0.19</td>
+<td class="gt_row gt_right" headers="q5">1.22</td>
+<td class="gt_row gt_right" headers="q95">1.86</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">3,394.27</td>
+<td class="gt_row gt_right" headers="ess_tail">2,825.60</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="variable">lambda[2]</td>
+<td class="gt_row gt_right" headers="mean">3.57</td>
+<td class="gt_row gt_right" headers="median">3.55</td>
+<td class="gt_row gt_right" headers="sd">0.50</td>
+<td class="gt_row gt_right" headers="mad">0.51</td>
+<td class="gt_row gt_right" headers="q5">2.79</td>
+<td class="gt_row gt_right" headers="q95">4.45</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,607.47</td>
+<td class="gt_row gt_right" headers="ess_tail">2,528.29</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="variable">lambda[3]</td>
+<td class="gt_row gt_right" headers="mean">6.08</td>
+<td class="gt_row gt_right" headers="median">6.05</td>
+<td class="gt_row gt_right" headers="sd">0.79</td>
+<td class="gt_row gt_right" headers="mad">0.78</td>
+<td class="gt_row gt_right" headers="q5">4.85</td>
+<td class="gt_row gt_right" headers="q95">7.44</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,922.44</td>
+<td class="gt_row gt_right" headers="ess_tail">2,475.93</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="variable">Sigma[1,2]</td>
+<td class="gt_row gt_right" headers="mean">0.43</td>
+<td class="gt_row gt_right" headers="median">0.44</td>
+<td class="gt_row gt_right" headers="sd">0.12</td>
+<td class="gt_row gt_right" headers="mad">0.12</td>
+<td class="gt_row gt_right" headers="q5">0.21</td>
+<td class="gt_row gt_right" headers="q95">0.61</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,873.68</td>
+<td class="gt_row gt_right" headers="ess_tail">2,756.21</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="variable">Sigma[1,3]</td>
+<td class="gt_row gt_right" headers="mean">0.19</td>
+<td class="gt_row gt_right" headers="median">0.20</td>
+<td class="gt_row gt_right" headers="sd">0.13</td>
+<td class="gt_row gt_right" headers="mad">0.14</td>
+<td class="gt_row gt_right" headers="q5">−0.04</td>
+<td class="gt_row gt_right" headers="q95">0.41</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">2,875.84</td>
+<td class="gt_row gt_right" headers="ess_tail">2,802.58</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="variable">Sigma[2,3]</td>
+<td class="gt_row gt_right" headers="mean">0.74</td>
+<td class="gt_row gt_right" headers="median">0.75</td>
+<td class="gt_row gt_right" headers="sd">0.08</td>
+<td class="gt_row gt_right" headers="mad">0.07</td>
+<td class="gt_row gt_right" headers="q5">0.60</td>
+<td class="gt_row gt_right" headers="q95">0.84</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">3,029.44</td>
+<td class="gt_row gt_right" headers="ess_tail">2,799.22</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="variable">nu</td>
+<td class="gt_row gt_right" headers="mean">3.55</td>
+<td class="gt_row gt_right" headers="median">3.29</td>
+<td class="gt_row gt_right" headers="sd">1.23</td>
+<td class="gt_row gt_right" headers="mad">1.07</td>
+<td class="gt_row gt_right" headers="q5">2.00</td>
+<td class="gt_row gt_right" headers="q95">5.88</td>
+<td class="gt_row gt_right" headers="rhat">1.00</td>
+<td class="gt_row gt_right" headers="ess_bulk">3,499.92</td>
+<td class="gt_row gt_right" headers="ess_tail">2,999.41</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div class="cell page-columns page-full">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mcmc_trace</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  result<span class="sc">$</span><span class="fu">draws</span>(), </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">"lambda[1]"</span>, <span class="st">"lambda[2]"</span>, <span class="st">"Sigma[1,2]"</span>, <span class="st">"nu"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display page-columns page-full">
+<div class="page-columns page-full">
+<figure class="figure page-columns page-full">
+<p class="page-columns page-full"><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img column-page" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>yrep <span class="ot">&lt;-</span> result<span class="sc">$</span><span class="fu">draws</span>(<span class="st">"yrep"</span>, <span class="at">format =</span> <span class="st">"matrix"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(Y)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_dens_overlay</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> y[<span class="fu">seq_len</span>(n_obs)], </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">yrep =</span> yrep[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, <span class="fu">seq_len</span>(n_obs)]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span> </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="fu">expression</span>(X[<span class="dv">1</span>]))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_dens_overlay</span>(</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> y[n_obs <span class="sc">+</span> <span class="fu">seq_len</span>(n_obs)], </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">yrep =</span> yrep[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, n_obs <span class="sc">+</span> <span class="fu">seq_len</span>(n_obs)]</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="fu">expression</span>(X[<span class="dv">2</span>]))</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ppc_dens_overlay</span>(</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> y[<span class="dv">2</span> <span class="sc">*</span> n_obs <span class="sc">+</span> <span class="fu">seq_len</span>(n_obs)], </span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">yrep =</span> yrep[<span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>, <span class="dv">2</span> <span class="sc">*</span> n_obs <span class="sc">+</span> <span class="fu">seq_len</span>(n_obs)]</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="fu">expression</span>(X[<span class="dv">2</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell column-page quarto-layout-panel" data-layout-ncol="3">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="index_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: center;">
+<p><img src="index_files/figure-html/unnamed-chunk-10-3.png" class="img-fluid"></p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="some-facts-about-the-t-copula" class="level1">
+<h1>Some Facts About the t-Copula</h1>
+<ol type="1">
+<li><strong>Dependence Range and Structure</strong>:
+<ul>
+<li>Like the Gaussian copula, interpolates between independence (<span class="math inline">\(\rho=0\)</span>) and perfect dependence (<span class="math inline">\(\rho=\pm1\)</span>)</li>
+<li>Tail dependence controlled by degrees of freedom parameter <span class="math inline">\(\nu\)</span></li>
+<li>Lower values of <span class="math inline">\(\nu\)</span> produce stronger tail dependence</li>
+<li>As <span class="math inline">\(\nu \to \infty\)</span>, converges to the Gaussian copula</li>
+<li>As <span class="math inline">\(\nu \to 0\)</span>, tail dependence increases</li>
+</ul></li>
+<li><strong>Concordance Measures</strong>:
+<ul>
+<li>Identical to the Gaussian copula due to rank preservation:
+<ul>
+<li><strong>Kendall’s <span class="math inline">\(\tau\)</span></strong>: <span class="math inline">\(\tau = \frac{2}{\pi}\arcsin(\rho)\)</span></li>
+<li><strong>Spearman’s <span class="math inline">\(\rho_S\)</span></strong>: <span class="math inline">\(\rho_S = \frac{6}{\pi}\arcsin(\rho/2)\)</span></li>
+</ul></li>
+<li>This is because multiplying by the scaling factor <span class="math inline">\(\sqrt{\nu/W}\)</span> affects magnitude but preserves ranks</li>
+</ul></li>
+<li><strong>Symmetries and Dependencies</strong>:
+<ul>
+<li><strong>Radial Symmetry</strong>: Like the Gaussian copula, exhibits radial symmetry</li>
+<li><strong>Exchangeability</strong>: For bivariate case, invariant under permutation of arguments</li>
+<li><strong>Tail Dependence</strong>: Unlike Gaussian copula, has tail dependence:
+<ul>
+<li>Upper and lower tail dependence coefficients are equal: <span class="math inline">\(\lambda_U = \lambda_L = 2t_{\nu+1}\left(-\sqrt{\frac{(\nu + 1)(1-\rho)}{1+\rho}}\right)\)</span></li>
+<li>Cannot model asymmetric tail dependence scenarios</li>
+<li>Tail dependence persists even with zero correlation</li>
+</ul></li>
+</ul></li>
+<li><strong>Computational Considerations</strong>:
+<ul>
+<li>More complex to implement than Gaussian copula</li>
+<li>Requires careful numerical handling of t quantile function</li>
+<li>Parameter estimation more challenging due to additional <span class="math inline">\(\nu\)</span> parameter</li>
+</ul></li>
+<li><strong>Practical Applications</strong>:
+<ul>
+<li>Well-suited for financial data where extreme co-movements are common</li>
+<li>Better than Gaussian for modeling joint extreme events</li>
+<li>Popular in risk management due to tail dependence properties</li>
+<li>Useful when data shows symmetric heavy-tailed behavior</li>
+</ul></li>
+<li><strong>Limitations</strong>:
+<ul>
+<li>Cannot capture asymmetric tail dependence</li>
+<li>Symmetric tail dependence may not match all applications</li>
+</ul></li>
+</ol>
+</section>
+<section id="looking-ahead" class="level1">
+<h1>Looking ahead</h1>
+<p>While the t-copula addresses some limitations of the Gaussian copula through tail dependence, it still maintains symmetries that may not be appropriate for all applications. In our next post, we’ll explore Archimedean copulas, which can model:</p>
+<ul>
+<li>Asymmetric tail dependence</li>
+<li>Different dependence structures</li>
+<li>More flexible patterns of association</li>
+</ul>
+<p>Stay tuned for “Understanding the Clayton Copula” where we’ll begin our exploration of this important family of copulas.</p>
+
+
+</section>
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/www\.bggj\.is");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

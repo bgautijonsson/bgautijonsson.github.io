@@ -91,5 +91,8 @@
   },
   "posts/gaussian-copula/index.qmd": {
     "index.html": "0b7801de"
+  },
+  "posts/t-copula/index.qmd": {
+    "index.html": "0101a0ff"
   }
 }

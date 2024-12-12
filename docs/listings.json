@@ -10,6 +10,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/t-copula/index.html",
       "/posts/gaussian-copula/index.html",
       "/posts/stan-copulas-1/index.html",
       "/posts/gev_copula_ar1/index.html",

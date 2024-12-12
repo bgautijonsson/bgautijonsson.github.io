@@ -17,7 +17,7 @@ data {
 }
 
 parameters {
-  vector[D] lambda;
+  vector<lower=0>[D] lambda;
   cholesky_factor_corr[D] L;
 }
 

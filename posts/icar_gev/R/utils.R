@@ -15,7 +15,7 @@ update_names <- function(table, variable, new_names) {
 }
 
 #' @export
-get_scaling_factor <- function(edges, model_stations) {
+get_scaling_factor <- function(edges, N_stations) {
   box::use(
     dplyr[filter, rename],
     Matrix[sparseMatrix, Diagonal, rowSums, diag],
