@@ -8,7 +8,7 @@
 
 <meta name="author" content="Brynjólfur Gauti Guðrúnar Jónsson">
 <meta name="dcterms.date" content="2024-12-12">
-<meta name="description" content="This post continues the series on copulas in Stan by introducing the t-copula, discussing its properties, applications, and providing examples of how to implement it in Stan.">
+<meta name="description" content="The Gaussian copula’s inability to model tail dependence can be a serious limitation in practice. This post introduces the t-copula, which shares many convenient properties with the Gaussian copula while also capturing the tendency of extreme events to occur together. We’ll examine its mathematical properties, discuss when to use it instead of the Gaussian copula, and provide a complete implementation in Stan.">
 
 <title>It was the best of tails, it was the worst of tails: The T-Copula – bggj</title>
 <style>
@@ -191,7 +191,7 @@ window.Quarto = {
             <p class="subtitle lead">Copulas in Stan: Episode III</p>
                   <div>
         <div class="description">
-          This post continues the series on copulas in Stan by introducing the t-copula, discussing its properties, applications, and providing examples of how to implement it in Stan.
+          The Gaussian copula’s inability to model tail dependence can be a serious limitation in practice. This post introduces the t-copula, which shares many convenient properties with the Gaussian copula while also capturing the tendency of extreme events to occur together. We’ll examine its mathematical properties, discuss when to use it instead of the Gaussian copula, and provide a complete implementation in Stan.
         </div>
       </div>
                           <div class="quarto-categories">
@@ -240,7 +240,7 @@ window.Quarto = {
    
   <ul>
   <li><a href="#motivation-the-need-for-tail-dependence" id="toc-motivation-the-need-for-tail-dependence" class="nav-link active" data-scroll-target="#motivation-the-need-for-tail-dependence">Motivation: The Need for Tail Dependence</a></li>
-  <li><a href="#the-t-copula-a-gentle-introduction" id="toc-the-t-copula-a-gentle-introduction" class="nav-link" data-scroll-target="#the-t-copula-a-gentle-introduction">The T-Copula: A Gentle Introduction</a>
+  <li><a href="#the-t-copula-a-dependent-tail" id="toc-the-t-copula-a-dependent-tail" class="nav-link" data-scroll-target="#the-t-copula-a-dependent-tail">The T-Copula: A Dependent Tail</a>
   <ul class="collapse">
   <li><a href="#what-is-the-t-copula" id="toc-what-is-the-t-copula" class="nav-link" data-scroll-target="#what-is-the-t-copula">What is the t-Copula?</a></li>
   <li><a href="#building-intuition-the-random-scale-factor" id="toc-building-intuition-the-random-scale-factor" class="nav-link" data-scroll-target="#building-intuition-the-random-scale-factor">Building Intuition: The Random Scale Factor</a></li>
@@ -344,8 +344,8 @@ T = \frac{Z}{\sqrt{V/\nu}}.
 </div>
 </div>
 </section>
-<section id="the-t-copula-a-gentle-introduction" class="level1 page-columns page-full">
-<h1>The T-Copula: A Gentle Introduction</h1>
+<section id="the-t-copula-a-dependent-tail" class="level1 page-columns page-full">
+<h1>The T-Copula: A Dependent Tail</h1>
 <p><img src="images/t_copula_meme.jpg" class="img-fluid"></p>
 <section id="what-is-the-t-copula" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-the-t-copula">What is the t-Copula?</h2>
@@ -501,23 +501,6 @@ z_i &amp;= t_\nu^{-1}(u_i)
 \end{aligned}
 \]</span></p>
 <p>where <span class="math inline">\(t_{\nu,\Sigma}\)</span> is the multivariate t density with correlation matrix <span class="math inline">\(\Sigma\)</span> and <span class="math inline">\(t_\nu\)</span> is the univariate t density.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-The Full Bivariate Density
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>For completeness, here’s the explicit bivariate density:</p>
-<p><span class="math display">\[
-c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\nu+1}{2})^2}\frac{(1 + \frac{z_1^2 + z_2^2 - 2\rho z_1z_2}{\nu(1-\rho^2)})^{-\frac{\nu+2}{2}}}{\sqrt{1-\rho^2}(1 + \frac{z_1^2}{\nu})^{\frac{\nu+1}{2}}(1 + \frac{z_2^2}{\nu})^{\frac{\nu+1}{2}}}
-\]</span></p>
-<p>However, we’ll use the hierarchical representation for implementation, which is both more intuitive and numerically stable.</p>
-</div>
-</div>
 </section>
 <section id="key-properties" class="level1 page-columns page-full">
 <h1>Key Properties</h1>
@@ -559,7 +542,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
 <p>To sample from this data-generating process we</p>
 <ol type="1">
 <li>Generate <span class="math inline">\(\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_D)\)</span></li>
-<li>Generate <span class="math inline">\(W \sim \text{Inv-}\chi^2(\nu)\)</span> independently</li>
+<li>Generate <span class="math inline">\(W \sim \chi^2(\nu)\)</span> independently</li>
 <li>Apply correlation structure: <span class="math inline">\(\mathbf{Z}' = \mathbf{L}\mathbf{Z}\)</span></li>
 <li>Scale variables: <span class="math inline">\(\mathbf{X} = \sqrt{\nu/W}\cdot\mathbf{Z}'\)</span></li>
 <li>Transform to uniform: <span class="math inline">\(\mathbf{U} = t_\nu(\mathbf{X})\)</span></li>
@@ -778,8 +761,8 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Priors</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> lkj_corr_cholesky_lpdf(L | <span class="fl">1.0</span>);</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  nu ~ gamma(<span class="dv">2</span>, <span class="fl">0.1</span>);  <span class="co">// Prior for degrees of freedom</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  lambda ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> exponential_lpdf(nu | <span class="dv">1</span>);</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">target +=</span> exponential_lpdf(lambda | <span class="dv">1</span>);</span>
 <span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -861,23 +844,23 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="iyhxytnzte" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#iyhxytnzte table {
+<div id="mpgpqkihvm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mpgpqkihvm table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#iyhxytnzte thead, #iyhxytnzte tbody, #iyhxytnzte tfoot, #iyhxytnzte tr, #iyhxytnzte td, #iyhxytnzte th {
+#mpgpqkihvm thead, #mpgpqkihvm tbody, #mpgpqkihvm tfoot, #mpgpqkihvm tr, #mpgpqkihvm td, #mpgpqkihvm th {
   border-style: none;
 }
 
-#iyhxytnzte p {
+#mpgpqkihvm p {
   margin: 0;
   padding: 0;
 }
 
-#iyhxytnzte .gt_table {
+#mpgpqkihvm .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -903,12 +886,12 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-left-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_caption {
+#mpgpqkihvm .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#iyhxytnzte .gt_title {
+#mpgpqkihvm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -920,7 +903,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-bottom-width: 0;
 }
 
-#iyhxytnzte .gt_subtitle {
+#mpgpqkihvm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -932,7 +915,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-top-width: 0;
 }
 
-#iyhxytnzte .gt_heading {
+#mpgpqkihvm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -944,13 +927,13 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_bottom_border {
+#mpgpqkihvm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_col_headings {
+#mpgpqkihvm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -965,7 +948,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_col_heading {
+#mpgpqkihvm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -985,7 +968,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   overflow-x: hidden;
 }
 
-#iyhxytnzte .gt_column_spanner_outer {
+#mpgpqkihvm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -997,15 +980,15 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   padding-right: 4px;
 }
 
-#iyhxytnzte .gt_column_spanner_outer:first-child {
+#mpgpqkihvm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#iyhxytnzte .gt_column_spanner_outer:last-child {
+#mpgpqkihvm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#iyhxytnzte .gt_column_spanner {
+#mpgpqkihvm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1017,11 +1000,11 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   width: 100%;
 }
 
-#iyhxytnzte .gt_spanner_row {
+#mpgpqkihvm .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#iyhxytnzte .gt_group_heading {
+#mpgpqkihvm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1047,7 +1030,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   text-align: left;
 }
 
-#iyhxytnzte .gt_empty_group_heading {
+#mpgpqkihvm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1062,15 +1045,15 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   vertical-align: middle;
 }
 
-#iyhxytnzte .gt_from_md > :first-child {
+#mpgpqkihvm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#iyhxytnzte .gt_from_md > :last-child {
+#mpgpqkihvm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#iyhxytnzte .gt_row {
+#mpgpqkihvm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1089,7 +1072,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   overflow-x: hidden;
 }
 
-#iyhxytnzte .gt_stub {
+#mpgpqkihvm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1102,7 +1085,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_stub_row_group {
+#mpgpqkihvm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1116,15 +1099,15 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   vertical-align: top;
 }
 
-#iyhxytnzte .gt_row_group_first td {
+#mpgpqkihvm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#iyhxytnzte .gt_row_group_first th {
+#mpgpqkihvm .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#iyhxytnzte .gt_summary_row {
+#mpgpqkihvm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1134,16 +1117,16 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_first_summary_row {
+#mpgpqkihvm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_first_summary_row.thick {
+#mpgpqkihvm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#iyhxytnzte .gt_last_summary_row {
+#mpgpqkihvm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1153,7 +1136,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_grand_summary_row {
+#mpgpqkihvm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1163,7 +1146,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_first_grand_summary_row {
+#mpgpqkihvm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1173,7 +1156,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-top-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_last_grand_summary_row_top {
+#mpgpqkihvm .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1183,11 +1166,11 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_striped {
+#mpgpqkihvm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#iyhxytnzte .gt_table_body {
+#mpgpqkihvm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1196,7 +1179,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_footnotes {
+#mpgpqkihvm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1210,7 +1193,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_footnote {
+#mpgpqkihvm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1219,7 +1202,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_sourcenotes {
+#mpgpqkihvm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1233,7 +1216,7 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_sourcenote {
+#mpgpqkihvm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1241,72 +1224,72 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_left {
+#mpgpqkihvm .gt_left {
   text-align: left;
 }
 
-#iyhxytnzte .gt_center {
+#mpgpqkihvm .gt_center {
   text-align: center;
 }
 
-#iyhxytnzte .gt_right {
+#mpgpqkihvm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#iyhxytnzte .gt_font_normal {
+#mpgpqkihvm .gt_font_normal {
   font-weight: normal;
 }
 
-#iyhxytnzte .gt_font_bold {
+#mpgpqkihvm .gt_font_bold {
   font-weight: bold;
 }
 
-#iyhxytnzte .gt_font_italic {
+#mpgpqkihvm .gt_font_italic {
   font-style: italic;
 }
 
-#iyhxytnzte .gt_super {
+#mpgpqkihvm .gt_super {
   font-size: 65%;
 }
 
-#iyhxytnzte .gt_footnote_marks {
+#mpgpqkihvm .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#iyhxytnzte .gt_asterisk {
+#mpgpqkihvm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#iyhxytnzte .gt_indent_1 {
+#mpgpqkihvm .gt_indent_1 {
   text-indent: 5px;
 }
 
-#iyhxytnzte .gt_indent_2 {
+#mpgpqkihvm .gt_indent_2 {
   text-indent: 10px;
 }
 
-#iyhxytnzte .gt_indent_3 {
+#mpgpqkihvm .gt_indent_3 {
   text-indent: 15px;
 }
 
-#iyhxytnzte .gt_indent_4 {
+#mpgpqkihvm .gt_indent_4 {
   text-indent: 20px;
 }
 
-#iyhxytnzte .gt_indent_5 {
+#mpgpqkihvm .gt_indent_5 {
   text-indent: 25px;
 }
 
-#iyhxytnzte .katex-display {
+#mpgpqkihvm .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#iyhxytnzte div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#mpgpqkihvm div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1522,13 +1505,12 @@ c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\n
 </section>
 <section id="looking-ahead" class="level1">
 <h1>Looking ahead</h1>
-<p>While the t-copula addresses some limitations of the Gaussian copula through tail dependence, it still maintains symmetries that may not be appropriate for all applications. In our next post, we’ll explore Archimedean copulas, which can model:</p>
+<p>While the t-copula addresses some limitations of the Gaussian copula through tail dependence, it still maintains symmetries that may not be appropriate for all applications. The next posts will be about Archimedean copulas, which can model:</p>
 <ul>
 <li>Asymmetric tail dependence</li>
 <li>Different dependence structures</li>
 <li>More flexible patterns of association</li>
 </ul>
-<p>Stay tuned for “Understanding the Clayton Copula” where we’ll begin our exploration of this important family of copulas.</p>
 
 
 </section>

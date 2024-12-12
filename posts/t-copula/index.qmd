@@ -232,20 +232,6 @@ $$
 
 where $t_{\nu,\Sigma}$ is the multivariate t density with correlation matrix $\Sigma$ and $t_\nu$ is the univariate t density.
 
-::: {.callout-note}
-
-## The Full Bivariate Density
-
-For completeness, here's the explicit bivariate density:
-
-$$
-c(u_1,u_2) = \frac{\Gamma(\frac{\nu+2}{2})\Gamma(\frac{\nu}{2})}{\Gamma(\frac{\nu+1}{2})^2}\frac{(1 + \frac{z_1^2 + z_2^2 - 2\rho z_1z_2}{\nu(1-\rho^2)})^{-\frac{\nu+2}{2}}}{\sqrt{1-\rho^2}(1 + \frac{z_1^2}{\nu})^{\frac{\nu+1}{2}}(1 + \frac{z_2^2}{\nu})^{\frac{\nu+1}{2}}}
-$$
-
-However, we'll use the hierarchical representation for implementation, which is both more intuitive and numerically stable.
-
-:::
-
 # Key Properties
 
 ## Tail Dependence
@@ -291,7 +277,7 @@ $$
 To sample from this data-generating process we
 
 1. Generate $\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_D)$
-2. Generate $W \sim \text{Inv-}\chi^2(\nu)$ independently
+2. Generate $W \sim \chi^2(\nu)$ independently
 3. Apply correlation structure: $\mathbf{Z}' = \mathbf{L}\mathbf{Z}$
 4. Scale variables: $\mathbf{X} = \sqrt{\nu/W}\cdot\mathbf{Z}'$
 5. Transform to uniform: $\mathbf{U} = t_\nu(\mathbf{X})$
@@ -506,8 +492,8 @@ model {
 
   // Priors
   target += lkj_corr_cholesky_lpdf(L | 1.0);
-  nu ~ gamma(2, 0.1);  // Prior for degrees of freedom
-  lambda ~ exponential(1);
+  target += exponential_lpdf(nu | 1);
+  target += exponential_lpdf(lambda | 1);
 }
 ```
 

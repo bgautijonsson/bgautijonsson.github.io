@@ -223,7 +223,6 @@ model {
 
   // Priors
   target += lkj_corr_cholesky_lpdf(L | 1.0);
-  // Prior on nu can be chosen, e.g.:
   target += exponential_lpdf(nu | 1);
   target += exponential_lpdf(lambda | 1);
 }

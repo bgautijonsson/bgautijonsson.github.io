@@ -94,8 +94,8 @@ A Quick Refresher on the Student-t Distribution
 </div>
 </div>
 </section>
-<section id="the-t-copula-a-gentle-introduction" class="level1 page-columns page-full">
-<h1>The T-Copula: A Gentle Introduction</h1>
+<section id="the-t-copula-a-dependent-tail" class="level1 page-columns page-full">
+<h1>The T-Copula: A Dependent Tail</h1>
 <p><img src="https://www.bggj.is/posts/t-copula/images/t_copula_meme.jpg" class="img-fluid"></p>
 <section id="what-is-the-t-copula" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-the-t-copula">What is the t-Copula?</h2>
@@ -513,21 +513,6 @@ font-style: inherit;">"Even for zero correlation, the t-copula has non-zero tail
 </ul>
 <p>The log-density of the t-copula can be written as: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Clog%20c(%5Cmathbf%7Bu%7D%7C%5Cnu,%5CSigma)%20&amp;=%20%5Clog%20t_%7B%5Cnu,%5CSigma%7D(%5Cmathbf%7Bz%7D)%20-%20%5Csum_%7Bi=1%7D%5ED%20%5Clog%20t_%5Cnu(z_i)%20%5C%5C%0Az_i%20&amp;=%20t_%5Cnu%5E%7B-1%7D(u_i)%0A%5Cend%7Baligned%7D%0A"></p>
 <p>where <img src="https://latex.codecogs.com/png.latex?t_%7B%5Cnu,%5CSigma%7D"> is the multivariate t density with correlation matrix <img src="https://latex.codecogs.com/png.latex?%5CSigma"> and <img src="https://latex.codecogs.com/png.latex?t_%5Cnu"> is the univariate t density.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-The Full Bivariate Density
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>For completeness, here’s the explicit bivariate density:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0Ac(u_1,u_2)%20=%20%5Cfrac%7B%5CGamma(%5Cfrac%7B%5Cnu+2%7D%7B2%7D)%5CGamma(%5Cfrac%7B%5Cnu%7D%7B2%7D)%7D%7B%5CGamma(%5Cfrac%7B%5Cnu+1%7D%7B2%7D)%5E2%7D%5Cfrac%7B(1%20+%20%5Cfrac%7Bz_1%5E2%20+%20z_2%5E2%20-%202%5Crho%20z_1z_2%7D%7B%5Cnu(1-%5Crho%5E2)%7D)%5E%7B-%5Cfrac%7B%5Cnu+2%7D%7B2%7D%7D%7D%7B%5Csqrt%7B1-%5Crho%5E2%7D(1%20+%20%5Cfrac%7Bz_1%5E2%7D%7B%5Cnu%7D)%5E%7B%5Cfrac%7B%5Cnu+1%7D%7B2%7D%7D(1%20+%20%5Cfrac%7Bz_2%5E2%7D%7B%5Cnu%7D)%5E%7B%5Cfrac%7B%5Cnu+1%7D%7B2%7D%7D%7D%0A"></p>
-<p>However, we’ll use the hierarchical representation for implementation, which is both more intuitive and numerically stable.</p>
-</div>
-</div>
 </section>
 <section id="key-properties" class="level1 page-columns page-full">
 <h1>Key Properties</h1>
@@ -565,7 +550,7 @@ The Full Bivariate Density
 <p>To sample from this data-generating process we</p>
 <ol type="1">
 <li>Generate <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BZ%7D%20%5Csim%20%5Cmathcal%7BN%7D(%5Cmathbf%7B0%7D,%20%5Cmathbf%7BI%7D_D)"></li>
-<li>Generate <img src="https://latex.codecogs.com/png.latex?W%20%5Csim%20%5Ctext%7BInv-%7D%5Cchi%5E2(%5Cnu)"> independently</li>
+<li>Generate <img src="https://latex.codecogs.com/png.latex?W%20%5Csim%20%5Cchi%5E2(%5Cnu)"> independently</li>
 <li>Apply correlation structure: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BZ%7D'%20=%20%5Cmathbf%7BL%7D%5Cmathbf%7BZ%7D"></li>
 <li>Scale variables: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BX%7D%20=%20%5Csqrt%7B%5Cnu/W%7D%5Ccdot%5Cmathbf%7BZ%7D'"></li>
 <li>Transform to uniform: <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BU%7D%20=%20t_%5Cnu(%5Cmathbf%7BX%7D)"></li>
@@ -1388,14 +1373,16 @@ font-weight: bold;
 font-style: inherit;">target +=</span> lkj_corr_cholesky_lpdf(L | <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1.0</span>);</span>
-<span id="cb6-21">  nu ~ gamma(<span class="dv" style="color: #AD0000;
+<span id="cb6-21">  <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">2</span>, <span class="fl" style="color: #AD0000;
+font-weight: bold;
+font-style: inherit;">target +=</span> exponential_lpdf(nu | <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0.1</span>);  <span class="co" style="color: #5E5E5E;
+font-style: inherit;">1</span>);</span>
+<span id="cb6-22">  <span class="kw" style="color: #003B4F;
 background-color: null;
-font-style: inherit;">// Prior for degrees of freedom</span></span>
-<span id="cb6-22">  lambda ~ exponential(<span class="dv" style="color: #AD0000;
+font-weight: bold;
+font-style: inherit;">target +=</span> exponential_lpdf(lambda | <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>);</span>
 <span id="cb6-23">}</span></code></pre></div>
@@ -1618,23 +1605,23 @@ background-color: null;
 font-style: inherit;">fmt_number</span>()</span></code></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="iyhxytnzte" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#iyhxytnzte table {
+<div id="mpgpqkihvm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mpgpqkihvm table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#iyhxytnzte thead, #iyhxytnzte tbody, #iyhxytnzte tfoot, #iyhxytnzte tr, #iyhxytnzte td, #iyhxytnzte th {
+#mpgpqkihvm thead, #mpgpqkihvm tbody, #mpgpqkihvm tfoot, #mpgpqkihvm tr, #mpgpqkihvm td, #mpgpqkihvm th {
   border-style: none;
 }
 
-#iyhxytnzte p {
+#mpgpqkihvm p {
   margin: 0;
   padding: 0;
 }
 
-#iyhxytnzte .gt_table {
+#mpgpqkihvm .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1660,12 +1647,12 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-left-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_caption {
+#mpgpqkihvm .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#iyhxytnzte .gt_title {
+#mpgpqkihvm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1677,7 +1664,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-bottom-width: 0;
 }
 
-#iyhxytnzte .gt_subtitle {
+#mpgpqkihvm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1689,7 +1676,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-top-width: 0;
 }
 
-#iyhxytnzte .gt_heading {
+#mpgpqkihvm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1701,13 +1688,13 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_bottom_border {
+#mpgpqkihvm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_col_headings {
+#mpgpqkihvm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1722,7 +1709,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_col_heading {
+#mpgpqkihvm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1742,7 +1729,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   overflow-x: hidden;
 }
 
-#iyhxytnzte .gt_column_spanner_outer {
+#mpgpqkihvm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1754,15 +1741,15 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   padding-right: 4px;
 }
 
-#iyhxytnzte .gt_column_spanner_outer:first-child {
+#mpgpqkihvm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#iyhxytnzte .gt_column_spanner_outer:last-child {
+#mpgpqkihvm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#iyhxytnzte .gt_column_spanner {
+#mpgpqkihvm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1774,11 +1761,11 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   width: 100%;
 }
 
-#iyhxytnzte .gt_spanner_row {
+#mpgpqkihvm .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#iyhxytnzte .gt_group_heading {
+#mpgpqkihvm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1804,7 +1791,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   text-align: left;
 }
 
-#iyhxytnzte .gt_empty_group_heading {
+#mpgpqkihvm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1819,15 +1806,15 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   vertical-align: middle;
 }
 
-#iyhxytnzte .gt_from_md > :first-child {
+#mpgpqkihvm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#iyhxytnzte .gt_from_md > :last-child {
+#mpgpqkihvm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#iyhxytnzte .gt_row {
+#mpgpqkihvm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1846,7 +1833,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   overflow-x: hidden;
 }
 
-#iyhxytnzte .gt_stub {
+#mpgpqkihvm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1859,7 +1846,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_stub_row_group {
+#mpgpqkihvm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1873,15 +1860,15 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   vertical-align: top;
 }
 
-#iyhxytnzte .gt_row_group_first td {
+#mpgpqkihvm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#iyhxytnzte .gt_row_group_first th {
+#mpgpqkihvm .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#iyhxytnzte .gt_summary_row {
+#mpgpqkihvm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1891,16 +1878,16 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_first_summary_row {
+#mpgpqkihvm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_first_summary_row.thick {
+#mpgpqkihvm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#iyhxytnzte .gt_last_summary_row {
+#mpgpqkihvm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1910,7 +1897,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_grand_summary_row {
+#mpgpqkihvm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1920,7 +1907,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_first_grand_summary_row {
+#mpgpqkihvm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1930,7 +1917,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-top-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_last_grand_summary_row_top {
+#mpgpqkihvm .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1940,11 +1927,11 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_striped {
+#mpgpqkihvm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#iyhxytnzte .gt_table_body {
+#mpgpqkihvm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1953,7 +1940,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-bottom-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_footnotes {
+#mpgpqkihvm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1967,7 +1954,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_footnote {
+#mpgpqkihvm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1976,7 +1963,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_sourcenotes {
+#mpgpqkihvm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1990,7 +1977,7 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   border-right-color: #D3D3D3;
 }
 
-#iyhxytnzte .gt_sourcenote {
+#mpgpqkihvm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1998,72 +1985,72 @@ font-style: inherit;">fmt_number</span>()</span></code></pre></div>
   padding-right: 5px;
 }
 
-#iyhxytnzte .gt_left {
+#mpgpqkihvm .gt_left {
   text-align: left;
 }
 
-#iyhxytnzte .gt_center {
+#mpgpqkihvm .gt_center {
   text-align: center;
 }
 
-#iyhxytnzte .gt_right {
+#mpgpqkihvm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#iyhxytnzte .gt_font_normal {
+#mpgpqkihvm .gt_font_normal {
   font-weight: normal;
 }
 
-#iyhxytnzte .gt_font_bold {
+#mpgpqkihvm .gt_font_bold {
   font-weight: bold;
 }
 
-#iyhxytnzte .gt_font_italic {
+#mpgpqkihvm .gt_font_italic {
   font-style: italic;
 }
 
-#iyhxytnzte .gt_super {
+#mpgpqkihvm .gt_super {
   font-size: 65%;
 }
 
-#iyhxytnzte .gt_footnote_marks {
+#mpgpqkihvm .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#iyhxytnzte .gt_asterisk {
+#mpgpqkihvm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#iyhxytnzte .gt_indent_1 {
+#mpgpqkihvm .gt_indent_1 {
   text-indent: 5px;
 }
 
-#iyhxytnzte .gt_indent_2 {
+#mpgpqkihvm .gt_indent_2 {
   text-indent: 10px;
 }
 
-#iyhxytnzte .gt_indent_3 {
+#mpgpqkihvm .gt_indent_3 {
   text-indent: 15px;
 }
 
-#iyhxytnzte .gt_indent_4 {
+#mpgpqkihvm .gt_indent_4 {
   text-indent: 20px;
 }
 
-#iyhxytnzte .gt_indent_5 {
+#mpgpqkihvm .gt_indent_5 {
   text-indent: 25px;
 }
 
-#iyhxytnzte .katex-display {
+#mpgpqkihvm .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#iyhxytnzte div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#mpgpqkihvm div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2401,13 +2388,12 @@ font-style: inherit;">2</span>]))</span></code></pre></div>
 </section>
 <section id="looking-ahead" class="level1">
 <h1>Looking ahead</h1>
-<p>While the t-copula addresses some limitations of the Gaussian copula through tail dependence, it still maintains symmetries that may not be appropriate for all applications. In our next post, we’ll explore Archimedean copulas, which can model:</p>
+<p>While the t-copula addresses some limitations of the Gaussian copula through tail dependence, it still maintains symmetries that may not be appropriate for all applications. The next posts will be about Archimedean copulas, which can model:</p>
 <ul>
 <li>Asymmetric tail dependence</li>
 <li>Different dependence structures</li>
 <li>More flexible patterns of association</li>
 </ul>
-<p>Stay tuned for “Understanding the Clayton Copula” where we’ll begin our exploration of this important family of copulas.</p>
 
 
 </section>
