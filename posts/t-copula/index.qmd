@@ -423,7 +423,7 @@ d |>
 
 ## Stan Model
 
-The Stan implementation has three main components:
+The Stan model is similar to the Gaussian copula model, but with some differences.
 
 ### Student-t Copula Log-Density
 
