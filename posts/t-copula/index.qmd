@@ -1,5 +1,5 @@
 ---
-title: "It was the best of tails, it was the worst of tails: The T-Copula"
+title: "It was the best of tails, it was the worst of tails: The t-Copula"
 subtitle: "Copulas in Stan: Episode III"
 description: "The Gaussian copula's inability to model tail dependence can be a serious limitation in practice. This post introduces the t-copula, which shares many convenient properties with the Gaussian copula while also capturing the tendency of extreme events to occur together. We'll examine its mathematical properties, discuss when to use it instead of the Gaussian copula, and provide a complete implementation in Stan."
 date: "2024-12-12"
