@@ -14,6 +14,7 @@ image: images/archimedean_copulas.jpg
 engine: knitr
 reference-location: margin
 citation-location: margin
+draft: true
 categories:
     - stan
     - copulas
@@ -70,7 +71,12 @@ $$
 C(u, v) = \varphi^{-1}\big(\varphi(u) + \varphi(v)\big),
 $$
 
-where $\varphi: [0,1] \to [0, \infty]$ is a continuous, strictly decreasing function with $\varphi(1) = 0$. The inverse $\varphi^{-1}$ maps from $[0, \infty]$ back to [0,1]. Intuitively, $\varphi$ transforms the unit interval into a positive half-line in such a way that “combining” two transformed variables via addition, and then transforming back, yields a valid joint distribution function.
+where 
+
+- $\varphi: [0,1] \to [0, \infty]$ is a continuous, strictly decreasing function with $\varphi(1) = 0$
+- The inverse $\varphi^{-1}$ maps from $[0, \infty]$ back to [0,1] 
+
+Intuitively, $\varphi$ transforms the unit interval into a positive half-line in such a way that “combining” two transformed variables via addition, and then transforming back, yields a valid joint distribution function.
 
 ### Key Properties of the Generator
 
