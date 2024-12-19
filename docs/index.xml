@@ -10,7 +10,132 @@
 <atom:link href="https://www.bggj.is/index.xml" rel="self" type="application/rss+xml"/>
 <description>Blogg um tölfræði og gögn</description>
 <generator>quarto-1.6.39</generator>
-<lastBuildDate>Thu, 12 Dec 2024 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 19 Dec 2024 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Building Blocks: Understanding Archimedean Copulas</title>
+  <dc:creator>Brynjólfur Gauti Guðrúnar Jónsson</dc:creator>
+  <link>https://www.bggj.is/posts/archimedean-copulas/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>In the previous posts of this series, we laid the groundwork for understanding copulas and explored the Gaussian and Student’s t families. The Gaussian and t-copulas belong to a class often referred to as <em>elliptical copulas</em>, distinguished by their construction from elliptically distributed random vectors. While these copulas are critical tools, especially given their ubiquity in finance and statistics, they’re not the only game in town. Today, we turn our attention to a different family: the Archimedean copulas.</p>
+<p><strong>Previous posts in this series:</strong></p>
+<ol type="1">
+<li><a href="../stan-copulas-1/index.html">Introduction to Copulas in Stan</a></li>
+<li><a href="../gaussian-copula/index.html">A Gentle Introduction: The Gaussian Copula</a></li>
+<li><a href="../t-copula/index.html">It was the best of tails, it was the worst of tails: The t-Copula</a></li>
+</ol>
+<hr>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Elliptical Distributions and Copulas
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Elliptical distributions generalize the multivariate normal distribution by allowing for elliptical, rather than strictly spherical, contours of constant density. A <img src="https://latex.codecogs.com/png.latex?d">-dimensional random vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BX%7D"> has an elliptical distribution if it can be represented as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbf%7BX%7D%20%5Cstackrel%7Bd%7D%7B=%7D%20%5Cboldsymbol%7B%5Cmu%7D%20+%20A%20%5Cmathbf%7BY%7D,%0A"></p>
+<p>where:</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cboldsymbol%7B%5Cmu%7D"> is a location vector,</li>
+<li><img src="https://latex.codecogs.com/png.latex?A"> is a scale matrix such that <img src="https://latex.codecogs.com/png.latex?%5CSigma%20=%20A%20A%5E%5Ctop">,</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BY%7D%20%5Cstackrel%7Bd%7D%7B=%7D%20R%20%5Cmathbf%7BS%7D">, where <img src="https://latex.codecogs.com/png.latex?R%20%5Cgeq%200"> is a radial random variable, and <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BS%7D"> is uniformly distributed on the unit sphere.</li>
+</ul>
+<p>Elliptical copulas are derived from elliptical distributions via Sklar’s Theorem. For example, the Gaussian copula corresponds to a multivariate normal distribution, and the <img src="https://latex.codecogs.com/png.latex?t">-copula corresponds to a multivariate <img src="https://latex.codecogs.com/png.latex?t">-distribution. These copulas capture the dependence structure of elliptical distributions but are limited in describing asymmetric or extreme dependencies.</p>
+</div>
+</div>
+<p>Archimedean copulas offer an elegant, flexible alternative to elliptical copulas. Their construction is defined through a single real-valued function known as a <em>generator</em>, and this approach provides a wide range of tail dependence characteristics—particularly useful when we need to capture more asymmetric dependence structures. In subsequent posts, we’ll explore specific Archimedean copulas (like Clayton, Gumbel, and Frank), each with its unique flavor of dependence.</p>
+<section id="recap-what-we-know-about-copulas" class="level2">
+<h2 class="anchored" data-anchor-id="recap-what-we-know-about-copulas">Recap: What We Know About Copulas</h2>
+<p>To set the stage, recall that a copula is a multivariate distribution defined on the unit hypercube, describing the dependence structure among random variables independently of their marginal distributions. By separating the joint distribution into a copula and a set of marginal distributions, we can mix and match marginals with various dependency templates. So far, we’ve seen:</p>
+<ul>
+<li><strong>Gaussian Copula:</strong> An elliptical copula derived from the Gaussian distribution. It is flexible but limited in describing tail dependence.</li>
+<li><strong>Student’s t-Copula:</strong> Also elliptical, but introduces symmetric tail dependence. This is a step forward, but it still may not capture certain asymmetric or other nuanced dependencies.</li>
+</ul>
+<p>Now we move to Archimedean copulas, which depart from the elliptical construction and instead rely on a generating function to encapsulate dependence.</p>
+</section>
+<section id="the-core-idea-generator-functions" class="level2">
+<h2 class="anchored" data-anchor-id="the-core-idea-generator-functions">The Core Idea: Generator Functions</h2>
+<p>At the heart of every Archimedean copula lies a <em>generator function</em>, often denoted by <img src="https://latex.codecogs.com/png.latex?%5Cvarphi">. The Archimedean copula for a pair of variables <img src="https://latex.codecogs.com/png.latex?(U,%20V)">—where <img src="https://latex.codecogs.com/png.latex?U"> and <img src="https://latex.codecogs.com/png.latex?V"> are uniform random variables on [0,1]—can be represented as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AC(u,%20v)%20=%20%5Cvarphi%5E%7B-1%7D%5Cbig(%5Cvarphi(u)%20+%20%5Cvarphi(v)%5Cbig),%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cvarphi:%20%5B0,1%5D%20%5Cto%20%5B0,%20%5Cinfty%5D"> is a continuous, strictly decreasing function with <img src="https://latex.codecogs.com/png.latex?%5Cvarphi(1)%20=%200">. The inverse <img src="https://latex.codecogs.com/png.latex?%5Cvarphi%5E%7B-1%7D"> maps from <img src="https://latex.codecogs.com/png.latex?%5B0,%20%5Cinfty%5D"> back to [0,1]. Intuitively, <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> transforms the unit interval into a positive half-line in such a way that “combining” two transformed variables via addition, and then transforming back, yields a valid joint distribution function.</p>
+<section id="key-properties-of-the-generator" class="level3">
+<h3 class="anchored" data-anchor-id="key-properties-of-the-generator">Key Properties of the Generator</h3>
+<ol type="1">
+<li><p><strong>Strict Monotonicity and Decreasing Nature:</strong><br>
+The function <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> must be strictly decreasing. This ensures a well-defined inverse <img src="https://latex.codecogs.com/png.latex?%5Cvarphi%5E%7B-1%7D">.</p></li>
+<li><p><strong>Normalization at 1:</strong><br>
+We require <img src="https://latex.codecogs.com/png.latex?%5Cvarphi(1)=0">. This sets a reference point that ensures the copula behaves properly at the boundaries (e.g., when <img src="https://latex.codecogs.com/png.latex?u"> or <img src="https://latex.codecogs.com/png.latex?v"> is 1).</p></li>
+<li><p><strong>Infinite-Domain Extension:</strong><br>
+As <img src="https://latex.codecogs.com/png.latex?u%20%5Cto%200">, <img src="https://latex.codecogs.com/png.latex?%5Cvarphi(u)"> should typically go to <img src="https://latex.codecogs.com/png.latex?%5Cinfty">, reflecting the tail behavior embedded in the copula structure.</p></li>
+</ol>
+<p>Many well-known Archimedean copulas (Clayton, Gumbel, Frank) differ only in the choice of <img src="https://latex.codecogs.com/png.latex?%5Cvarphi">. This simplicity—capturing all dependence through a single function—makes Archimedean copulas a natural and elegant choice for modeling certain types of association that are challenging for elliptical copulas.</p>
+</section>
+</section>
+<section id="from-generators-to-copulas-a-construction" class="level2">
+<h2 class="anchored" data-anchor-id="from-generators-to-copulas-a-construction">From Generators to Copulas: A Construction</h2>
+<p>To see how this construction emerges, consider the following steps:</p>
+<ol type="1">
+<li><p><strong>Define <img src="https://latex.codecogs.com/png.latex?%5Cvarphi">:</strong> Start with a function <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> that meets the conditions described above.</p></li>
+<li><p><strong>Construct a Joint Distribution:</strong> For a bivariate setting, the copula is given by: <img src="https://latex.codecogs.com/png.latex?%0AC(u,v)%20=%20%5Cvarphi%5E%7B-1%7D%5Cbig(%5Cvarphi(u)+%5Cvarphi(v)%5Cbig).%0A"></p></li>
+<li><p><strong>Extend to Higher Dimensions:</strong> One of the beauties of Archimedean copulas is their straightforward extension to dimensions beyond two. For a <img src="https://latex.codecogs.com/png.latex?d">-dimensional Archimedean copula, we have: <img src="https://latex.codecogs.com/png.latex?%0AC(u_1,%20u_2,%20%5Cldots,%20u_d)%20=%20%5Cvarphi%5E%7B-1%7D%5Cbig(%5Cvarphi(u_1)%20+%20%5Cvarphi(u_2)%20+%20%5Ccdots%20+%20%5Cvarphi(u_d)%5Cbig).%0A"></p></li>
+</ol>
+<p>This scalar-additive structure sets them apart: while elliptical copulas rely on a correlation or covariance structure in a multivariate distribution, Archimedean copulas depend on a single function and simple addition of its transformed coordinates.</p>
+</section>
+<section id="connection-to-laplace-transforms" class="level2">
+<h2 class="anchored" data-anchor-id="connection-to-laplace-transforms">Connection to Laplace Transforms</h2>
+<p>One of the most profound theoretical insights into Archimedean copulas is their close relationship to <em>Laplace transforms.</em> Indeed, the function <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> can often be viewed as a Laplace transform of a certain nonnegative random variable. More specifically, there is a well-known representation from survival analysis and risk theory:</p>
+<ul>
+<li><p>Suppose we have a random variable <img src="https://latex.codecogs.com/png.latex?T%20%5Cge%200">. Consider its Laplace transform: <img src="https://latex.codecogs.com/png.latex?%0A%5Cmathcal%7BL%7D_T(s)%20=%20E%5Be%5E%7B-sT%7D%5D.%0A"></p>
+<p>If we identify <img src="https://latex.codecogs.com/png.latex?%5Cvarphi(u)"> with <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D_T%5E%7B-1%7D(u)"> for an appropriately chosen random variable <img src="https://latex.codecogs.com/png.latex?T">, the Archimedean copula structure emerges naturally. This is not just a mathematical curiosity: it provides deep intuition. The Archimedean construction can be understood as if one is modeling dependent events (or lifetimes) through a latent factor <img src="https://latex.codecogs.com/png.latex?T">. Conditional on <img src="https://latex.codecogs.com/png.latex?T=t">, the variables become independent, but marginalizing over <img src="https://latex.codecogs.com/png.latex?T"> induces the copula dependence structure.</p></li>
+</ul>
+<p>This connection to Laplace transforms is not merely aesthetic—it informs properties such as tail dependence and how the copula behaves under scaling. Furthermore, viewing <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> through the lens of Laplace transforms can guide us in choosing suitable generators with desirable theoretical properties, like tail heaviness or asymmetry.</p>
+</section>
+<section id="theoretical-foundations-for-implementation-in-stan" class="level2">
+<h2 class="anchored" data-anchor-id="theoretical-foundations-for-implementation-in-stan">Theoretical Foundations for Implementation in Stan</h2>
+<p>As we move towards implementation in Stan, it’s helpful to understand the theoretical underpinnings that will guide our coding strategies. Here are some key points:</p>
+<ol type="1">
+<li><p><strong>Parameterization:</strong><br>
+Each Archimedean copula family is characterized by one or more parameters that define <img src="https://latex.codecogs.com/png.latex?%5Cvarphi">. For example, the Clayton copula has a single parameter <img src="https://latex.codecogs.com/png.latex?%5Ctheta%20%3E%200"> that controls the strength of association and tail dependence. Identifying stable parameterizations suitable for HMC sampling will be crucial.</p></li>
+<li><p><strong>Differentiability and Inverses:</strong><br>
+Stan relies on differentiable functions for efficient Hamiltonian Monte Carlo. Ensuring that <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> and <img src="https://latex.codecogs.com/png.latex?%5Cvarphi%5E%7B-1%7D"> are differentiable with respect to both parameters and the input variables is key. In practice, this means choosing smooth parameterizations or using stable numerical techniques for the inverse function.</p></li>
+<li><p><strong>Boundary Behavior and Numerical Stability:</strong><br>
+For certain parameter settings, the behavior of <img src="https://latex.codecogs.com/png.latex?%5Cvarphi"> near <img src="https://latex.codecogs.com/png.latex?u=1"> or near <img src="https://latex.codecogs.com/png.latex?u=0"> can cause numerical issues. Implementing safe checks, well-chosen transforms, or robust initializations will help ensure stable sampling.</p></li>
+<li><p><strong>Dimensional Extensions:</strong><br>
+Moving from bivariate to multivariate is straightforward in theory, but may lead to increased computational complexity. The addition inside <img src="https://latex.codecogs.com/png.latex?%5Cvarphi%5E%7B-1%7D"> grows linearly with dimension, which may be simpler than dealing with large covariance matrices (as in Gaussian copulas). However, careful coding is still necessary for efficient computation.</p></li>
+</ol>
+</section>
+<section id="a-look-ahead" class="level2">
+<h2 class="anchored" data-anchor-id="a-look-ahead">A Look Ahead</h2>
+<p>In the upcoming posts, we’ll dive into specific Archimedean copula families and show how to implement them in Stan. Each of these copulas—Clayton, Gumbel, and Frank—embodies a different flavor of dependence:</p>
+<ul>
+<li><strong>Clayton Copula:</strong> Exhibits <em>lower tail dependence</em>, making it suitable for scenarios where joint extreme lows occur more frequently than would be expected under independence.</li>
+<li><strong>Gumbel Copula:</strong> Emphasizes <em>upper tail dependence</em>, capturing scenarios where joint extreme highs are more prevalent.</li>
+<li><strong>Frank Copula:</strong> Offers a <em>symmetric dependence</em> structure that can be an alternative to Gaussian or Student’s t copulas, useful especially when you want something non-elliptical but still without pronounced tail asymmetry.</li>
+</ul>
+<p>By understanding their generating functions <img src="https://latex.codecogs.com/png.latex?%5Cvarphi">, we can tailor copula models to the dependence patterns we observe in our data, and do so in a way that is relatively direct to implement in Stan.</p>
+<hr>
+<p><strong>In Summary:</strong></p>
+<p>Archimedean copulas present a fundamentally different approach to capturing dependence. Rather than building upon multivariate distributions (as with elliptical copulas), they rely on a single univariate function—the generator <img src="https://latex.codecogs.com/png.latex?%5Cvarphi">—to shape the joint behavior. This approach offers flexibility, conceptual clarity, and direct links to underlying latent structures via Laplace transforms. These theoretical underpinnings will guide our forthcoming exploration and implementations in Stan, as we continue to expand our toolkit for modeling complex dependencies.</p>
+<p>In the next post, we’ll pick up one of the most famous Archimedean copulas—the Clayton copula—and implement it step-by-step in Stan, highlighting both theoretical considerations and practical modeling tips. Stay tuned!</p>
+
+
+</section>
+
+ ]]></description>
+  <category>stan</category>
+  <category>copulas</category>
+  <category>copulas in stan</category>
+  <guid>https://www.bggj.is/posts/archimedean-copulas/</guid>
+  <pubDate>Thu, 19 Dec 2024 00:00:00 GMT</pubDate>
+  <media:content url="https://www.bggj.is/posts/archimedean-copulas/images/archimedean_copulas.jpg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>It was the best of tails, it was the worst of tails: The T-Copula</title>
   <dc:creator>Brynjólfur Gauti Guðrúnar Jónsson</dc:creator>

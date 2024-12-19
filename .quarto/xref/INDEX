@@ -97,5 +97,8 @@
   },
   "LICENSE.md": {
     "LICENSE.html": "c3e13b16"
+  },
+  "posts/archimedean-copulas/index.qmd": {
+    "index.html": "c6a26c75"
   }
 }

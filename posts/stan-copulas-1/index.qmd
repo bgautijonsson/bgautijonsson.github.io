@@ -95,7 +95,7 @@ We see that if we use the independence copula, we just end up with the usual lik
 $$
 \begin{aligned}
 \log h(X) &= 0 + \sum_{i=1}^D \log f_i(X_i \vert \theta_i) \\
-&= \log f_i(X_i \vert \theta_i)
+&= \sum_{i=1}^D\log f_i(X_i \vert \theta_i)
 \end{aligned}
 $$
 
